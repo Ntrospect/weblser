@@ -29,6 +29,51 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Widget _buildStepIcon(String stepNumber) {
+    const iconSize = 48.0;
+    const generateIconSize = 52.8; // 10% bigger
+    const exportIconSize = 43.2; // 10% smaller
+    const iconWidget = SizedBox(
+      width: iconSize,
+      height: iconSize,
+    );
+
+    switch (stepNumber) {
+      case '1':
+        return Padding(
+          padding: const EdgeInsets.all(5),
+          child: SizedBox(
+            width: iconSize,
+            height: iconSize,
+            child: Image.asset('assets/input.png', fit: BoxFit.contain),
+          ),
+        );
+      case '2':
+        return SizedBox(
+          width: iconSize,
+          height: iconSize,
+          child: Image.asset('assets/process.png', fit: BoxFit.contain),
+        );
+      case '3':
+        return SizedBox(
+          width: generateIconSize,
+          height: generateIconSize,
+          child: Image.asset('assets/generate.png', fit: BoxFit.contain),
+        );
+      case '4':
+        return Padding(
+          padding: const EdgeInsets.all(5),
+          child: SizedBox(
+            width: exportIconSize,
+            height: exportIconSize,
+            child: Image.asset('assets/export.png', fit: BoxFit.contain),
+          ),
+        );
+      default:
+        return const Text('');
+    }
+  }
+
   void _analyzeUrl() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) {
@@ -75,39 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and logo
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: DarkAppTheme.cardBg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: DarkAppTheme.borderColor),
-                  ),
-                  child: Image.asset('assets/logo.png', fit: BoxFit.contain),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Welcome to weblser',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Text(
-                        'AI-Powered Website Analysis',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-
             // Search Card
             Card(
               child: Padding(
@@ -177,8 +189,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Icon(Icons.search),
-                        label: Text(_isLoading ? 'Analyzing...' : 'Analyze'),
+                            : const Icon(Icons.search, size: 28),
+                        label: Text(
+                          _isLoading ? 'Analyzing...' : 'Analyze',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                   ],
@@ -187,20 +202,101 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Quick Stats
-            Text(
-              'How It Works',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            ..._buildStatsCards(context),
+            // How It Works Section with Placeholder
+            _buildHowItWorksSection(context),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _buildStatsCards(BuildContext context) {
+  Widget _buildHowItWorksSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
+
+    final gridWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'How It Works',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 16),
+        _buildStatsGrid(context),
+      ],
+    );
+
+    final placeholderWidget = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.lightbulb_outline,
+              size: 64,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.blue.shade300
+                  : Theme.of(context).primaryColor.withOpacity(0.6),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Risk it for the Biscuit!',
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Fortune favors the hungry; leap first, learn fast, keep swinging until the crumbs turn into whole cakes today.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 75,
+              height: 75,
+              child: Image.asset(
+                'assets/websler-logo-robot-grey.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (isDesktop) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 1,
+            child: gridWidget,
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 360,
+              child: placeholderWidget,
+            ),
+          ),
+        ],
+      );
+    } else {
+      // Mobile layout - stack vertically
+      return Column(
+        children: [
+          gridWidget,
+          const SizedBox(height: 20),
+          placeholderWidget,
+        ],
+      );
+    }
+  }
+
+  Widget _buildStatsGrid(BuildContext context) {
     final steps = [
       ('1', '🔗', 'Input', 'Enter any website URL'),
       ('2', '⚙️', 'Process', 'AI extracts & analyzes'),
@@ -208,70 +304,78 @@ class _HomeScreenState extends State<HomeScreen> {
       ('4', '📥', 'Export', 'Download as PDF'),
     ];
 
-    return steps.map((step) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Card(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 600;
+    final columns = isDesktop ? 2 : 1;
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        mainAxisExtent: 140,
+      ),
+      itemCount: steps.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final step = steps[index];
+        return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Step number
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        DarkAppTheme.primaryAccent,
-                        DarkAppTheme.secondaryAccent,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      step.$1,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Icon and text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                // Step number and title row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
                         children: [
                           Text(
-                            step.$3,
-                            style: Theme.of(context).textTheme.titleSmall,
+                            step.$1,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 72,
+                              height: 1.0,
+                              color: Color(0xFFB9C2D0),
+                            ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Text(
-                            step.$2,
-                            style: const TextStyle(fontSize: 20),
+                            step.$3,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        step.$4,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 30),
+                      child: _buildStepIcon(step.$1),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Description
+                Expanded(
+                  child: Text(
+                    step.$4,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      );
-    }).toList();
+        );
+      },
+    );
   }
 }

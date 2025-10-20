@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/analysis.dart';
@@ -49,44 +50,84 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
   }
 
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Copied to clipboard'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildMetadataField(BuildContext context, String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: SelectableText(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.copy, size: 18),
+              onPressed: () => _copyToClipboard(value),
+              tooltip: 'Copy',
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              padding: EdgeInsets.zero,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 900;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analysis Result'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        elevation: 1,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(24.0),
+          child: isDesktop ? _buildDesktopLayout(context, dateFormat) : _buildMobileLayout(context, dateFormat),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, DateFormat dateFormat) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Column - Metadata
+        Expanded(
+          flex: 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // URL
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'URL',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SelectableText(
-                        widget.analysis.url,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: _buildMetadataField(context, 'URL', widget.analysis.url),
                 ),
               ),
               const SizedBox(height: 16),
@@ -95,82 +136,21 @@ class _ResultsScreenState extends State<ResultsScreen> {
               if (widget.analysis.title != null)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Page Title',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SelectableText(
-                          widget.analysis.title!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: _buildMetadataField(context, 'Page Title', widget.analysis.title!),
                   ),
                 ),
-              if (widget.analysis.title != null)
-                const SizedBox(height: 16),
+              if (widget.analysis.title != null) const SizedBox(height: 16),
 
               // Meta Description
               if (widget.analysis.metaDescription != null)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Meta Description',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SelectableText(
-                          widget.analysis.metaDescription!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: _buildMetadataField(context, 'Meta Description', widget.analysis.metaDescription!),
                   ),
                 ),
-              if (widget.analysis.metaDescription != null)
-                const SizedBox(height: 16),
-
-              // Summary
-              Card(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'AI Summary',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SelectableText(
-                        widget.analysis.summary,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              if (widget.analysis.metaDescription != null) const SizedBox(height: 16),
 
               // Timestamp
               Text(
@@ -179,45 +159,201 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   color: Colors.grey[600],
                 ),
               ),
-              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+        const SizedBox(width: 24),
 
-              // Action Buttons
+        // Right Column - Summary
+        Expanded(
+          flex: 1,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'AI Summary',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(
+                    color: Theme.of(context).dividerColor,
+                    height: 16,
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(
+                    widget.analysis.summary,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isGeneratingPdf ? null : _generatePdf,
+                          icon: _isGeneratingPdf
+                              ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                          )
+                              : const Icon(Icons.file_download),
+                          label: Text(_isGeneratingPdf ? 'Generating...' : 'Download PDF'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text('Back Home'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.blue.shade300
+                                : Theme.of(context).primaryColor.withOpacity(0.8),
+                            side: BorderSide(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.blue.shade300
+                                  : Theme.of(context).primaryColor.withOpacity(0.8),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, DateFormat dateFormat) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // URL
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildMetadataField(context, 'URL', widget.analysis.url),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Page Title
+        if (widget.analysis.title != null)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _buildMetadataField(context, 'Page Title', widget.analysis.title!),
+            ),
+          ),
+        if (widget.analysis.title != null) const SizedBox(height: 16),
+
+        // Meta Description
+        if (widget.analysis.metaDescription != null)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _buildMetadataField(context, 'Meta Description', widget.analysis.metaDescription!),
+            ),
+          ),
+        if (widget.analysis.metaDescription != null) const SizedBox(height: 16),
+
+        // Summary
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'AI Summary',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Divider(
+                  color: Theme.of(context).dividerColor,
+                  height: 12,
+                ),
+                const SizedBox(height: 12),
+                SelectableText(
+                  widget.analysis.summary,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Timestamp
+        Text(
+          'Analyzed on ${dateFormat.format(widget.analysis.createdAt)}',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Action Buttons
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              ElevatedButton.icon(
+                onPressed: _isGeneratingPdf ? null : _generatePdf,
+                icon: _isGeneratingPdf
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                )
+                    : const Icon(Icons.file_download),
+                label: Text(_isGeneratingPdf ? 'Generating...' : 'Download PDF'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                ),
+              ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: Column(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _isGeneratingPdf ? null : _generatePdf,
-                      icon: _isGeneratingPdf
-                          ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                          : const Icon(Icons.file_download),
-                      label: Text(_isGeneratingPdf ? 'Generating...' : 'Download PDF'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Back Home'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                    foregroundColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.blue.shade300
+                        : Theme.of(context).primaryColor.withOpacity(0.8),
+                    side: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.blue.shade300
+                          : Theme.of(context).primaryColor.withOpacity(0.8),
+                      width: 2,
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Back Home'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

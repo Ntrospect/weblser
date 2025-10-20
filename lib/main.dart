@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/dark_theme.dart';
+import 'theme/light_theme.dart';
 import 'services/api_service.dart';
+import 'services/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
@@ -18,28 +20,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'weblser - AI Website Analyzer',
-      theme: DarkAppTheme.darkTheme,
-      home: FutureBuilder<SharedPreferences>(
-        future: SharedPreferences.getInstance(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return MultiProvider(
-              providers: [
-                ChangeNotifierProvider(
-                  create: (_) => ApiService(snapshot.data!),
-                ),
-              ],
-              child: const AppNavigation(),
-            );
-          }
-          return Scaffold(
-            backgroundColor: const Color(0xFFF6F8FF),
-            body: const Center(child: CircularProgressIndicator()),
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(
+                create: (_) => ThemeProvider(snapshot.data!),
+              ),
+              ChangeNotifierProvider(
+                create: (_) => ApiService(snapshot.data!),
+              ),
+            ],
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return MaterialApp(
+                  title: 'weblser - AI Website Analyzer',
+                  theme: themeProvider.isDarkMode
+                      ? DarkAppTheme.darkTheme
+                      : LightAppTheme.lightTheme,
+                  home: const AppNavigation(),
+                );
+              },
+            ),
           );
-        },
-      ),
+        }
+        return Scaffold(
+          backgroundColor: const Color(0xFFF6F8FF),
+          body: const Center(child: CircularProgressIndicator()),
+        );
+      },
     );
   }
 }
@@ -105,24 +116,38 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'weblser',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+        toolbarHeight: 68,
+        title: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return SizedBox(
+              width: 157,
+              height: 66,
+              child: Image.asset(
+                themeProvider.isDarkMode
+                    ? 'assets/websler-logo_new_white.png'
+                    : 'assets/websler-logo_new.png',
+                fit: BoxFit.contain,
+              ),
+            );
+          },
         ),
         centerTitle: false,
         actions: [
           Padding(
-            padding: const EdgeInsets.all(8),
-            child: SizedBox(
-              width: 140,
-              height: 50,
-              child: Image.asset(
-                'assets/jumoki_white_transparent_bg.png',
-                fit: BoxFit.contain,
-              ),
+            padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 32),
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return SizedBox(
+                  width: 151,
+                  height: 54,
+                  child: Image.asset(
+                    themeProvider.isDarkMode
+                        ? 'assets/jumoki_white_transparent_bg.png'
+                        : 'assets/jumoki_coloured_transparent_bg.png',
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
             ),
           ),
         ],

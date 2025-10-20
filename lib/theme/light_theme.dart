@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class DarkAppTheme {
-  // Dark Color Palette
-  static const Color bgDark = Color(0xFF0F1419);
-  static const Color bgDarker = Color(0xFF1A1F2E);
-  static const Color cardBg = Color(0xFF242C3E);
+class LightAppTheme {
+  // Light Color Palette
+  static const Color bgLight = Color(0xFFF4F3F2);
+  static const Color bgLighter = Color(0xFFFFFFFF);
+  static const Color cardBg = Color(0xFFF3F4F6);
   static const Color primaryAccent = Color(0xFF7c3aed); // Jumoki purple
   static const Color secondaryAccent = Color(0xFF2052b6); // Jumoki blue
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFB0B5C1);
-  static const Color borderColor = Color(0xFF3A4452);
+  static const Color textPrimary = Color(0xFF0B1220);
+  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color borderColor = Color(0xFFE5E7EB);
   static const Color successColor = Color(0xFF10B981);
   static const Color warningColor = Color(0xFFF59E0B);
   static const Color errorColor = Color(0xFFEF4444);
 
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.light(
         primary: primaryAccent,
         secondary: secondaryAccent,
         surface: cardBg,
         error: errorColor,
-        onPrimary: textPrimary,
-        onSecondary: textPrimary,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
         onSurface: textPrimary,
       ),
-      scaffoldBackgroundColor: bgDark,
+      scaffoldBackgroundColor: bgLight,
 
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: bgDarker,
+        backgroundColor: bgLighter,
         foregroundColor: textPrimary,
-        elevation: 0,
+        elevation: 1,
         centerTitle: false,
         titleTextStyle: TextStyle(
           color: textPrimary,
@@ -46,8 +46,8 @@ class DarkAppTheme {
 
       // Card Theme
       cardTheme: CardThemeData(
-        color: cardBg,
-        elevation: 0,
+        color: bgLighter,
+        elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: borderColor, width: 1),
@@ -57,7 +57,7 @@ class DarkAppTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: bgDarker,
+        fillColor: cardBg,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -89,7 +89,7 @@ class DarkAppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryAccent,
-          foregroundColor: textPrimary,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -120,10 +120,10 @@ class DarkAppTheme {
 
       // Bottom Navigation Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: bgDarker,
+        backgroundColor: bgLighter,
         selectedItemColor: primaryAccent,
         unselectedItemColor: textSecondary,
-        elevation: 0,
+        elevation: 1,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: TextStyle(
@@ -203,7 +203,7 @@ class DarkAppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        backgroundColor: cardBg,
+        backgroundColor: bgLighter,
       ),
     );
   }
