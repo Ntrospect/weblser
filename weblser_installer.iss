@@ -3,14 +3,14 @@
 
 [Setup]
 AppName=weblser
-AppVersion=1.0.0
+AppVersion=1.1.0
 AppPublisher=Jumoki Agency LLC
 AppPublisherURL=https://jumoki.agency
 DefaultDirName={autopf}\weblser
 DefaultGroupName=weblser
 AllowNoIcons=yes
 OutputDir=C:\Users\Ntro\weblser\weblser_app\installers
-OutputBaseFilename=weblser-1.0.0-installer
+OutputBaseFilename=weblser-1.1.0-installer
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
