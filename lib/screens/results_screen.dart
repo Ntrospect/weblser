@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
 import '../models/analysis.dart';
 import '../services/api_service.dart';
 import '../theme/dark_theme.dart';
@@ -18,20 +20,33 @@ class ResultsScreen extends StatefulWidget {
 class _ResultsScreenState extends State<ResultsScreen> {
   bool _isGeneratingPdf = false;
   String? _pdfError;
+  String? _pdfFilePath;
 
   void _generatePdf() async {
     setState(() {
       _isGeneratingPdf = true;
       _pdfError = null;
+      _pdfFilePath = null;
     });
 
     try {
       final apiService = context.read<ApiService>();
-      await apiService.generatePdf(widget.analysis.id);
+      final filePath = await apiService.generatePdf(widget.analysis.id);
+
+      setState(() {
+        _pdfFilePath = filePath;
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF generated successfully!')),
+          SnackBar(
+            content: Text('PDF saved to Downloads!'),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Open',
+              onPressed: () => _openPdfFile(filePath),
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -47,6 +62,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
       setState(() {
         _isGeneratingPdf = false;
       });
+    }
+  }
+
+  void _openPdfFile(String filePath) async {
+    try {
+      final uri = Uri.file(filePath);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open PDF: $e')),
+      );
     }
   }
 
@@ -212,7 +240,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back Home'),
+                          label: const Text('Back'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Theme.of(context).brightness == Brightness.dark
                                 ? Colors.blue.shade300
@@ -335,7 +363,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back Home'),
+                  label: const Text('Back'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
                     foregroundColor: Theme.of(context).brightness == Brightness.dark

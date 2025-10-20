@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'dart:io';
 import '../models/analysis.dart';
 
 class ApiService extends ChangeNotifier {
@@ -96,8 +98,22 @@ class ApiService extends ChangeNotifier {
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        // Return the PDF as base64 or save it
-        return base64Encode(response.bodyBytes);
+        // Get the downloads directory
+        final Directory? downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access Downloads directory');
+        }
+
+        // Create filename with timestamp
+        final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+        final String filename = 'weblser-analysis-$timestamp.pdf';
+        final String filepath = '${downloadsDir.path}/$filename';
+
+        // Save PDF file
+        final File file = File(filepath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        return filepath;
       } else {
         throw Exception('Failed to generate PDF: ${response.statusCode}');
       }
