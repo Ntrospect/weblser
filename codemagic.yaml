@@ -4,6 +4,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
+      flutter: 3.35.6
       groups:
         - ios_credentials
       vars:
@@ -14,9 +15,8 @@ workflows:
         APPLE_DEVELOPER_TEAM_ID: $APPLE_DEVELOPER_TEAM_ID
     scripts:
       - name: Get Flutter packages
-        script: |
-          cd weblser_app
-          flutter pub get
+        script: flutter pub get
+        working_directory: weblser_app
       - name: Fetch iOS code signing files from Apple Developer Portal
         script: |
           app-store-connect fetch-signing-files io.jumoki.weblser \
@@ -28,17 +28,12 @@ workflows:
             --private-key @env:AUTH_KEY \
             --certificate-key @env:CERTIFICATE_KEY
       - name: Use local signing
-        script: |
-          cd weblser_app/ios && xcode-select --install || true
+        script: xcode-select --install || true
       - name: Build iOS App
-        script: |
-          cd weblser_app
-          flutter build ios --release \
-            --no-codesign \
-            -t lib/main.dart
+        script: flutter build ios --release --no-codesign -t lib/main.dart
+        working_directory: weblser_app
       - name: Build and archive
         script: |
-          cd weblser_app/ios
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
@@ -48,14 +43,15 @@ workflows:
             CODE_SIGN_STYLE="Automatic" \
             DEVELOPMENT_TEAM="$APPLE_DEVELOPER_TEAM_ID" \
             archive
+        working_directory: weblser_app/ios
       - name: Export IPA
         script: |
-          cd weblser_app/ios
           xcodebuild -exportArchive \
             -archivePath build/ios_build/Runner.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
             -exportPath build/ios_build/ipa \
             -allowProvisioningUpdates
+        working_directory: weblser_app/ios
     artifacts:
       - weblser_app/build/ios_build/ipa/*.ipa
       - weblser_app/build/ios_build/Runner.xcarchive
@@ -71,23 +67,21 @@ workflows:
     max_build_duration: 120
     instance_type: linux
     environment:
+      flutter: 3.35.6
       android_signing:
         - keystore_reference
       groups:
         - android_credentials
     scripts:
       - name: Get Flutter packages
-        script: |
-          cd weblser_app
-          flutter pub get
+        script: flutter pub get
+        working_directory: weblser_app
       - name: Build APK
-        script: |
-          cd weblser_app
-          flutter build apk --release
+        script: flutter build apk --release
+        working_directory: weblser_app
       - name: Build AppBundle
-        script: |
-          cd weblser_app
-          flutter build appbundle --release
+        script: flutter build appbundle --release
+        working_directory: weblser_app
     artifacts:
       - weblser_app/build/app/outputs/flutter-apk/*.apk
       - weblser_app/build/app/outputs/bundle/release/*.aab
