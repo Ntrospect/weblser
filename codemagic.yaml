@@ -12,7 +12,7 @@ workflows:
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "io.jumoki.weblser"
         APP_ID_NAME: "weblser - AI Website Analyzer"
-        APPLE_DEVELOPER_TEAM_ID: $TEAM_ID
+        APPLE_DEVELOPER_TEAM_ID: PKB9P8F266
     scripts:
       - name: Debug environment
         script: |
