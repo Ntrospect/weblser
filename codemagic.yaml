@@ -5,10 +5,7 @@ workflows:
     instance_type: mac_pro
     environment:
       ios_signing:
-        provisioning_profiles:
-          - weblser_app_store
-        certificates:
-          - ios_app_store
+        - release
       groups:
         - ios_credentials
       vars:
