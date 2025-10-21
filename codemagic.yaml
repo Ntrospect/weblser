@@ -5,8 +5,6 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       flutter: 3.35.6
-      groups:
-        - ios_credentials
       vars:
         XCODE_WORKSPACE: "weblser_app/ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -82,8 +80,6 @@ workflows:
       flutter: 3.35.6
       android_signing:
         - keystore_reference
-      groups:
-        - android_credentials
     scripts:
       - name: Get Flutter packages
         script: |
