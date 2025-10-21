@@ -26,6 +26,10 @@ workflows:
           pwd
           ls -la pubspec.yaml
           flutter pub get -v
+      - name: Clean Flutter build cache
+        script: |
+          cd weblser_app
+          flutter clean
       - name: Fetch iOS code signing files from Apple Developer Portal
         script: |
           app-store-connect fetch-signing-files io.jumoki.weblser \
