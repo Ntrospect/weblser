@@ -5,6 +5,8 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       flutter: 3.35.6
+      groups:
+        - ios-signing
       vars:
         XCODE_WORKSPACE: "weblser_app/ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
