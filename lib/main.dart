@@ -66,23 +66,15 @@ class _AppNavigationState extends State<AppNavigation> {
   bool _showSplash = true;
 
   @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(milliseconds: 100), () {
-      setState(() {
-        _showSplash = false;
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_showSplash) {
       return SplashScreen(
         onSplashComplete: () {
-          setState(() {
-            _showSplash = false;
-          });
+          if (mounted) {
+            setState(() {
+              _showSplash = false;
+            });
+          }
         },
       );
     }
