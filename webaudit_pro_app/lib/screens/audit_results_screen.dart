@@ -155,11 +155,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [scoreColor.withOpacity(0.8), scoreColor.withOpacity(0.4)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: scoreColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
