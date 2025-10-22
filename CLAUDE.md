@@ -1,0 +1,388 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+**weblser** - A Python CLI tool that analyzes websites and generates intelligent summaries of their purpose and content. It fetches a URL, extracts metadata and full page content, then uses Claude AI to generate concise, meaningful summaries that can be passed to other agents for further processing.
+
+## Setup
+
+### Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+### API Key Setup
+
+This tool requires an Anthropic API key to generate summaries using Claude.
+
+**Get your API key:**
+1. Visit https://console.anthropic.com/account/keys
+2. Create a new API key
+3. Set it as an environment variable
+
+**Windows (Command Prompt):**
+```cmd
+set ANTHROPIC_API_KEY=your-api-key-here
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+**Linux/macOS (Bash):**
+```bash
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+**Persistent setup (add to your shell profile):**
+- Windows: Add to Environment Variables in System Settings
+- Linux/macOS: Add to ~/.bashrc, ~/.zshrc, or equivalent
+
+### Running the Analyzer
+
+#### Option 1: Using Executable Scripts (Recommended)
+
+**Windows:**
+```bash
+weblser.bat https://example.com
+weblser.bat https://example.com --json
+weblser.bat https://example.com --pdf
+weblser.bat https://example.com --pdf --output my-report.pdf
+weblser.bat https://example.com --pdf --company-name "Jumoki Agency LLC" --company-details "1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency"
+weblser.bat https://example.com --pdf --logo "path/to/logo.png" --company-name "Your Company"
+weblser.bat https://example.com --timeout 15 --api-key your-key-here
+```
+
+**Linux/macOS:**
+```bash
+./weblser https://example.com
+./weblser https://example.com --json
+./weblser https://example.com --pdf
+./weblser https://example.com --pdf --output my-report.pdf
+./weblser https://example.com --pdf --company-name "Jumoki Agency LLC" --company-details "1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency"
+./weblser https://example.com --pdf --logo "path/to/logo.png" --company-name "Your Company"
+./weblser https://example.com --timeout 15 --api-key your-key-here
+```
+
+The executable scripts automatically:
+- Check for Python installation
+- Install missing dependencies
+- Use ANTHROPIC_API_KEY environment variable if set
+- Run the analyzer
+
+#### Option 2: Direct Python Execution
+
+```bash
+# Display intelligent summary
+python analyzer.py https://example.com
+
+# Output as JSON for programmatic use
+python analyzer.py https://example.com --json
+
+# Generate formatted PDF report (auto-named from domain)
+python analyzer.py https://example.com --pdf
+
+# Generate PDF with custom filename
+python analyzer.py https://example.com --pdf --output my-report.pdf
+
+# Generate branded PDF with company info
+python analyzer.py https://example.com --pdf --company-name "Your Company" --company-details "Address, Phone, Email"
+
+# Generate PDF with logo
+python analyzer.py https://example.com --pdf --logo "path/to/logo.png" --company-name "Your Company"
+
+# Customize request timeout
+python analyzer.py https://example.com --timeout 15
+
+# Pass API key directly
+python analyzer.py https://example.com --api-key your-key-here
+```
+
+#### Global Installation (All Platforms)
+
+Add the script directory to your PATH to run `weblser` from anywhere:
+
+**Windows (Command Prompt):**
+```cmd
+set PATH=%PATH%;C:\Users\Ntro\weblser
+weblser https://example.com
+```
+
+**Linux/macOS (Bash):**
+```bash
+export PATH="/path/to/weblser:$PATH"
+weblser https://example.com
+```
+
+## Architecture
+
+The project uses a simple, single-module architecture with Claude API integration:
+
+### `analyzer.py`
+
+The main module contains the `WebsiteAnalyzer` class with these key responsibilities:
+
+- **`analyze(url)`** - Main entry point that:
+  1. Normalizes the URL (adds https:// if no scheme provided)
+  2. Fetches the page with requests library
+  3. Parses HTML with BeautifulSoup
+  4. Extracts metadata (title, meta description)
+  5. Extracts full page content (removes noise, keeps meaningful text)
+  6. Calls Claude API to generate intelligent summary
+  7. Returns structured results
+
+- **Metadata extraction methods**:
+  - `_extract_title()` - Tries multiple sources: `<title>` tag, og:title meta tag, then H1 as fallback
+  - `_extract_meta_description()` - Tries meta name="description", then og:description
+
+- **Content extraction**:
+  - `_extract_full_content()` - Removes scripts, styles, navigation, and footer elements; extracts main content from `<main>`, `<article>`, or primary content divs; cleans whitespace; limits to 5000 characters
+
+- **Summarization**:
+  - `_generate_summary_with_claude()` - Sends extracted content to Claude 3.5 Sonnet model with a prompt to generate a 2-3 sentence summary focused on purpose, features, and target audience
+
+- **Error handling** - Returns a structured response with `success` flag and error message on failure. Handles network errors, API errors, and malformed HTML gracefully.
+
+### Output Format
+
+The analyzer returns a dictionary with:
+
+```python
+{
+    'url': str,                           # The analyzed URL
+    'title': str or None,                 # Page title
+    'meta_description': str or None,      # Page meta description
+    'extracted_content': str or None,     # First 500 chars of extracted content (for reference)
+    'summary': str,                       # AI-generated summary or error message
+    'success': bool                       # Whether analysis succeeded
+}
+```
+
+### PDF Output Format
+
+When using the `--pdf` flag, a formatted PDF report is generated containing:
+
+- **Report Title** - "Website Analysis Report"
+- **URL** - The analyzed website URL
+- **Page Title** - Extracted from the page's title tag or metadata
+- **Meta Description** - The page's meta description tag
+- **Summary** - AI-generated summary of the website's purpose
+
+**PDF Naming:**
+- Default: Automatically generated from domain (e.g., `example-com-analysis.pdf`)
+- Custom: Use `--output filename.pdf` to specify a custom name
+
+**Example:**
+```bash
+weblser.bat https://github.com --pdf
+# Creates: github-com-analysis.pdf
+
+weblser.bat https://github.com --pdf --output git-analysis.pdf
+# Creates: git-analysis.pdf
+```
+
+### Branded PDF Reports
+
+You can customize PDF reports with your company branding:
+
+**Available Branding Options:**
+- `--logo <path-or-url>` - Path to logo file or URL to logo image
+- `--company-name <name>` - Your company name (displayed in header)
+- `--company-details <details>` - Contact information (displayed in footer)
+
+**Examples:**
+
+With company details only:
+```bash
+weblser.bat https://jumoki.com --pdf \
+  --company-name "Jumoki Agency LLC" \
+  --company-details "1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency"
+```
+
+With logo file:
+```bash
+weblser.bat https://example.com --pdf \
+  --logo "C:\path\to\logo.png" \
+  --company-name "Your Company" \
+  --company-details "Your contact details"
+```
+
+With logo URL:
+```bash
+weblser.bat https://example.com --pdf \
+  --logo "https://example.com/assets/logo.png" \
+  --company-name "Your Company"
+```
+
+**PDF Header & Footer Content:**
+- Header includes: Company logo (if provided) and company name
+- Footer includes: Company contact details with divider line
+- Professional styling with purple company name (color: #7c3aed)
+
+## Integration with Other Agents
+
+### Using JSON Output
+
+Pass the `--json` flag to get structured JSON output that can be easily parsed by other agents:
+
+```bash
+weblser.bat https://example.com --json
+./weblser https://example.com --json
+```
+
+Extract just the summary:
+```bash
+weblser https://example.com --json | jq '.summary'
+```
+
+### Python Integration
+
+Import and use directly in other Python code:
+
+```python
+from analyzer import WebsiteAnalyzer
+
+# API key from environment or parameter
+analyzer = WebsiteAnalyzer(api_key="your-api-key")  # or use ANTHROPIC_API_KEY env var
+result = analyzer.analyze('https://example.com')
+if result['success']:
+    print(result['summary'])
+else:
+    print(f"Error: {result['summary']}")
+```
+
+## Extending the Analyzer
+
+To modify the summarization behavior:
+
+1. **Change the summary prompt** - Edit the prompt in `_generate_summary_with_claude()` to focus on different aspects
+2. **Adjust content extraction** - Modify `_extract_full_content()` to include/exclude different elements
+3. **Change the model** - Update the `model` parameter in `_generate_summary_with_claude()` (e.g., use claude-3-opus-20250219)
+4. **Add metadata extraction** - Add new extraction methods following the pattern of `_extract_title()`
+5. **Increase summary length** - Adjust the `max_tokens` parameter in the API call
+
+## Common Issues
+
+- **API Key Error** - Make sure ANTHROPIC_API_KEY is set or pass `--api-key your-key`
+- **Rate Limiting** - If you hit API rate limits, add delays between requests or upgrade your API plan
+- **Network Timeout** - Use `--timeout` parameter to increase timeout for slow websites
+- **Content Extraction Issues** - Some sites may have unusual HTML structures; the tool tries main/article/content divs first, then falls back to full page text
+- **SSL Certificate Errors** - Ensure requests library is up to date: `pip install --upgrade requests`
+
+## Recent Development (Session Oct 21, 2025)
+
+### Professional Splash Screen 🎨
+✅ **Flutter splash screen with Websler branding**
+- Smooth fade & scale animations (2-second display)
+- Websler logo and "AI-Powered Website Analyzer" tagline
+- Multi-platform support: Android, iOS, Windows, web
+- Auto-generated splash assets via flutter_native_splash
+- Dark theme background with light/dark mode compatibility
+- Commit: `d5bc421` - "feat: Add professional splash screen with Websler branding"
+
+## Recent Development (Session Oct 20, 2025)
+
+### Windows Desktop App (v1.1.0)
+✅ **Complete cross-platform Flutter application** with professional UI/UX
+- Light & Dark theme support with persistent preferences (SharedPreferences)
+- Responsive layouts for desktop and mobile (2-column desktop, stacked mobile)
+- Jumoki branding with theme-aware logo swapping
+- Professional Raleway typography globally applied
+
+### Windows Installer (.exe)
+✅ **Inno Setup installer** ready for distribution
+- Professional installer with Start Menu shortcuts and uninstall support
+- File: `weblser-1.1.0-installer.exe`
+- Location: `installers/` folder
+
+### PDF Download Feature
+✅ **Enhanced PDF generation** with professional branding
+- PDFs save to user's Downloads folder (Windows: `C:\Users\[User]\Downloads\`)
+- Files named with timestamps: `weblser-analysis-[timestamp].pdf`
+- "Open" button in snackbar to launch PDF immediately after download
+- API Service updated: `lib/services/api_service.dart`
+
+### Professional PDF Header
+✅ **Dual-logo centered header** for branded reports
+- Websler logo (left) - 1.0" width, auto height (proportional)
+- Jumoki logo (right) - 1.1" width, auto height (proportional)
+- 15px spacing between logos
+- Logos centered on page with proper whitespace balance
+- Backend: Updated `analyzer.py` with proportional image scaling
+
+### Flutter Home Screen UI Improvements
+✅ **Optimized layout spacing**
+- Reduced section spacing: 32px → 20px
+- Reduced outer padding: 24px → 16px (vertical)
+- Added 40px bottom padding for better scrolling experience
+- Improved overall container height for better content visibility
+
+### App Icon
+✅ **Custom Jumoki AI Robot icon**
+- Replaced default Flutter logo with `jumoki_AI_robot.ico`
+- Applied to: `windows/runner/resources/app_icon.ico`
+- Appears in Windows taskbar, Start Menu, and installer
+
+### CI/CD Pipeline
+✅ **Codemagic automated builds**
+- GitHub integration for automatic builds on push
+- Android & iOS builds supported
+- Workflow: Push to GitHub → Codemagic builds automatically
+
+### iOS TestFlight Build (Oct 22, 2025) ✅
+✅ **Build 1.2.1 (1) successfully submitted to TestFlight**
+- Build completed and uploaded: Oct 22, 2025 at 2:20 PM UTC
+- IPA size: 19.60 MB
+- Code signing: Automatic via Codemagic Workflow Editor UI
+- Build artifacts: Full archive (Runner.xcarchive) + debug symbols
+- Current status: In Apple Beta App Review (24-48 hour typical review time)
+- Key breakthrough: Switched from YAML certificate handling to Codemagic Workflow Editor UI
+- Once approved: Ready to assign to jumoki-external test group (4 testers)
+
+### Backend PDF Generation
+✅ **Enhanced `analyzer.py`** with professional logo header
+- Reads logo files from backend directory
+- Automatic fallback if logos missing
+- `weblser_logo.png` - Websler branding
+- `jumoki_coloured_transparent_bg.png` - Jumoki branding
+- Proportional scaling to prevent image distortion
+
+### VPS Deployment
+✅ **FastAPI backend** running on 140.99.254.83:8000
+- Deployed via systemd service
+- Environment variable: ANTHROPIC_API_KEY configured
+- PDF generation with dual-logo headers fully functional
+
+### Git Repository
+✅ **Version control with GitHub**
+- Repository: https://github.com/Ntrospect/weblser
+- All changes committed and pushed
+- Full backup and rollback capability
+
+### Completed Tasks (Session Oct 22, 2025)
+✅ **Apple Developer Account Setup**
+- Account approved and configured ($99/year)
+- TestFlight distribution now active
+- iOS app submitted and awaiting Apple Beta App Review
+
+### Current Tasks
+🔄 **Apple Beta App Review in Progress**
+- Build 1.2.1 (1) awaiting Apple's review (24-48 hours typical)
+- Once approved: Assign to jumoki-external test group
+- iPad Pro owner can then test the app
+- Gather feedback and iterate if needed
+
+### Technology Stack
+- **Backend**: Python FastAPI (VPS deployment)
+- **Frontend**: Flutter (cross-platform)
+- **State Management**: Provider
+- **Local Storage**: SharedPreferences
+- **Theming**: Material Design 3 (Light & Dark modes)
+- **PDF Generation**: ReportLab (Python)
+- **CI/CD**: Codemagic
+- **Version Control**: Git/GitHub
+- **Distribution**: Windows Installer (Inno Setup), iOS (TestFlight pending), macOS (pending)
