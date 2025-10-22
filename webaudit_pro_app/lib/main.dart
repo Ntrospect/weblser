@@ -112,8 +112,8 @@ class _MainAppState extends State<MainApp> {
         title: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
             return SizedBox(
-              width: 157,
-              height: 66,
+              width: 165,
+              height: 69,
               child: Image.asset(
                 themeProvider.isDarkMode
                     ? 'assets/websler_pro-dark-theme.png'

@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 Image.asset(
                   'assets/websler_pro-dark-theme.png',
-                  height: 80,
+                  height: 84,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 24),
