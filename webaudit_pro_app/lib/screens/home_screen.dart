@@ -322,7 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: scoreColor.withOpacity(0.2),
+                border: Border.all(
+                  color: scoreColor,
+                  width: 2.5,
+                ),
               ),
               child: Center(
                 child: Text(
