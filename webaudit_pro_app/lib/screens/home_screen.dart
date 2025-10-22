@@ -388,8 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Color _getScoreColor(double score) {
-    if (score >= 75) return Colors.green;
-    if (score >= 50) return Colors.orange;
+    if (score >= 7.5) return Colors.green;
+    if (score >= 5.0) return Colors.orange;
     return Colors.red;
   }
 
