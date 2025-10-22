@@ -182,10 +182,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 250,
+              height: (sortedScores.length * 40.0) + 40,
               child: BarChart(
                 BarChartData(
-                  maxY: 10,
+                  maxX: 10,
+                  barDirection: BarDirection.horizontal,
                   barGroups: List.generate(
                     sortedScores.length,
                     (index) {
@@ -195,12 +196,12 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                         x: index,
                         barRods: [
                           BarChartRodData(
-                            toY: entry.value,
+                            toX: entry.value,
                             color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
-                            width: 12,
+                            width: 24,
                             borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(4),
                               topRight: Radius.circular(4),
+                              bottomRight: Radius.circular(4),
                             ),
                           ),
                         ],
@@ -209,6 +210,28 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                   ),
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 140,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index >= 0 && index < sortedScores.length) {
+                            final criterion = sortedScores[index].key;
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              child: Text(
+                                criterion,
+                                style: Theme.of(context).textTheme.labelSmall,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
@@ -221,35 +244,6 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                         },
                       ),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 80,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < sortedScores.length) {
-                            final criterion = sortedScores[index].key;
-                            final shortName = criterion.length > 10
-                                ? criterion.substring(0, 10) + '...'
-                                : criterion;
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Text(
-                                  shortName,
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                    ),
                     topTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
                     ),
@@ -259,8 +253,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                   ),
                   gridData: FlGridData(
                     show: true,
-                    horizontalInterval: 2,
-                    drawVerticalLine: false,
+                    verticalInterval: 2,
+                    drawHorizontalLine: false,
                   ),
                   borderData: FlBorderData(show: false),
                 ),
