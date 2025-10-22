@@ -337,7 +337,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 ),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
