@@ -274,7 +274,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 _isLoading ? 'Auditing Website...' : 'Start Audit',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-              style: AppButtonStyles.primaryElevatedButton(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E68DA),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 2,
+              ),
             ),
           ),
         ],
