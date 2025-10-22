@@ -22,8 +22,10 @@ class CriterionDetailScreen extends StatefulWidget {
   State<CriterionDetailScreen> createState() => _CriterionDetailScreenState();
 }
 
-class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
+class _CriterionDetailScreenState extends State<CriterionDetailScreen> with TickerProviderStateMixin {
   late List<Recommendation> _criterionRecommendations;
+  late AnimationController _animationController;
+  late Animation<double> _scoreAnimation;
 
   @override
   void initState() {
@@ -31,6 +33,26 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
     _criterionRecommendations = widget.recommendations
         .where((rec) => rec.criterion == widget.criterion)
         .toList();
+
+    // Initialize animation controller
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    // Create animation that goes from 0 to the actual score
+    _scoreAnimation = Tween<double>(begin: 0, end: widget.score).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+
+    // Start animation automatically
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Color _getScoreColor(double score) {
@@ -115,51 +137,56 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 50),
       child: Center(
-        child: Column(
-          children: [
-          // Circular gauge using PieChart with animation
-          SizedBox(
-            height: 200,
-            width: 200,
-            child: PieChart(
-              PieChartData(
-                sections: [
-                  PieChartSectionData(
-                    value: widget.score,
-                    color: color,
-                    radius: 80,
-                    showTitle: false,
+        child: AnimatedBuilder(
+          animation: _scoreAnimation,
+          builder: (context, child) {
+            final animatedScore = _scoreAnimation.value;
+            return Column(
+              children: [
+                // Circular gauge using PieChart with animation
+                SizedBox(
+                  height: 200,
+                  width: 200,
+                  child: PieChart(
+                    PieChartData(
+                      sections: [
+                        PieChartSectionData(
+                          value: animatedScore,
+                          color: color,
+                          radius: 80,
+                          showTitle: false,
+                        ),
+                        PieChartSectionData(
+                          value: 10 - animatedScore,
+                          color: color.withOpacity(0.2),
+                          radius: 80,
+                          showTitle: false,
+                        ),
+                      ],
+                      centerSpaceRadius: 60,
+                      startDegreeOffset: -90,
+                    ),
                   ),
-                  PieChartSectionData(
-                    value: 10 - widget.score,
-                    color: color.withOpacity(0.2),
-                    radius: 80,
-                    showTitle: false,
-                  ),
-                ],
-                centerSpaceRadius: 60,
-                startDegreeOffset: -90,
-              ),
-              swapAnimationDuration: const Duration(milliseconds: 1500),
-            ),
-          ),
-          const SizedBox(height: 60),
-          Text(
-            '${widget.score.toStringAsFixed(1)}/10',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
                 ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(height: 60),
+                Text(
+                  '${animatedScore.toStringAsFixed(1)}/10',
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-          ),
-        ],
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -185,30 +212,37 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
             const SizedBox(height: 16),
             SizedBox(
               height: 300,
-              child: BarChart(
-                BarChartData(
-                  maxY: 10,
-                  barGroups: List.generate(
-                    sortedScores.length,
-                    (index) {
-                      final entry = sortedScores[index];
-                      final isCurrentCriterion = entry.key == widget.criterion;
-                      return BarChartGroupData(
-                        x: index,
-                        barRods: [
-                          BarChartRodData(
-                            toY: entry.value,
-                            color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
-                            width: 30,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(4),
-                              topRight: Radius.circular(4),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+              child: AnimatedBuilder(
+                animation: _scoreAnimation,
+                builder: (context, child) {
+                  final animationProgress = _scoreAnimation.value / widget.score;
+                  return BarChart(
+                    BarChartData(
+                      maxY: 10,
+                      barGroups: List.generate(
+                        sortedScores.length,
+                        (index) {
+                          final entry = sortedScores[index];
+                          final isCurrentCriterion = entry.key == widget.criterion;
+                          final displayValue = isCurrentCriterion
+                              ? _scoreAnimation.value
+                              : entry.value * animationProgress;
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: displayValue,
+                                color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
+                                width: 30,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(4),
+                                  topRight: Radius.circular(4),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                   titlesData: FlTitlesData(
                     leftTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: true, reservedSize: 30),
@@ -253,8 +287,9 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                   ),
                   borderData: FlBorderData(show: false),
                   barTouchData: BarTouchData(enabled: false),
-                ),
-                swapAnimationDuration: const Duration(milliseconds: 1500),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 12),
