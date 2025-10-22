@@ -346,7 +346,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        Icons.check_circle,
+                        icon,
                         size: 20,
                         color: color,
                       ),
