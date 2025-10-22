@@ -365,10 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: scoreColor,
-                  width: 2.5,
-                ),
+                color: scoreColor,
               ),
               child: Transform.translate(
                 offset: const Offset(0, 2),
@@ -378,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.leagueSpartan(
                       fontWeight: FontWeight.w900,
                       fontSize: 24,
-                      color: scoreColor,
+                      color: Colors.white,
                     ),
                   ),
                 ),
