@@ -38,7 +38,8 @@ workflows:
             --platform IOS \
             --issuer-id $ISSUER_ID \
             --key-id $KEY_ID \
-            --private-key @env:AUTH_KEY
+            --private-key @env:AUTH_KEY \
+            --certificate-key @env:CERT_KEY
       - name: Build iOS App
         script: |
           cd weblser_app
