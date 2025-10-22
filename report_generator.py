@@ -20,8 +20,6 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     PageBreak, Image, KeepTogether
 )
-from reportlab.platypus.flowable import PageTemplate, Frame, PageBreakIfNotEmpty
-from reportlab.pyfont.ttfonts import TTFont
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 
 
