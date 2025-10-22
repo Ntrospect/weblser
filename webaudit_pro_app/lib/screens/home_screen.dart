@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../models/audit_result.dart';
 import '../theme/dark_theme.dart';
+import '../theme/spacing.dart';
+import '../widgets/styled_card.dart';
 import 'audit_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -117,23 +119,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 32),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.horizontal,
+          vertical: AppSpacing.vertical,
+        ).copyWith(bottom: AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Audit Input Card
             _buildAuditInputCard(context),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.sectionGap),
 
             // Recent Audits Section
             if (_recentAudits.isNotEmpty) ...[
               _buildRecentAuditsSection(context),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.sectionGap),
             ],
 
             // How It Works Section
             _buildHowItWorksSection(context),
-            const SizedBox(height: 40),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
@@ -141,106 +146,103 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAuditInputCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              'Audit Your Website',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Get a professional 10-point evaluation of your digital presence',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // URL Input Field
-            TextField(
-              controller: _urlController,
-              enabled: !_isLoading,
-              decoration: InputDecoration(
-                hintText: 'Enter website URL (e.g., github.com)',
-                prefixIcon: const Icon(Icons.language),
-                suffixIcon: _isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(8),
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+    return ElevatedStyledCard(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            'Audit Your Website',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
                 ),
-              ),
-              onSubmitted: (_) => _auditWebsite(),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Get a professional 10-point evaluation of your digital presence',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey,
             ),
+          ),
+          const SizedBox(height: AppSpacing.componentGap),
 
-            // Error message
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _error!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.red,
-                            ),
+          // URL Input Field
+          TextField(
+            controller: _urlController,
+            enabled: !_isLoading,
+            decoration: InputDecoration(
+              hintText: 'Enter website URL (e.g., github.com)',
+              prefixIcon: const Icon(Icons.language),
+              suffixIcon: _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(AppSpacing.sm),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                    ),
-                  ],
-                ),
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.small),
               ),
-            ],
+            ),
+            onSubmitted: (_) => _auditWebsite(),
+          ),
 
-            const SizedBox(height: 16),
-
-            // Audit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _auditWebsite,
-                icon: _isLoading
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Icon(Icons.assessment_outlined, size: 22),
-                label: Text(
-                  _isLoading ? 'Auditing Website...' : 'Start Audit',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
+          // Error message
+          if (_error != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                border: Border.all(color: Colors.red),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 18),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      _error!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.red,
+                          ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // Audit Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isLoading ? null : _auditWebsite,
+              icon: _isLoading
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.assessment_outlined, size: 22),
+              label: Text(
+                _isLoading ? 'Auditing Website...' : 'Start Audit',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -267,7 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.componentGap),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -284,37 +286,54 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAuditHistoryCard(BuildContext context, AuditResult audit) {
     final scoreColor = _getScoreColor(audit.overallScore);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        onTap: () => _loadAuditFromHistory(audit),
-        title: Text(
-          audit.websiteName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          audit.formattedDate,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        trailing: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: scoreColor.withOpacity(0.2),
-          ),
-          child: Center(
-            child: Text(
-              '${audit.overallScore.toStringAsFixed(1)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: scoreColor,
+    return SubtleCard(
+      padding: EdgeInsets.zero,
+      onTap: () => _loadAuditFromHistory(audit),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    audit.websiteName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    audit.formattedDate,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey,
+                        ),
+                  ),
+                ],
               ),
             ),
-          ),
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: scoreColor.withOpacity(0.2),
+              ),
+              child: Center(
+                child: Text(
+                  '${audit.overallScore.toStringAsFixed(1)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: scoreColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -359,47 +378,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.componentGap),
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            mainAxisExtent: 120,
+            mainAxisSpacing: AppSpacing.md,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisExtent: 140,
           ),
           itemCount: steps.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             final step = steps[index];
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      step.$1,
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      step.$2,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      step.$3,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+            return SubtleCard(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    step.$1,
+                    style: const TextStyle(fontSize: 40),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    step.$2,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    step.$3,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             );
           },

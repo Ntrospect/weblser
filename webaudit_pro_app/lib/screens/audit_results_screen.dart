@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/audit_result.dart';
 import '../services/api_service.dart';
+import '../theme/spacing.dart';
+import '../widgets/styled_card.dart';
 import 'audit_reports_screen.dart';
 import 'criterion_detail_screen.dart';
 
@@ -36,21 +38,21 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.horizontal),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Website Info
               _buildWebsiteInfo(context),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // Overall Score Display
               _buildOverallScoreDisplay(context),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // 10 Criterion Scores Grid
               _buildScoresGrid(context),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // Key Strengths
               _buildSection(
@@ -60,7 +62,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 Colors.green,
                 _auditResult.keyStrengths,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.componentGap),
 
               // Critical Issues
               _buildSection(
@@ -70,11 +72,11 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 Colors.red,
                 _auditResult.criticalIssues,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // Priority Recommendations
               _buildRecommendationsSection(context),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // View Reports Button
               SizedBox(
@@ -87,11 +89,11 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                     style: TextStyle(fontSize: 16),
                   ),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
@@ -100,39 +102,37 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
   }
 
   Widget _buildWebsiteInfo(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Website',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.grey,
-              ),
+    return StyledCard(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Website',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.grey,
             ),
-            const SizedBox(height: 4),
-            Text(
-              _auditResult.websiteName,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-              ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            _auditResult.websiteName,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Audit Date',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.grey,
-              ),
+          ),
+          const SizedBox(height: AppSpacing.componentGap),
+          Text(
+            'Audit Date',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.grey,
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${_auditResult.formattedDate} at ${_auditResult.formattedTime}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '${_auditResult.formattedDate} at ${_auditResult.formattedTime}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ),
     );
   }
@@ -204,13 +204,13 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.componentGap),
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            mainAxisExtent: 130,
+            mainAxisSpacing: AppSpacing.md,
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisExtent: 140,
           ),
           itemCount: _auditResult.scores.length,
           shrinkWrap: true,
@@ -245,11 +245,11 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           border: Border.all(color: textColor.withOpacity(0.3)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -261,7 +261,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                   color: textColor,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 criterion,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -272,7 +272,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Icon(
                 Icons.arrow_forward,
                 size: 16,
@@ -313,7 +313,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         Row(
           children: [
             Icon(icon, color: color, size: 24),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -322,17 +322,17 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.componentGap),
         ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.only(top: AppSpacing.xs),
                     child: Icon(Icons.circle, size: 6, color: color),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(item),
                   ),
@@ -352,7 +352,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         Row(
           children: [
             const Icon(Icons.lightbulb_outline, size: 24),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               'Top Recommendations',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -361,65 +361,68 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.componentGap),
         ...List.generate(
           recommendations.length,
           (index) {
             final rec = recommendations[index];
             final isExpanded = _expandedIndex == index;
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ExpansionTile(
-                onExpansionChanged: (expanded) {
-                  setState(() {
-                    _expandedIndex = expanded ? index : -1;
-                  });
-                },
-                initiallyExpanded: isExpanded,
-                title: Text(
-                  '${index + 1}. ${rec.criterion}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: !isExpanded ? Text(
-                  rec.recommendation,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ) : null,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          rec.recommendation,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Card(
+                margin: EdgeInsets.zero,
+                child: ExpansionTile(
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      _expandedIndex = expanded ? index : -1;
+                    });
+                  },
+                  initiallyExpanded: isExpanded,
+                  title: Text(
+                    '${index + 1}. ${rec.criterion}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: !isExpanded ? Text(
+                    rec.recommendation,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ) : null,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            rec.recommendation,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
-                          decoration: BoxDecoration(
-                            color: _getPriorityColor(rec.priority)
-                                .withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Priority: ${rec.priority}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _getPriorityColor(rec.priority),
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(height: AppSpacing.componentGap),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getPriorityColor(rec.priority)
+                                  .withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
+                            ),
+                            child: Text(
+                              'Priority: ${rec.priority}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _getPriorityColor(rec.priority),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
