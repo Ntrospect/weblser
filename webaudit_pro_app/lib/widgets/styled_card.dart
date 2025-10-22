@@ -104,13 +104,9 @@ class SubtleCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: borderRadius,
-              color: isDarkMode
-                  ? Colors.white.withOpacity(0.15)
-                  : Colors.white.withOpacity(0.85),
+              color: const Color(0xFFB9C2D0).withOpacity(0.8),
               border: Border.all(
-                color: isDarkMode
-                    ? Colors.white.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.5),
+                color: const Color(0xFFB9C2D0).withOpacity(0.6),
                 width: 2,
               ),
               boxShadow: [
