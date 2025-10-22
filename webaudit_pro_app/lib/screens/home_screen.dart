@@ -148,11 +148,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAuditInputCard(BuildContext context) {
-    return ElevatedStyledCard(
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(16),
+      shadowColor: primaryColor.withOpacity(0.2),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              primaryColor.withOpacity(0.08),
+              primaryColor.withOpacity(0.04),
+            ],
+          ),
+          border: Border.all(
+            color: primaryColor.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Title
           Text(
             'Audit Your Website',
@@ -247,7 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
+        ),
+      );
   }
 
   Widget _buildRecentAuditsSection(BuildContext context) {
