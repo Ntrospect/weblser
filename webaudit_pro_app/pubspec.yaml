@@ -56,6 +56,9 @@ dependencies:
   # Google Fonts - for Raleway font
   google_fonts: ^6.1.0
 
+  # Charts for data visualization
+  fl_chart: ^0.68.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

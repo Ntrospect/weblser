@@ -1,0 +1,454 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/audit_result.dart';
+import '../services/api_service.dart';
+import 'audit_reports_screen.dart';
+import 'criterion_detail_screen.dart';
+
+class AuditResultsScreen extends StatefulWidget {
+  final AuditResult auditResult;
+
+  const AuditResultsScreen({
+    Key? key,
+    required this.auditResult,
+  }) : super(key: key);
+
+  @override
+  State<AuditResultsScreen> createState() => _AuditResultsScreenState();
+}
+
+class _AuditResultsScreenState extends State<AuditResultsScreen> {
+  late AuditResult _auditResult;
+  int _expandedIndex = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _auditResult = widget.auditResult;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Audit Results'),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Website Info
+              _buildWebsiteInfo(context),
+              const SizedBox(height: 24),
+
+              // Overall Score Display
+              _buildOverallScoreDisplay(context),
+              const SizedBox(height: 28),
+
+              // 10 Criterion Scores Grid
+              _buildScoresGrid(context),
+              const SizedBox(height: 28),
+
+              // Key Strengths
+              _buildSection(
+                context,
+                'Key Strengths',
+                Icons.check_circle_outline,
+                Colors.green,
+                _auditResult.keyStrengths,
+              ),
+              const SizedBox(height: 20),
+
+              // Critical Issues
+              _buildSection(
+                context,
+                'Critical Issues',
+                Icons.warning_outlined,
+                Colors.red,
+                _auditResult.criticalIssues,
+              ),
+              const SizedBox(height: 28),
+
+              // Priority Recommendations
+              _buildRecommendationsSection(context),
+              const SizedBox(height: 28),
+
+              // View Reports Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToReports(),
+                  icon: const Icon(Icons.file_download_outlined),
+                  label: const Text(
+                    'View Reports & Download PDFs',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebsiteInfo(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Website',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _auditResult.websiteName,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Audit Date',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${_auditResult.formattedDate} at ${_auditResult.formattedTime}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverallScoreDisplay(BuildContext context) {
+    final score = _auditResult.overallScore;
+    late Color scoreColor;
+    late String scoreStatus;
+
+    if (score >= 80) {
+      scoreColor = Colors.green;
+      scoreStatus = 'Excellent';
+    } else if (score >= 60) {
+      scoreColor = Colors.orange;
+      scoreStatus = 'Good';
+    } else {
+      scoreColor = Colors.red;
+      scoreStatus = 'Needs Work';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [scoreColor.withOpacity(0.8), scoreColor.withOpacity(0.4)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Overall Score',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '${score.toStringAsFixed(1)}/100',
+            style: TextStyle(
+              fontSize: 56,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            scoreStatus,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoresGrid(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '10-Point Evaluation',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            mainAxisExtent: 100,
+          ),
+          itemCount: _auditResult.scores.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final entries = _auditResult.scores.entries.toList();
+            final criterion = entries[index].key;
+            final score = entries[index].value;
+            return _buildScoreCard(context, criterion, score);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScoreCard(BuildContext context, String criterion, double score) {
+    late Color bgColor, textColor;
+
+    if (score >= 8) {
+      bgColor = Colors.green.withOpacity(0.1);
+      textColor = Colors.green;
+    } else if (score >= 6) {
+      bgColor = Colors.orange.withOpacity(0.1);
+      textColor = Colors.orange;
+    } else {
+      bgColor = Colors.red.withOpacity(0.1);
+      textColor = Colors.red;
+    }
+
+    return GestureDetector(
+      onTap: () => _navigateToCriterionDetail(context, criterion, score),
+      child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: textColor.withOpacity(0.3)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                score.toStringAsFixed(1),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                criterion,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: textColor,
+                      fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              Icon(
+                Icons.arrow_forward,
+                size: 16,
+                color: textColor.withOpacity(0.7),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToCriterionDetail(BuildContext context, String criterion, double score) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CriterionDetailScreen(
+          criterion: criterion,
+          score: score,
+          overallScore: _auditResult.overallScore,
+          recommendations: _auditResult.priorityRecommendations,
+          allScores: _auditResult.scores,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSection(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    List<String> items,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Icon(Icons.circle, size: 6, color: color),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(item),
+                  ),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildRecommendationsSection(BuildContext context) {
+    final recommendations = _auditResult.priorityRecommendations.take(5).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.lightbulb_outline, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              'Top Recommendations',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...List.generate(
+          recommendations.length,
+          (index) {
+            final rec = recommendations[index];
+            final isExpanded = _expandedIndex == index;
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ExpansionTile(
+                onExpansionChanged: (expanded) {
+                  setState(() {
+                    _expandedIndex = expanded ? index : -1;
+                  });
+                },
+                initiallyExpanded: isExpanded,
+                title: Text(
+                  '${index + 1}. ${rec.criterion}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: !isExpanded ? Text(
+                  rec.recommendation,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ) : null,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rec.recommendation,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getPriorityColor(rec.priority)
+                                .withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Priority: ${rec.priority}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _getPriorityColor(rec.priority),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'High':
+        return Colors.red;
+      case 'Medium':
+        return Colors.orange;
+      case 'Low':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _navigateToReports() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AuditReportsScreen(
+          auditResult: _auditResult,
+        ),
+      ),
+    );
+  }
+}
