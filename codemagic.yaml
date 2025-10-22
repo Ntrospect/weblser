@@ -30,19 +30,6 @@ workflows:
         script: |
           cd weblser_app
           flutter clean
-      - name: Decode and save certificate from base64
-        script: |
-          echo $CERT_KEY | base64 -D > /tmp/ios-certificate.p12
-      - name: Fetch iOS code signing files from Apple Developer Portal
-        script: |
-          app-store-connect fetch-signing-files io.jumoki.weblser \
-            --create \
-            --type IOS_APP_STORE \
-            --platform IOS \
-            --issuer-id $ISSUER_ID \
-            --key-id $KEY_ID \
-            --private-key @env:AUTH_KEY \
-            --certificate-key /tmp/ios-certificate.p12
       - name: Build iOS App
         script: |
           cd weblser_app
