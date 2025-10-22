@@ -30,6 +30,15 @@ workflows:
         script: |
           cd weblser_app
           flutter clean
+      - name: Fetch iOS code signing files from Apple Developer Portal
+        script: |
+          app-store-connect fetch-signing-files io.jumoki.weblser \
+            --create \
+            --type IOS_APP_STORE \
+            --platform IOS \
+            --issuer-id $ISSUER_ID \
+            --key-id $KEY_ID \
+            --private-key @env:AUTH_KEY
       - name: Build iOS App
         script: |
           cd weblser_app
