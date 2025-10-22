@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../models/audit_result.dart';
-import '../theme/dark_theme.dart';
 import '../theme/spacing.dart';
+import '../theme/button_styles.dart';
 import '../widgets/styled_card.dart';
 import 'audit_results_screen.dart';
 
@@ -240,6 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _isLoading ? 'Auditing Website...' : 'Start Audit',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
+              style: AppButtonStyles.primaryElevatedButton(context),
             ),
           ),
         ],

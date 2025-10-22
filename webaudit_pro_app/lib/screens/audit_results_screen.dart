@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/audit_result.dart';
-import '../services/api_service.dart';
 import '../theme/spacing.dart';
+import '../theme/button_styles.dart';
 import '../widgets/styled_card.dart';
+import '../widgets/app_badge.dart';
 import 'audit_reports_screen.dart';
 import 'criterion_detail_screen.dart';
 
@@ -86,11 +86,9 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                   icon: const Icon(Icons.file_download_outlined),
                   label: const Text(
                     'View Reports & Download PDFs',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  ),
+                  style: AppButtonStyles.primaryElevatedButton(context),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -396,28 +394,12 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                         children: [
                           Text(
                             rec.recommendation,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.componentGap),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getPriorityColor(rec.priority)
-                                  .withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                            ),
-                            child: Text(
-                              'Priority: ${rec.priority}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _getPriorityColor(rec.priority),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+                          PriorityBadge(priority: rec.priority),
                         ],
                       ),
                     ),
@@ -429,19 +411,6 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         ),
       ],
     );
-  }
-
-  Color _getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High':
-        return Colors.red;
-      case 'Medium':
-        return Colors.orange;
-      case 'Low':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
   }
 
   void _navigateToReports() {
