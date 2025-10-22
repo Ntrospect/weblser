@@ -327,16 +327,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 2.5,
                 ),
               ),
-              child: Transform.translate(
-                offset: const Offset(0, 2),
-                child: Center(
-                  child: Text(
-                    '${audit.overallScore.toStringAsFixed(1)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                      color: scoreColor,
-                    ),
+              child: Center(
+                child: Text(
+                  '${audit.overallScore.toStringAsFixed(1)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: scoreColor,
                   ),
                 ),
               ),
