@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import '../theme/spacing.dart';
 
 /// Custom card widget with consistent styling and elevation hierarchy
@@ -71,7 +72,7 @@ class ElevatedStyledCard extends StatelessWidget {
   }
 }
 
-/// Subtle card for secondary content
+/// Subtle card for secondary content with glassmorphism effect
 class SubtleCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
@@ -89,32 +90,47 @@ class SubtleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(AppRadius.large);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Material(
-      elevation: AppElevation.standard,
+    return ClipRRect(
       borderRadius: borderRadius,
-      shadowColor: Theme.of(context).primaryColor.withOpacity(0.15),
-      color: backgroundColor ?? Theme.of(context).cardColor,
-      child: InkWell(
-        onTap: onTap,
+      child: Material(
+        elevation: AppElevation.standard,
         borderRadius: borderRadius,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-                spreadRadius: 0,
+        shadowColor: Theme.of(context).primaryColor.withOpacity(0.15),
+        color: Colors.transparent,
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: isDarkMode
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.7),
+              border: Border.all(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.2)
+                    : Colors.white.withOpacity(0.3),
+                width: 1.5,
               ),
-            ],
-          ),
-          child: Padding(
-            padding: padding ?? EdgeInsets.zero,
-            child: child,
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: padding ?? EdgeInsets.zero,
+                child: child,
+              ),
+            ),
           ),
         ),
       ),
