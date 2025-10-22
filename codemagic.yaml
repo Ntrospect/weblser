@@ -30,9 +30,10 @@ workflows:
         script: |
           cd weblser_app
           flutter clean
-      - name: Decode certificate and setup signing
+      - name: Decode certificate and extract private key
         script: |
           echo $CERT_KEY | base64 --decode > ~/ios_certificate.p12
+          openssl pkcs12 -in ~/ios_certificate.p12 -nocerts -nodes -passin pass: -out ~/ios_private_key.key
           app-store-connect fetch-signing-files io.jumoki.weblser \
             --create \
             --type IOS_APP_STORE \
@@ -40,8 +41,7 @@ workflows:
             --issuer-id $ISSUER_ID \
             --key-id $KEY_ID \
             --private-key @env:AUTH_KEY \
-            --certificate-key ~/ios_certificate.p12 \
-            --p12-password ""
+            --certificate-key ~/ios_private_key.key
       - name: Build iOS App
         script: |
           cd weblser_app
