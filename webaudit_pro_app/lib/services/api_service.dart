@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
 
@@ -160,6 +161,9 @@ class ApiService extends ChangeNotifier {
     bool deepScan = true,
   }) async {
     try {
+      debugPrint('🔍 Starting audit for URL: $url');
+      debugPrint('📡 API URL: $_apiUrl/api/audit/analyze');
+
       final response = await http.post(
         Uri.parse('$_apiUrl/api/audit/analyze'),
         headers: {'Content-Type': 'application/json'},
@@ -170,12 +174,22 @@ class ApiService extends ChangeNotifier {
         }),
       ).timeout(Duration(seconds: timeout + 60));
 
+      debugPrint('📊 Response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
+        debugPrint('✅ Audit successful');
         return AuditResult.fromJson(jsonDecode(response.body));
       } else {
-        throw Exception('Failed to audit website: ${response.statusCode}');
+        final errorBody = response.body;
+        debugPrint('❌ Server error: ${response.statusCode}');
+        debugPrint('📝 Response body: $errorBody');
+        throw Exception('Server error ${response.statusCode}: $errorBody');
       }
+    } on TimeoutException catch (e) {
+      debugPrint('⏱️ Request timeout: $e');
+      throw Exception('Request timeout - audit took too long. Please try again.');
     } catch (e) {
+      debugPrint('🔴 Error auditing website: $e');
       throw Exception('Error auditing website: $e');
     }
   }
