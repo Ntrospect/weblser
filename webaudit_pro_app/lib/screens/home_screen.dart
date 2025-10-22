@@ -314,10 +314,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: AppSpacing.componentGap),
-        ListView.builder(
+        ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: (_recentAudits.length > 3) ? 3 : _recentAudits.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final audit = _recentAudits[index];
             return _buildAuditHistoryCard(context, audit);
