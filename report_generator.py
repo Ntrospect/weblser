@@ -220,7 +220,7 @@ class WebAuditReportGenerator:
         elements.append(Paragraph("Executive Summary", self.styles['SectionHeader']))
         elements.append(Paragraph(
             f"This improvement plan is based on a comprehensive audit of <b>{audit_data['website_name']}</b>. "
-            f"The website scored <b>{audit_data['overall_score']:.1f}/100</b> across 10 key evaluation criteria. "
+            f"The website scored <b>{audit_data['overall_score']:.1f}/10</b> across 10 key evaluation criteria. "
             f"Below are prioritized recommendations to elevate your digital performance.",
             self.styles['BodyText']
         ))
@@ -321,7 +321,7 @@ class WebAuditReportGenerator:
         elements.append(Paragraph("The Opportunity", self.styles['SectionHeader']))
         elements.append(Paragraph(
             f"Based on our recent evaluation, <b>{audit_data['website_name']}</b> has significant opportunities "
-            f"for digital transformation. With a current score of <b>{audit_data['overall_score']:.1f}/100</b>, "
+            f"for digital transformation. With a current score of <b>{audit_data['overall_score']:.1f}/10</b>, "
             f"strategic improvements could increase traffic, engagement, and conversions.",
             self.styles['BodyText']
         ))
@@ -400,7 +400,7 @@ class WebAuditReportGenerator:
             ["Website", audit_data.get('website_name', 'N/A')],
             ["URL", audit_data.get('url', 'N/A')],
             ["Audit Date", datetime.fromisoformat(audit_data['audit_timestamp']).strftime("%B %d, %Y")],
-            ["Overall Score", f"{audit_data['overall_score']:.1f}/100"]
+            ["Overall Score", f"{audit_data['overall_score']:.1f}/10"]
         ]
 
         table = Table(data, colWidths=[1.5*inch, 3.5*inch])

@@ -173,7 +173,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '${score.toStringAsFixed(1)}/100',
+            '${score.toStringAsFixed(1)}/10',
             style: TextStyle(
               fontSize: 56,
               fontWeight: FontWeight.w900,
