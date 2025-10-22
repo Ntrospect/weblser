@@ -12,12 +12,10 @@ class ApiService extends ChangeNotifier {
   late String _apiUrl;
 
   static const String _apiUrlKey = 'api_url';
-  static const String _defaultApiUrl = 'http://localhost:8000';
+  static const String _defaultApiUrl = 'http://140.99.254.83:8000';
 
   ApiService(this._prefs) {
-    // TODO: Change back to use _prefs after testing
-    _apiUrl = 'http://localhost:8000'; // Hardcoded for testing
-    // _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
+    _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
   }
 
   String get apiUrl => _apiUrl;
