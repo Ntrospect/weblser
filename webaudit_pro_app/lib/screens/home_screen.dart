@@ -331,8 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   '${audit.overallScore.toStringAsFixed(1)}',
                   style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
                     color: scoreColor,
                   ),
                 ),
