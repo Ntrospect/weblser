@@ -140,10 +140,10 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
     late Color scoreColor;
     late String scoreStatus;
 
-    if (score >= 80) {
+    if (score >= 7.5) {
       scoreColor = Colors.green;
       scoreStatus = 'Excellent';
-    } else if (score >= 60) {
+    } else if (score >= 5.0) {
       scoreColor = Colors.orange;
       scoreStatus = 'Good';
     } else {
