@@ -117,7 +117,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
       child: Center(
         child: Column(
           children: [
-          // Circular gauge using PieChart
+          // Circular gauge using PieChart with animation
           SizedBox(
             height: 200,
             width: 200,
@@ -138,7 +138,9 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                   ),
                 ],
                 centerSpaceRadius: 60,
+                startDegreeOffset: -90,
               ),
+              swapAnimationDuration: const Duration(milliseconds: 1500),
             ),
           ),
           const SizedBox(height: 60),
@@ -250,7 +252,9 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                     drawVerticalLine: false,
                   ),
                   borderData: FlBorderData(show: false),
+                  barTouchData: BarTouchData(enabled: false),
                 ),
+                swapAnimationDuration: const Duration(milliseconds: 1500),
               ),
             ),
             const SizedBox(height: 12),
