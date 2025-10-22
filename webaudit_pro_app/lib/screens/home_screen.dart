@@ -328,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               child: Transform.translate(
-                offset: const Offset(0, -5),
+                offset: const Offset(0, 2),
                 child: Center(
                   child: Text(
                     '${audit.overallScore.toStringAsFixed(1)}',
