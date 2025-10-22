@@ -272,7 +272,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   : const Icon(Icons.assessment_outlined, size: 22),
               label: Text(
                 _isLoading ? 'Auditing Website...' : 'Start Audit',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2E68DA),
