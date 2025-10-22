@@ -122,12 +122,13 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 # Native splash screen configuration
-flutter_native_splash:
-  color: "#F6F8FF"
-  color_dark: "#0A0E27"
-  image: assets/jumoki_AI_robot_gradient.png
-  image_dark: assets/jumoki_AI_robot_gradient.png
-  branding: assets/websler-logo_new.png
-  branding_dark: assets/websler-logo_new_white.png
-  android: true
-  ios: true
+# Disabled - using custom Dart splash screen (splash_screen.dart) instead
+# flutter_native_splash:
+#   color: "#F6F8FF"
+#   color_dark: "#0A0E27"
+#   image: assets/jumoki_AI_robot_gradient.png
+#   image_dark: assets/jumoki_AI_robot_gradient.png
+#   branding: assets/websler-logo_new.png
+#   branding_dark: assets/websler-logo_new_white.png
+#   android: true
+#   ios: true
