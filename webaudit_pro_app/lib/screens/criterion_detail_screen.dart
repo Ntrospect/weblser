@@ -182,11 +182,10 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: (sortedScores.length * 40.0) + 40,
+              height: 300,
               child: BarChart(
                 BarChartData(
-                  maxX: 10,
-                  barDirection: BarDirection.horizontal,
+                  maxY: 10,
                   barGroups: List.generate(
                     sortedScores.length,
                     (index) {
@@ -196,12 +195,12 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                         x: index,
                         barRods: [
                           BarChartRodData(
-                            toX: entry.value,
+                            toY: entry.value,
                             color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
-                            width: 24,
+                            width: 30,
                             borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(4),
                               topRight: Radius.circular(4),
-                              bottomRight: Radius.circular(4),
                             ),
                           ),
                         ],
@@ -209,38 +208,32 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                     },
                   ),
                   titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: true, reservedSize: 30),
+                    ),
+                    bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 140,
+                        reservedSize: 60,
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
                           if (index >= 0 && index < sortedScores.length) {
                             final criterion = sortedScores[index].key;
                             return SideTitleWidget(
                               axisSide: meta.axisSide,
-                              child: Text(
-                                criterion,
-                                style: Theme.of(context).textTheme.labelSmall,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  criterion,
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             );
                           }
                           return const SizedBox.shrink();
-                        },
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 30,
-                        interval: 2,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: Theme.of(context).textTheme.labelSmall,
-                          );
                         },
                       ),
                     ),
@@ -253,8 +246,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                   ),
                   gridData: FlGridData(
                     show: true,
-                    verticalInterval: 2,
-                    drawHorizontalLine: false,
+                    horizontalInterval: 2,
+                    drawVerticalLine: false,
                   ),
                   borderData: FlBorderData(show: false),
                 ),
