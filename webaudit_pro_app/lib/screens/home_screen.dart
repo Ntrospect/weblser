@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
             enabled: !_isLoading,
             decoration: InputDecoration(
               hintText: 'Enter website URL (e.g., github.com)',
-              prefixIcon: const Icon(Icons.language),
+              prefixIcon: const Icon(Icons.language, color: Color(0xFF9018AD)),
               suffixIcon: _isLoading
                   ? const Padding(
                       padding: EdgeInsets.all(AppSpacing.sm),
