@@ -91,7 +91,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
             ],
           ),
         ),

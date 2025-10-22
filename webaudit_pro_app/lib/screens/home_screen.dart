@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 40),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
