@@ -109,13 +109,19 @@ class _MainAppState extends State<MainApp> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 68,
-        title: SizedBox(
-          width: 157,
-          height: 66,
-          child: Image.asset(
-            'assets/websler_pro.png',
-            fit: BoxFit.contain,
-          ),
+        title: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return SizedBox(
+              width: 157,
+              height: 66,
+              child: Image.asset(
+                themeProvider.isDarkMode
+                    ? 'assets/websler_pro-dark-theme.png'
+                    : 'assets/websler_pro.png',
+                fit: BoxFit.contain,
+              ),
+            );
+          },
         ),
         centerTitle: false,
         actions: [

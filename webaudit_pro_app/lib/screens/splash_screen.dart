@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/websler_pro.png',
+                  'assets/websler_pro-dark-theme.png',
                   height: 80,
                   fit: BoxFit.contain,
                 ),
