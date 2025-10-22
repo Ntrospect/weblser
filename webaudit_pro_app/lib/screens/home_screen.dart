@@ -5,6 +5,7 @@ import '../models/audit_result.dart';
 import '../theme/spacing.dart';
 import '../theme/button_styles.dart';
 import '../widgets/styled_card.dart';
+import '../widgets/process_timeline.dart';
 import 'audit_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -347,82 +348,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHowItWorksSection(BuildContext context) {
-    final steps = [
-      (
-        '📋',
-        'Input',
-        'Enter any website URL',
-      ),
-      (
-        '🔍',
-        'Analyze',
-        'Comprehensive 10-point audit',
-      ),
-      (
-        '📊',
-        'Results',
-        'Detailed scores & recommendations',
-      ),
-      (
-        '📥',
-        'Export',
-        'Download professional PDFs',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'How It Works',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: AppSpacing.componentGap),
-        GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: AppSpacing.md,
-            crossAxisSpacing: AppSpacing.md,
-            mainAxisExtent: 140,
-          ),
-          itemCount: steps.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            final step = steps[index];
-            return SubtleCard(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    step.$1,
-                    style: const TextStyle(fontSize: 40),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    step.$2,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    step.$3,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
+    return const ProcessTimeline();
   }
 }
