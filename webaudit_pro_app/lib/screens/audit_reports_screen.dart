@@ -124,7 +124,7 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
               const SizedBox(height: 16),
 
               _buildDocumentCard(
-                icon: Icons.target_outlined,
+                icon: Icons.trending_up_outlined,
                 iconColor: Colors.orange,
                 title: 'Website Improvement Plan',
                 description: 'Strategic roadmap',

@@ -112,9 +112,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
   }
 
   Widget _buildScoreDisplay(Color color, String label) {
-    return Center(
-      child: Column(
-        children: [
+    return Padding(
+      padding: const EdgeInsets.only(top: 50),
+      child: Center(
+        child: Column(
+          children: [
           // Circular gauge using PieChart
           SizedBox(
             height: 200,
@@ -139,7 +141,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 60),
           Text(
             '${widget.score.toStringAsFixed(1)}/10',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
@@ -156,6 +158,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> {
                 ),
           ),
         ],
+        ),
       ),
     );
   }

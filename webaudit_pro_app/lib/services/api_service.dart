@@ -5,16 +5,19 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../models/analysis.dart';
+import '../models/audit_result.dart';
 
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
   late String _apiUrl;
 
   static const String _apiUrlKey = 'api_url';
-  static const String _defaultApiUrl = 'http://140.99.254.83:8000';
+  static const String _defaultApiUrl = 'http://localhost:8000';
 
   ApiService(this._prefs) {
-    _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
+    // TODO: Change back to use _prefs after testing
+    _apiUrl = 'http://localhost:8000'; // Hardcoded for testing
+    // _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
   }
 
   String get apiUrl => _apiUrl;
@@ -147,6 +150,156 @@ class ApiService extends ChangeNotifier {
       }
     } catch (e) {
       throw Exception('Error clearing history: $e');
+    }
+  }
+
+  // ==================== WebAudit Pro - Audit Methods ====================
+
+  /// Run a comprehensive 10-point audit on a website
+  Future<AuditResult> auditWebsite(
+    String url, {
+    int timeout = 60,
+    bool deepScan = true,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_apiUrl/api/audit/analyze'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'url': url,
+          'timeout': timeout,
+          'deep_scan': deepScan,
+        }),
+      ).timeout(Duration(seconds: timeout + 60));
+
+      if (response.statusCode == 200) {
+        return AuditResult.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to audit website: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error auditing website: $e');
+    }
+  }
+
+  /// Get a specific audit result by ID
+  Future<AuditResult> getAudit(String auditId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl/api/audit/$auditId'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        return AuditResult.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to get audit: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching audit: $e');
+    }
+  }
+
+  /// Get audit history
+  Future<List<AuditResult>> getAuditHistory({int limit = 100}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl/api/audit/history/list?limit=$limit'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final audits = (data['audits'] as List)
+            .map((item) => AuditResult.fromJson(item as Map<String, dynamic>))
+            .toList();
+        return audits;
+      } else {
+        throw Exception('Failed to get audit history: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching audit history: $e');
+    }
+  }
+
+  /// Generate PDF report for an audit
+  /// documentType: "audit-report", "improvement-plan", or "partnership-proposal"
+  Future<String> generateAuditPdf(
+    String auditId,
+    String documentType, {
+    String? clientName,
+    String companyName = 'WebAudit Pro',
+    String? companyDetails,
+  }) async {
+    try {
+      // Validate document type
+      const validTypes = ['audit-report', 'improvement-plan', 'partnership-proposal'];
+      if (!validTypes.contains(documentType)) {
+        throw Exception('Invalid document type: $documentType');
+      }
+
+      final response = await http.post(
+        Uri.parse('$_apiUrl/api/audit/generate-pdf/$auditId/$documentType'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'audit_id': auditId,
+          'document_type': documentType,
+          'client_name': clientName,
+          'company_name': companyName,
+          'company_details': companyDetails,
+        }),
+      ).timeout(const Duration(seconds: 60));
+
+      if (response.statusCode == 200) {
+        // Get the downloads directory
+        final Directory? downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access Downloads directory');
+        }
+
+        // Create filename based on document type
+        final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+        final String filename = 'webaudit-$documentType-$timestamp.pdf';
+        final String filepath = '${downloadsDir.path}/$filename';
+
+        // Save PDF file
+        final File file = File(filepath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        return filepath;
+      } else {
+        throw Exception('Failed to generate PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error generating PDF: $e');
+    }
+  }
+
+  /// Delete an audit from history
+  Future<void> deleteAudit(String auditId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_apiUrl/api/audit/$auditId'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete audit: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting audit: $e');
+    }
+  }
+
+  /// Clear all audit history
+  Future<void> clearAuditHistory() async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_apiUrl/api/audit/history/clear'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to clear audit history: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error clearing audit history: $e');
     }
   }
 }

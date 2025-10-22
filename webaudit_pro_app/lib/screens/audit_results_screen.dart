@@ -178,7 +178,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             '${score.toStringAsFixed(1)}/100',
             style: TextStyle(
               fontSize: 56,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
               color: Colors.white,
             ),
           ),
@@ -210,7 +210,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             crossAxisCount: 2,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            mainAxisExtent: 100,
+            mainAxisExtent: 130,
           ),
           itemCount: _auditResult.scores.length,
           shrinkWrap: true,
