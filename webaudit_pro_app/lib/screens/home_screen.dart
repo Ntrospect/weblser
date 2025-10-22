@@ -148,25 +148,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAuditInputCard(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
-
     return Material(
       elevation: 8,
       borderRadius: BorderRadius.circular(16),
-      shadowColor: primaryColor.withOpacity(0.2),
+      shadowColor: const Color(0xFF2E68DA).withOpacity(0.2),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
             colors: [
-              primaryColor.withOpacity(0.08),
-              primaryColor.withOpacity(0.04),
+              Color(0xFF2E68DA),
+              Color(0xFF9018AD),
             ],
           ),
           border: Border.all(
-            color: primaryColor.withOpacity(0.15),
+            color: const Color(0xFF2E68DA).withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -180,13 +178,14 @@ class _HomeScreenState extends State<HomeScreen> {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
+                  color: Colors.white,
                 ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Get a professional 10-point evaluation of your digital presence',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
+                  color: Colors.white.withOpacity(0.85),
             ),
           ),
           const SizedBox(height: AppSpacing.componentGap),
@@ -208,9 +207,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : null,
+              filled: true,
+              fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.small),
+                borderSide: BorderSide.none,
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                borderSide: const BorderSide(color: Colors.white, width: 2),
+              ),
+              hintStyle: const TextStyle(color: Colors.grey),
             ),
             onSubmitted: (_) => _auditWebsite(),
           ),
