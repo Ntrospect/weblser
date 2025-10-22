@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 import '../models/audit_result.dart';
 import '../theme/spacing.dart';
@@ -330,8 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Center(
                 child: Text(
                   '${audit.overallScore.toStringAsFixed(1)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
+                  style: GoogleFonts.leagueSpartan(
+                    fontWeight: FontWeight.w900,
                     fontSize: 24,
                     color: scoreColor,
                   ),
