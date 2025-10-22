@@ -88,13 +88,36 @@ class SubtleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StyledCard(
-      elevation: AppElevation.subtle,
-      padding: padding,
-      backgroundColor: backgroundColor,
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.large),
-      child: child,
+    final borderRadius = BorderRadius.circular(AppRadius.large);
+
+    return Material(
+      elevation: AppElevation.standard,
+      borderRadius: borderRadius,
+      shadowColor: Theme.of(context).primaryColor.withOpacity(0.15),
+      color: backgroundColor ?? Theme.of(context).cardColor,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.3)
+                    : Colors.grey.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: padding ?? EdgeInsets.zero,
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }

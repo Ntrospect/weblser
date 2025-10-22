@@ -32,7 +32,7 @@ class DarkAppTheme {
 
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: bgDarker,
+        backgroundColor: bgDark,
         foregroundColor: textPrimary,
         elevation: 0,
         centerTitle: false,
