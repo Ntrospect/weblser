@@ -263,6 +263,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
 
+            // Sentry Test Button
+            Card(
+              color: Colors.orange.withOpacity(0.1),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      throw StateError('This is a test exception for Sentry error tracking');
+                    },
+                    icon: const Icon(Icons.bug_report),
+                    label: const Text('Verify Sentry Setup'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),

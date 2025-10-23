@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
 import 'services/api_service.dart';
@@ -12,7 +13,14 @@ import 'screens/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = 'https://5041718ba3901909930fd91d0411c87d@o4510235337687040.ingest.us.sentry.io/4510235452506112';
+      options.tracesSampleRate = 1.0;
+      options.environment = 'production';
+    },
+    appRunner: () => runApp(const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
