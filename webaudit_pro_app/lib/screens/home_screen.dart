@@ -390,9 +390,9 @@ class _AuditHistoryCardWithHoverState extends State<_AuditHistoryCardWithHover> 
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : [
@@ -404,7 +404,7 @@ class _AuditHistoryCardWithHoverState extends State<_AuditHistoryCardWithHover> 
                 ],
         ),
         child: Material(
-          color: _isHovered ? Colors.grey.withOpacity(0.05) : Colors.transparent,
+          color: _isHovered ? Colors.grey.withOpacity(0.02) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: widget.onTap,
