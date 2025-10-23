@@ -257,7 +257,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             crossAxisCount: 2,
             mainAxisSpacing: AppSpacing.md,
             crossAxisSpacing: AppSpacing.md,
-            mainAxisExtent: 140,
+            mainAxisExtent: 170,
           ),
           itemCount: _auditResult.scores.length,
           shrinkWrap: true,
