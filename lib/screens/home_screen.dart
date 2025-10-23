@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 75,
               height: 75,
               child: Image.asset(
-                'assets/websler-logo-robot-grey.png',
+                'assets/jumoki_AI_robot_gradient.png',
                 fit: BoxFit.contain,
               ),
             ),
