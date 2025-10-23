@@ -321,12 +321,13 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                     final index = value.toInt();
                     if (index >= 0 && index < sortedScores.length) {
                       final criterion = sortedScores[index].key;
+                      final abbreviatedCriterion = _getAbbreviatedCriterion(criterion);
                       return SideTitleWidget(
                         axisSide: meta.axisSide,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            criterion,
+                            abbreviatedCriterion,
                             style: Theme.of(context).textTheme.labelSmall,
                             textAlign: TextAlign.center,
                             maxLines: 2,
@@ -445,5 +446,21 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       default:
         return Colors.grey;
     }
+  }
+
+  String _getAbbreviatedCriterion(String criterion) {
+    const abbreviations = {
+      'Visual Design': 'Visual',
+      'Technical Quality': 'Technical',
+      'User Experience': 'UX',
+      'Performance': 'Perf',
+      'Mobile Responsiveness': 'Mobile',
+      'Content Quality': 'Content',
+      'SEO & Discoverability': 'SEO',
+      'Security': 'Security',
+      'Conversion/Goal Achievement': 'Conversion',
+      'Accessibility': 'A11y',
+    };
+    return abbreviations[criterion] ?? criterion;
   }
 }
