@@ -5,6 +5,7 @@ A cross-platform Flutter application that analyzes websites using Claude AI to g
 **Live Website Analysis → AI-Generated Insights → Professional PDF Reports**
 
 ## Features
+<img width="2956" height="2015" alt="Screenshot 2025-10-22 211933" src="https://github.com/user-attachments/assets/e5b0886a-4a7f-4d58-ac37-bd6ec42dd5ae" />
 
 ✨ **AI-Powered Analysis**
 - Intelligent website content extraction and analysis
