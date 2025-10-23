@@ -18,9 +18,9 @@ A cross-platform Flutter application that analyzes websites using Claude AI to g
 - macOS desktop application
 - iOS mobile app
 
-<img width="600" height="1156" alt="Screenshot 2025-10-23 131028" src="https://github.com/user-attachments/assets/9f96e1f3-bc8a-4bf6-b57b-1d7bdf0c1f93" />
+<img width="400" height="771" alt="Screenshot 2025-10-23 131028" src="https://github.com/user-attachments/assets/9f96e1f3-bc8a-4bf6-b57b-1d7bdf0c1f93" />
 
-<img width="600" height="1169" alt="Screenshot 2025-10-23 131253" src="https://github.com/user-attachments/assets/a9355cf2-3a1f-46b0-b311-89869abc3e76" />
+<img width="400" height="779" alt="Screenshot 2025-10-23 131253" src="https://github.com/user-attachments/assets/a9355cf2-3a1f-46b0-b311-89869abc3e76" />
 
 
 💼 **Professional PDF Reports**
