@@ -380,24 +380,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHowItWorksSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'How It Works',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        ProcessTimeline(
-          steps: const [
-            'Enter your website URL',
-            'AI analyzes the content',
-            'Get instant summary',
-            'Optional: Upgrade to Pro Audit',
-          ],
-        ),
+    return ProcessTimeline(
+      steps: const [
+        'Enter your website URL',
+        'AI analyzes the content',
+        'Get instant summary',
+        'Optional: Upgrade to Pro Audit',
       ],
     );
   }
