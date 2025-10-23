@@ -26,6 +26,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
   late List<Recommendation> _criterionRecommendations;
   late AnimationController _animationController;
   late Animation<double> _scoreAnimation;
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   @override
   void initState() {
@@ -33,6 +35,10 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     _criterionRecommendations = widget.recommendations
         .where((rec) => rec.criterion == widget.criterion)
         .toList();
+
+    // Initialize scroll controller with listener
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
 
     // Initialize animation controller
     _animationController = AnimationController(
@@ -49,8 +55,19 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     _animationController.forward();
   }
 
+  void _onScroll() {
+    final isScrolled = _scrollController.offset > 0;
+    if (isScrolled != _isScrolled) {
+      setState(() {
+        _isScrolled = isScrolled;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -76,7 +93,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.criterion),
-        elevation: 0,
+        elevation: _isScrolled ? 2 : 0,
+        backgroundColor: _isScrolled ? const Color(0xFFe3e0da) : Colors.transparent,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -89,6 +107,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
