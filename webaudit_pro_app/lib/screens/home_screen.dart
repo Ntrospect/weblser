@@ -383,6 +383,10 @@ class _AuditHistoryCardWithHoverState extends State<_AuditHistoryCardWithHover> 
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
+          ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
