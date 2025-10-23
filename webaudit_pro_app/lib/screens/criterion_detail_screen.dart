@@ -198,7 +198,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       ..sort((a, b) => b.value.compareTo(a.value));
 
     final isMobile = MediaQuery.of(context).size.width < 600;
-    final chartWidth = isMobile ? 700.0 : MediaQuery.of(context).size.width - 64;
+    final chartWidth = isMobile ? 550.0 : MediaQuery.of(context).size.width - 64;
 
     return Card(
       child: Padding(
