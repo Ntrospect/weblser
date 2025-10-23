@@ -300,8 +300,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       step.$3,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ],
