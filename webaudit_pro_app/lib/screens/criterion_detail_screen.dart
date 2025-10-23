@@ -450,16 +450,16 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
 
   String _getAbbreviatedCriterion(String criterion) {
     const abbreviations = {
-      'Visual Design': 'Visual',
+      'Visual Design': 'Design',
       'Technical Quality': 'Technical',
       'User Experience': 'UX',
-      'Performance': 'Perf',
+      'Performance': 'Speed',
       'Mobile Responsiveness': 'Mobile',
       'Content Quality': 'Content',
       'SEO & Discoverability': 'SEO',
       'Security': 'Security',
       'Conversion/Goal Achievement': 'Conversion',
-      'Accessibility': 'A11y',
+      'Accessibility': 'Access',
     };
     return abbreviations[criterion] ?? criterion;
   }
