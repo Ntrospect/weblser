@@ -534,11 +534,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       'Technical Quality': 'Technical',
       'User Experience': 'UX',
       'Performance': 'Speed',
-      'Responsiveness': 'Responsive',
+      'Responsiveness': 'Mobile',
       'Content Quality': 'Content',
       'SEO & Discovery': 'SEO',
       'Security': 'Security',
-      'Conversion Goals': 'Goals',
+      'Conversion Goals': 'Conversion',
       'Accessibility': 'Access',
     };
     return abbreviations[criterion] ?? criterion;
