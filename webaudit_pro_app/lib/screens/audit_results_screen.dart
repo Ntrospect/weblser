@@ -137,17 +137,20 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
 
   Widget _buildOverallScoreDisplay(BuildContext context) {
     final score = _auditResult.overallScore;
-    late Color scoreColor;
+    late Color scoreColor, gradientColor;
     late String scoreStatus;
 
     if (score >= 7.5) {
       scoreColor = Colors.green;
+      gradientColor = Colors.green.shade700;
       scoreStatus = 'Excellent';
     } else if (score >= 5.0) {
       scoreColor = Colors.orange;
+      gradientColor = Colors.orange.shade700;
       scoreStatus = 'Good';
     } else {
       scoreColor = Colors.red;
+      gradientColor = Colors.red.shade700;
       scoreStatus = 'Needs Work';
     }
 
@@ -155,8 +158,19 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: scoreColor,
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [scoreColor, gradientColor],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: scoreColor.withOpacity(0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -165,22 +179,25 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '${score.toStringAsFixed(1)}/10',
             style: TextStyle(
-              fontSize: 56,
+              fontSize: 64,
               fontWeight: FontWeight.w900,
               color: Colors.white,
+              letterSpacing: -1,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             scoreStatus,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: Colors.white.withOpacity(0.95),
+                  letterSpacing: 0.3,
             ),
           ),
         ],
@@ -221,61 +238,29 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
   }
 
   Widget _buildScoreCard(BuildContext context, String criterion, double score) {
-    late Color bgColor, textColor;
+    late Color bgColor, textColor, gradientColor;
 
     if (score >= 8) {
-      bgColor = Colors.green.withOpacity(0.1);
+      bgColor = Colors.green.withOpacity(0.08);
       textColor = Colors.green;
+      gradientColor = Colors.green.shade600;
     } else if (score >= 6) {
-      bgColor = Colors.orange.withOpacity(0.1);
+      bgColor = Colors.orange.withOpacity(0.08);
       textColor = Colors.orange;
+      gradientColor = Colors.orange.shade600;
     } else {
-      bgColor = Colors.red.withOpacity(0.1);
+      bgColor = Colors.red.withOpacity(0.08);
       textColor = Colors.red;
+      gradientColor = Colors.red.shade600;
     }
 
-    return GestureDetector(
+    return _ScoreCardWithHover(
+      criterion: criterion,
+      score: score,
+      bgColor: bgColor,
+      textColor: textColor,
+      gradientColor: gradientColor,
       onTap: () => _navigateToCriterionDetail(context, criterion, score),
-      child: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(AppRadius.medium),
-          border: Border.all(color: textColor.withOpacity(0.3)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                score.toStringAsFixed(1),
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                criterion,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: textColor,
-                      fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Icon(
-                Icons.arrow_forward,
-                size: 16,
-                color: textColor.withOpacity(0.7),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -306,12 +291,23 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       children: [
         Row(
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                      letterSpacing: 0.3,
+                ),
               ),
             ),
           ],
@@ -376,12 +372,23 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.lightbulb_outline, size: 24),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Top Recommendations',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.lightbulb_outline, color: Colors.blue, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                'Top Recommendations',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: Colors.blue,
+                      letterSpacing: 0.3,
+                ),
               ),
             ),
           ],
@@ -446,6 +453,128 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       MaterialPageRoute(
         builder: (context) => AuditReportsScreen(
           auditResult: _auditResult,
+        ),
+      ),
+    );
+  }
+}
+
+/// Score card with interactive hover state
+class _ScoreCardWithHover extends StatefulWidget {
+  final String criterion;
+  final double score;
+  final Color bgColor;
+  final Color textColor;
+  final Color gradientColor;
+  final VoidCallback onTap;
+
+  const _ScoreCardWithHover({
+    required this.criterion,
+    required this.score,
+    required this.bgColor,
+    required this.textColor,
+    required this.gradientColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_ScoreCardWithHover> createState() => _ScoreCardWithHoverState();
+}
+
+class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: Matrix4.identity()
+          ..translate(0.0, _isHovered ? -4 : 0.0),
+        decoration: BoxDecoration(
+          gradient: _isHovered
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    widget.bgColor,
+                    widget.bgColor.withOpacity(0.5),
+                  ],
+                )
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [widget.bgColor, widget.bgColor],
+                ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: widget.textColor.withOpacity(_isHovered ? 0.5 : 0.2),
+            width: 1.5,
+          ),
+          boxShadow: _isHovered
+              ? [
+                  BoxShadow(
+                    color: widget.textColor.withOpacity(0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: widget.textColor.withOpacity(0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.score.toStringAsFixed(1),
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      color: widget.textColor,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    widget.criterion,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: widget.textColor,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  AnimatedOpacity(
+                    opacity: _isHovered ? 1.0 : 0.6,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: widget.textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
