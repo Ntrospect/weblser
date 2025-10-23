@@ -290,6 +290,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                   extraLinesData: ExtraLinesData(
                     horizontalLines: [
                       HorizontalLine(
+                        y: 0,
+                        color: Colors.grey.withOpacity(0.3),
+                        strokeWidth: 1,
+                      ),
+                      HorizontalLine(
                         y: widget.overallScore,
                         color: Colors.grey.withOpacity(0.5),
                         strokeWidth: 2,
