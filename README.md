@@ -11,16 +11,16 @@ A cross-platform Flutter application that analyzes websites using Claude AI to g
 - Claude AI-generated summaries (2-3 sentences)
 - Extracts page title, meta description, and full content
 
-<img width="2999" height="2009" alt="Screenshot 2025-10-23 130901" src="https://github.com/user-attachments/assets/5f35aa62-4d0b-4ece-bb7c-9983871278b7" />
+<img width="1024" height="686" alt="Screenshot 2025-10-23 130901" src="https://github.com/user-attachments/assets/5f35aa62-4d0b-4ece-bb7c-9983871278b7" />
 
 📊 **Multi-Platform Support**
 - Windows desktop application
 - macOS desktop application
 - iOS mobile app
 
-<img width="1059" height="2040" alt="Screenshot 2025-10-23 131028" src="https://github.com/user-attachments/assets/9f96e1f3-bc8a-4bf6-b57b-1d7bdf0c1f93" />
+<img width="600" height="1156" alt="Screenshot 2025-10-23 131028" src="https://github.com/user-attachments/assets/9f96e1f3-bc8a-4bf6-b57b-1d7bdf0c1f93" />
 
-<img width="1060" height="2065" alt="Screenshot 2025-10-23 131253" src="https://github.com/user-attachments/assets/a9355cf2-3a1f-46b0-b311-89869abc3e76" />
+<img width="600" height="1169" alt="Screenshot 2025-10-23 131253" src="https://github.com/user-attachments/assets/a9355cf2-3a1f-46b0-b311-89869abc3e76" />
 
 
 💼 **Professional PDF Reports**
