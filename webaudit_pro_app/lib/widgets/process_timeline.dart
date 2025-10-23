@@ -86,59 +86,57 @@ class _ProcessTimelineState extends State<ProcessTimeline>
 
   Widget _buildHorizontalTimeline(BuildContext context, List<dynamic> steps) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(steps.length, (index) {
-        final step = steps[index];
-        final isLast = index == steps.length - 1;
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(steps.length * 2 - 1, (index) {
+        final isConnector = index.isOdd;
 
-        return Expanded(
-          child: Row(
+        if (isConnector) {
+          // Connector line
+          final connectorIndex = index ~/ 2;
+          return SizedBox(
+            width: 80,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 24),
+                _buildAnimatedConnector(connectorIndex),
+              ],
+            ),
+          );
+        } else {
+          // Step circle
+          final stepIndex = index ~/ 2;
+          final step = steps[stepIndex];
+
+          return Column(
             children: [
-              // Step circle
-              Expanded(
-                child: Column(
-                  children: [
-                    _buildStepCircle(
-                      context,
-                      step.icon,
-                      index + 1,
-                      index,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      step.title,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      step.description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                          ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+              _buildStepCircle(
+                context,
+                step.icon,
+                stepIndex + 1,
+                stepIndex,
               ),
-              // Connecting line (skip for last item)
-              if (!isLast)
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 24),
-                      _buildAnimatedConnector(index),
-                    ],
-                  ),
-                ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                step.title,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                step.description,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
-          ),
-        );
+          );
+        }
       }),
     );
   }
