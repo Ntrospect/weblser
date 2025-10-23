@@ -15,11 +15,33 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   late Future<List<Analysis>> _historyFuture;
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     _loadHistory();
+  }
+
+  void _onScroll() {
+    if (_scrollController.offset > 10) {
+      if (!_isScrolled) {
+        setState(() => _isScrolled = true);
+      }
+    } else {
+      if (_isScrolled) {
+        setState(() => _isScrolled = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _loadHistory() {
@@ -90,10 +112,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Analysis History'),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
           IconButton(
@@ -169,6 +192,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               });
             },
             child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(0, 80, 0, 0),
               itemCount: analyses.length,
               itemBuilder: (context, index) {
                 final analysis = analyses[index];
