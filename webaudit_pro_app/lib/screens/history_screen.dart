@@ -240,7 +240,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   )
                 : ListView.separated(
                     controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(16, 130, 16, 16),
                     itemCount: _history.length,
                     separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                     itemBuilder: (context, index) {
