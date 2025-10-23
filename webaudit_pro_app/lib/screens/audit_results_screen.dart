@@ -22,20 +22,43 @@ class AuditResultsScreen extends StatefulWidget {
 class _AuditResultsScreenState extends State<AuditResultsScreen> {
   late AuditResult _auditResult;
   int _expandedIndex = -1;
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
     _auditResult = widget.auditResult;
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.offset > 10) {
+      if (!_isScrolled) {
+        setState(() => _isScrolled = true);
+      }
+    } else {
+      if (_isScrolled) {
+        setState(() => _isScrolled = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Audit Results'),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
           Padding(
@@ -49,8 +72,9 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.horizontal),
+          padding: EdgeInsets.fromLTRB(AppSpacing.horizontal, 80, AppSpacing.horizontal, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -555,16 +579,17 @@ class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
                   Text(
                     widget.score.toStringAsFixed(1),
                     style: TextStyle(
-                      fontSize: 38,
+                      fontSize: 48,
                       fontWeight: FontWeight.w900,
                       color: widget.textColor,
-                      letterSpacing: -0.5,
+                      letterSpacing: -1,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 16),
                   Text(
                     widget.criterion,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontSize: 13,
                           color: widget.textColor,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.2,
