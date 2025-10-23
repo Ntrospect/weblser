@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 30),
                   child: SizedBox(
-                    width: 85,
+                    width: 65,
                     child: Text(
                       step.$1,
                       style: const TextStyle(
