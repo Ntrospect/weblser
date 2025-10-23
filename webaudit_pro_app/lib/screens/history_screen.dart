@@ -96,14 +96,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Image.asset(
-              'assets/websler_pro.png',
-              height: 40,
-              fit: BoxFit.contain,
-            ),
-          ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
             tooltip: 'Clear History',
