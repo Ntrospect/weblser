@@ -279,42 +279,44 @@ class _HomeScreenState extends State<HomeScreen> {
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Step number and title row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      step.$1,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 72,
-                        height: 1.0,
-                        color: Color(0xFFB9C2D0),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      step.$3,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
+                // Step number
+                Text(
+                  step.$1,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 72,
+                    height: 1.0,
+                    color: Color(0xFFB9C2D0),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                // Description
+                const SizedBox(width: 12),
+                // Title and description centered
                 Expanded(
-                  child: Text(
-                    step.$4,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        step.$3,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(
+                          step.$4,
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
