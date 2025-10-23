@@ -273,6 +273,81 @@ To modify the summarization behavior:
 - **Content Extraction Issues** - Some sites may have unusual HTML structures; the tool tries main/article/content divs first, then falls back to full page text
 - **SSL Certificate Errors** - Ensure requests library is up to date: `pip install --upgrade requests`
 
+## Recent Development (Session Oct 24, 2025)
+
+### Unified Websler/Pro Workflow Architecture ✅
+**Consolidated summary → audit upgrade funnel with clean navigation**
+
+#### New Data Model
+- `WebsiteAnalysis` model (lib/models/website_analysis.dart)
+  - Single unified model for both summaries AND audits
+  - Supports `AnalysisType.summary` and `AnalysisType.audit`
+  - Automatic conversion from both weblser and audit API responses
+  - Tracks linked summaries if audit was upgraded from summary
+
+#### Enhanced API Service
+- `getUnifiedHistory()` - Fetch combined summaries + audits (sorted newest first)
+- `generateWebslerSummary()` - Quick summary wrapper
+- `upgradeToAudit()` - Convert summary to full 10-point audit
+- `generatePdfUnified()` - Works with both summary and audit PDFs
+- `deleteAnalysisUnified()` - Delete either type uniformly
+- All new methods backward compatible with existing endpoints
+
+#### Navigation Refactor
+- Simplified to clean **3-screen structure**: Home | History | Settings
+- **Home Screen**: Websler summary generator
+  - Simple URL input card with gradient design
+  - "Generate Summary" button
+  - Summary appears in dialog with "Upgrade to Pro" option
+  - "How It Works" timeline explaining the flow
+- **History Screen**: Unified history view
+  - Combines summaries and audits in chronological order
+  - Color-coded: Blue (summaries), Green/Orange/Red (audits)
+  - Type-specific actions:
+    * Summaries: "Upgrade to Pro" button
+    * Audits: "View Audit" button
+  - Delete individual items or clear all
+  - Pull-to-refresh for latest data
+- **Settings Screen**: Theme & API configuration
+
+#### User Experience Improvements
+- Loading dialogs with spinners when upgrading summaries
+- "Running WebAudit Pro..." message with timeout guidance
+- Non-dismissible dialogs prevent accidental cancellation
+- Proper AppBar spacing (130px padding) to prevent content cutoff
+- App version updated to 1.2.1
+- Removed duplicate UI elements
+- Professional timeline spacing
+
+#### Git Commits (Session)
+- `bf7829a` - feat: Implement unified Websler/Pro workflow
+- `04cfaaa` - refactor: Simplify navigation to 3-screen structure
+- `627575c` - feat: Add loading dialog for 'Upgrade to Pro' (History)
+- `be448b4` - feat: Add loading dialog for 'Upgrade to Pro' (Home)
+- `4c8a13e` - chore: Update app version to 1.2.1
+- `951c566` - fix: Remove duplicate 'How It Works' title
+- `b52b99a` - style: Add 40px timeline spacing
+- `92c26dd` - fix: History screen padding
+
+#### Technical Details
+- Maintains separation of concerns (models, services, screens)
+- All existing audit/summary functionality intact
+- New unified methods are additive, not replacing
+- Supports future features (export, sharing, advanced filtering)
+- Ready for iOS TestFlight and Windows distribution
+
+#### Product Flow
+1. User opens Home → sees Websler summary input
+2. Enters URL → gets instant AI summary
+3. Summary dialog shows with "Upgrade to Pro" button
+4. Can close or click upgrade
+5. Loading spinner shows during audit (1+ minute)
+6. Results display or saved to History
+7. History tab shows all summaries and audits together
+8. Users can view, upgrade, or delete any analysis
+
+**Status**: Feature complete and tested. Ready for production use.
+
 ## Recent Development (Session Oct 21, 2025)
 
 ### Professional Splash Screen 🎨
