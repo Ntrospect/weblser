@@ -42,26 +42,26 @@ class WebsiteAuditor:
     Professional website auditor evaluating across 10 key criteria:
     1. User Experience (UX)
     2. Performance
-    3. Mobile Responsiveness
+    3. Responsiveness
     4. Visual Design
     5. Content Quality
     6. Accessibility
-    7. SEO & Discoverability
+    7. SEO & Discovery
     8. Security
-    9. Conversion/Goal Achievement
+    9. Conversion Goals
     10. Technical Quality
     """
 
     CRITERIA = [
         "User Experience",
         "Performance",
-        "Mobile Responsiveness",
+        "Responsiveness",
         "Visual Design",
         "Content Quality",
         "Accessibility",
-        "SEO & Discoverability",
+        "SEO & Discovery",
         "Security",
-        "Conversion/Goal Achievement",
+        "Conversion Goals",
         "Technical Quality"
     ]
 

@@ -26,6 +26,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
   late List<Recommendation> _criterionRecommendations;
   late AnimationController _animationController;
   late Animation<double> _scoreAnimation;
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   @override
   void initState() {
@@ -33,6 +35,10 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     _criterionRecommendations = widget.recommendations
         .where((rec) => rec.criterion == widget.criterion)
         .toList();
+
+    // Initialize scroll controller
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
 
     // Initialize animation controller
     _animationController = AnimationController(
@@ -49,8 +55,21 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     _animationController.forward();
   }
 
+  void _onScroll() {
+    if (_scrollController.offset > 10) {
+      if (!_isScrolled) {
+        setState(() => _isScrolled = true);
+      }
+    } else {
+      if (_isScrolled) {
+        setState(() => _isScrolled = false);
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -74,10 +93,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     final scoreLabel = _getScoreLabel(widget.score);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(widget.criterion),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
           Padding(
@@ -91,8 +111,9 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -513,11 +534,11 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       'Technical Quality': 'Technical',
       'User Experience': 'UX',
       'Performance': 'Speed',
-      'Mobile Responsiveness': 'Mobile',
+      'Responsiveness': 'Responsive',
       'Content Quality': 'Content',
-      'SEO & Discoverability': 'SEO',
+      'SEO & Discovery': 'SEO',
       'Security': 'Security',
-      'Conversion/Goal Achievement': 'Conversion',
+      'Conversion Goals': 'Goals',
       'Accessibility': 'Access',
     };
     return abbreviations[criterion] ?? criterion;
