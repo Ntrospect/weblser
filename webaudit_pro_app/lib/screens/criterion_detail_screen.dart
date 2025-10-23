@@ -293,12 +293,16 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                 final displayValue = isCurrentCriterion
                     ? _scoreAnimation.value
                     : entry.value * animationProgress;
+                final barColor = isCurrentCriterion
+                    ? color
+                    : _getScoreColor(entry.value);
+
                 return BarChartGroupData(
                   x: index,
                   barRods: [
                     BarChartRodData(
                       toY: displayValue,
-                      color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
+                      color: barColor.withOpacity(0.7),
                       width: 30,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(4),
@@ -323,9 +327,10 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                       final criterion = sortedScores[index].key;
                       final abbreviatedCriterion = _getAbbreviatedCriterion(criterion);
                       final isCurrentCriterion = criterion == widget.criterion;
+                      final criterionScore = sortedScores[index].value;
                       final badgeColor = isCurrentCriterion
                           ? _getScoreColor(widget.score)
-                          : Colors.blue;
+                          : _getScoreColor(criterionScore);
 
                       return SideTitleWidget(
                         axisSide: meta.axisSide,
