@@ -32,7 +32,7 @@ class LightAppTheme {
 
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: bgLighter,
+        backgroundColor: bgLight,
         foregroundColor: textPrimary,
         elevation: 1,
         centerTitle: false,
