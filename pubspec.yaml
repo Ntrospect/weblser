@@ -73,6 +73,9 @@ dev_dependencies:
   # Native splash screen
   flutter_native_splash: ^2.4.0
 
+  # App icon generator
+  flutter_launcher_icons: ^0.13.1
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -134,3 +137,10 @@ flutter_native_splash:
   branding_dark: assets/websler-logo_new_white.png
   android: true
   ios: true
+
+# App icon configuration
+flutter_launcher_icons:
+  android: "icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/jumoki_AI_robot_gradient.png"
