@@ -197,8 +197,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     final sortedScores = widget.allScores.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final isMobile = MediaQuery.of(context).size.width < 800;
-    final chartWidth = isMobile ? 600.0 : MediaQuery.of(context).size.width - 64;
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final chartWidth = isMobile ? 700.0 : MediaQuery.of(context).size.width - 64;
 
     return Card(
       child: Padding(
