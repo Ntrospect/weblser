@@ -197,6 +197,9 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
     final sortedScores = widget.allScores.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final chartWidth = isMobile ? 600.0 : MediaQuery.of(context).size.width - 64;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -210,110 +213,32 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                   ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 300,
-              child: AnimatedBuilder(
-                animation: _scoreAnimation,
-                builder: (context, child) {
-                  final animationProgress = _scoreAnimation.value / widget.score;
-                  return BarChart(
-                    BarChartData(
-                      maxY: 10,
-                      barGroups: List.generate(
-                        sortedScores.length,
-                        (index) {
-                          final entry = sortedScores[index];
-                          final isCurrentCriterion = entry.key == widget.criterion;
-                          final displayValue = isCurrentCriterion
-                              ? _scoreAnimation.value
-                              : entry.value * animationProgress;
-                          return BarChartGroupData(
-                            x: index,
-                            barRods: [
-                              BarChartRodData(
-                                toY: displayValue,
-                                color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
-                                width: 30,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(4),
-                                  topRight: Radius.circular(4),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                  titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: true, reservedSize: 30),
+            // Horizontally scrollable chart on mobile
+            isMobile
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: chartWidth,
+                      height: 300,
+                      child: _buildChart(color, sortedScores),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 60,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < sortedScores.length) {
-                            final criterion = sortedScores[index].key;
-                            return SideTitleWidget(
-                              axisSide: meta.axisSide,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  criterion,
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                  )
+                : SizedBox(
+                    height: 300,
+                    child: _buildChart(color, sortedScores),
                   ),
-                  gridData: FlGridData(
-                    show: true,
-                    horizontalInterval: 2,
-                    drawVerticalLine: false,
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barTouchData: BarTouchData(enabled: false),
-                  extraLinesData: ExtraLinesData(
-                    horizontalLines: [
-                      HorizontalLine(
-                        y: 0,
-                        color: Colors.grey.withOpacity(0.3),
-                        strokeWidth: 1,
-                      ),
-                      HorizontalLine(
-                        y: widget.overallScore,
-                        color: Colors.grey.withOpacity(0.5),
-                        strokeWidth: 2,
-                        dashArray: [5, 5],
-                        label: HorizontalLineLabel(
-                          show: true,
-                          alignment: Alignment.topLeft,
-                          padding: const EdgeInsets.only(left: 8, top: 4),
-                          labelResolver: (_) => 'Overall: ${widget.overallScore.toStringAsFixed(1)}',
-                        ),
-                      ),
-                    ],
-                  ),
-                    ),
-                  );
-                },
-              ),
-            ),
             const SizedBox(height: 12),
+            if (isMobile)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Swipe horizontally to see all criteria →',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ),
             // Legend
             Row(
               children: [
@@ -349,6 +274,109 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildChart(Color color, List<MapEntry<String, double>> sortedScores) {
+    return AnimatedBuilder(
+      animation: _scoreAnimation,
+      builder: (context, child) {
+        final animationProgress = _scoreAnimation.value / widget.score;
+        return BarChart(
+          BarChartData(
+            maxY: 10,
+            barGroups: List.generate(
+              sortedScores.length,
+              (index) {
+                final entry = sortedScores[index];
+                final isCurrentCriterion = entry.key == widget.criterion;
+                final displayValue = isCurrentCriterion
+                    ? _scoreAnimation.value
+                    : entry.value * animationProgress;
+                return BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: displayValue,
+                      color: isCurrentCriterion ? color : Colors.blue.withOpacity(0.6),
+                      width: 30,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            titlesData: FlTitlesData(
+              leftTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: true, reservedSize: 30),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 60,
+                  getTitlesWidget: (value, meta) {
+                    final index = value.toInt();
+                    if (index >= 0 && index < sortedScores.length) {
+                      final criterion = sortedScores[index].key;
+                      return SideTitleWidget(
+                        axisSide: meta.axisSide,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            criterion,
+                            style: Theme.of(context).textTheme.labelSmall,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+            ),
+            gridData: FlGridData(
+              show: true,
+              horizontalInterval: 2,
+              drawVerticalLine: false,
+            ),
+            borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(enabled: false),
+            extraLinesData: ExtraLinesData(
+              horizontalLines: [
+                HorizontalLine(
+                  y: 0,
+                  color: Colors.grey.withOpacity(0.3),
+                  strokeWidth: 1,
+                ),
+                HorizontalLine(
+                  y: widget.overallScore,
+                  color: Colors.grey.withOpacity(0.5),
+                  strokeWidth: 2,
+                  dashArray: [5, 5],
+                  label: HorizontalLineLabel(
+                    show: true,
+                    alignment: Alignment.topLeft,
+                    padding: const EdgeInsets.only(left: 8, top: 4),
+                    labelResolver: (_) => 'Overall: ${widget.overallScore.toStringAsFixed(1)}',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
