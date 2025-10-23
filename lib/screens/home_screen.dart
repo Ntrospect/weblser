@@ -301,6 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 4),
                       Text(
                         step.$3,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
