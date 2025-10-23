@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/spacing.dart';
 
-/// Animated process timeline showing the audit workflow
+/// Animated process timeline showing workflow steps
 class ProcessTimeline extends StatefulWidget {
-  const ProcessTimeline({Key? key}) : super(key: key);
+  final List<String>? steps; // Optional custom steps (if null, uses default audit steps)
+
+  const ProcessTimeline({Key? key, this.steps}) : super(key: key);
 
   @override
   State<ProcessTimeline> createState() => _ProcessTimelineState();
@@ -42,28 +44,16 @@ class _ProcessTimelineState extends State<ProcessTimeline>
 
   @override
   Widget build(BuildContext context) {
-    final steps = [
-      (
-        icon: Icons.description_outlined,
-        title: 'Input',
-        description: 'Enter website URL',
-      ),
-      (
-        icon: Icons.analytics_outlined,
-        title: 'Analyze',
-        description: '10-point audit',
-      ),
-      (
-        icon: Icons.assessment_outlined,
-        title: 'Results',
-        description: 'Detailed scores',
-      ),
-      (
-        icon: Icons.download_outlined,
-        title: 'Export',
-        description: 'Download PDFs',
-      ),
+    // Use custom steps if provided, otherwise use default audit workflow
+    final stepsList = widget.steps ?? [
+      'Enter your website URL',
+      'AI analyzes the content',
+      'Get instant summary',
+      'Optional: Upgrade to Pro Audit',
     ];
+
+    // Convert to structured format for timeline
+    final structuredSteps = _buildStepStructure(stepsList);
 
     final isDesktop = MediaQuery.of(context).size.width > 800;
 
@@ -78,8 +68,8 @@ class _ProcessTimelineState extends State<ProcessTimeline>
         ),
         const SizedBox(height: AppSpacing.lg),
         isDesktop
-            ? _buildHorizontalTimeline(context, steps)
-            : _buildVerticalTimeline(context, steps),
+            ? _buildHorizontalTimeline(context, structuredSteps)
+            : _buildVerticalTimeline(context, structuredSteps),
       ],
     );
   }
@@ -315,6 +305,26 @@ class _ProcessTimelineState extends State<ProcessTimeline>
           ],
         );
       },
+    );
+  }
+
+  /// Convert string steps to structured step data with icons
+  List<dynamic> _buildStepStructure(List<String> stepsList) {
+    final icons = [
+      Icons.description_outlined,
+      Icons.analytics_outlined,
+      Icons.assessment_outlined,
+      Icons.download_outlined,
+      Icons.check_circle_outlined,
+    ];
+
+    return List.generate(
+      stepsList.length,
+      (index) => (
+        icon: index < icons.length ? icons[index] : Icons.check_circle_outlined,
+        title: 'Step ${index + 1}',
+        description: stepsList[index],
+      ),
     );
   }
 }

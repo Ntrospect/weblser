@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:async';
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
+import '../models/website_analysis.dart';
 
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -312,6 +313,136 @@ class ApiService extends ChangeNotifier {
       }
     } catch (e) {
       throw Exception('Error clearing audit history: $e');
+    }
+  }
+
+  // ==================== Unified History Methods ====================
+
+  /// Generate a Weblser summary and return as unified WebsiteAnalysis
+  Future<WebsiteAnalysis> generateWebslerSummary(String url) async {
+    try {
+      final analysis = await analyzeUrl(url);
+      return WebsiteAnalysis.fromSummaryJson(analysis.toJson());
+    } catch (e) {
+      throw Exception('Error generating summary: $e');
+    }
+  }
+
+  /// Get unified history combining both summaries and audits
+  /// Returns chronologically sorted list (newest first)
+  Future<List<WebsiteAnalysis>> getUnifiedHistory({int limit = 100}) async {
+    try {
+      // Get both summaries and audits in parallel
+      final summaryFuture = getHistory(limit: limit);
+      final auditFuture = getAuditHistory(limit: limit);
+
+      final summaries = await summaryFuture;
+      final audits = await auditFuture;
+
+      // Convert to unified model
+      final unifiedList = <WebsiteAnalysis>[
+        ...summaries.map((s) => WebsiteAnalysis.fromSummaryJson(s.toJson())),
+        ...audits.map((a) => WebsiteAnalysis.fromAuditJson(a.toJson())),
+      ];
+
+      // Sort by created_at descending (newest first)
+      unifiedList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      // Return limited list
+      return unifiedList.take(limit).toList();
+    } catch (e) {
+      throw Exception('Error fetching unified history: $e');
+    }
+  }
+
+  /// Get only summaries from unified history
+  Future<List<WebsiteAnalysis>> getSummaryHistory({int limit = 100}) async {
+    try {
+      final summaries = await getHistory(limit: limit);
+      return summaries
+          .map((s) => WebsiteAnalysis.fromSummaryJson(s.toJson()))
+          .toList();
+    } catch (e) {
+      throw Exception('Error fetching summary history: $e');
+    }
+  }
+
+  /// Get only audits from unified history
+  Future<List<WebsiteAnalysis>> getAuditHistoryAsUnified({int limit = 100}) async {
+    try {
+      final audits = await getAuditHistory(limit: limit);
+      return audits
+          .map((a) => WebsiteAnalysis.fromAuditJson(a.toJson()))
+          .toList();
+    } catch (e) {
+      throw Exception('Error fetching audit history: $e');
+    }
+  }
+
+  /// Delete a unified analysis (works for both summaries and audits)
+  Future<void> deleteAnalysisUnified(WebsiteAnalysis analysis) async {
+    try {
+      if (analysis.isSummary) {
+        await deleteAnalysis(analysis.id);
+      } else {
+        await deleteAudit(analysis.id);
+      }
+    } catch (e) {
+      throw Exception('Error deleting analysis: $e');
+    }
+  }
+
+  /// Generate PDF from unified analysis (works for both summaries and audits)
+  Future<String> generatePdfUnified(
+    WebsiteAnalysis analysis, {
+    String documentType = 'audit-report', // For audits
+    String? clientName,
+    String companyName = 'WebAudit Pro',
+    String? companyDetails,
+  }) async {
+    try {
+      if (analysis.isSummary) {
+        // For summaries, use the weblser PDF generation
+        return await generatePdf(analysis.id,
+            logoUrl: null, companyName: companyName, companyDetails: companyDetails);
+      } else {
+        // For audits, use the audit PDF generation
+        return await generateAuditPdf(
+          analysis.id,
+          documentType,
+          clientName: clientName,
+          companyName: companyName,
+          companyDetails: companyDetails,
+        );
+      }
+    } catch (e) {
+      throw Exception('Error generating PDF: $e');
+    }
+  }
+
+  /// Upgrade a summary to a full audit (run audit on the same URL)
+  Future<WebsiteAnalysis> upgradeToAudit(
+    WebsiteAnalysis summary, {
+    int timeout = 60,
+    bool deepScan = true,
+  }) async {
+    if (!summary.isSummary) {
+      throw Exception('Can only upgrade summaries to audits');
+    }
+
+    try {
+      final auditResult = await auditWebsite(
+        summary.url,
+        timeout: timeout,
+        deepScan: deepScan,
+      );
+
+      return WebsiteAnalysis.fromAuditJson(
+        auditResult.toJson(),
+        linkedSummaryId: summary.id,
+      );
+    } catch (e) {
+      throw Exception('Error upgrading to audit: $e');
     }
   }
 }
