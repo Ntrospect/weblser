@@ -158,17 +158,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _upgradeToAudit(WebsiteAnalysis summary) async {
-    setState(() {
-      _isLoading = true;
-    });
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Running WebAudit Pro...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This may take a minute',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
 
     try {
       final apiService = context.read<ApiService>();
       final auditResult = await apiService.upgradeToAudit(summary);
 
       if (mounted) {
-        // Navigate to history screen to show the new audit
-        DefaultTabController.of(context)?.animateTo(1);
+        // Close loading dialog
+        Navigator.pop(context);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✓ Audit complete! Check the History tab.'),
@@ -178,18 +203,15 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // Close loading dialog
+        Navigator.pop(context);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
