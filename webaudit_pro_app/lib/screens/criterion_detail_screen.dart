@@ -77,7 +77,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       appBar: AppBar(
         title: Text(widget.criterion),
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
