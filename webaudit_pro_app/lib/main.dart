@@ -91,6 +91,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
+  bool _isScrolled = false;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -101,16 +102,29 @@ class _MainAppState extends State<MainApp> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _isScrolled = false;
     });
+  }
+
+  void _onScroll(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      final isScrolled = notification.metrics.pixels > 10;
+      if (isScrolled != _isScrolled) {
+        setState(() {
+          _isScrolled = isScrolled;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         toolbarHeight: 68,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         title: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
@@ -147,7 +161,13 @@ class _MainAppState extends State<MainApp> {
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          _onScroll(notification);
+          return false;
+        },
+        child: _screens[_selectedIndex],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(

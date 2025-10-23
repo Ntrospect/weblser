@@ -80,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.fromLTRB(20.0, 88, 20.0, 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

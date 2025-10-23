@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.horizontal,
           vertical: AppSpacing.vertical,
-        ).copyWith(bottom: AppSpacing.xl),
+        ).copyWith(bottom: AppSpacing.xl, top: 88),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
