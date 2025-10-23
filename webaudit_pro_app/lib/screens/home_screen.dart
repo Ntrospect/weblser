@@ -335,59 +335,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAuditHistoryCard(BuildContext context, AuditResult audit) {
     final scoreColor = _getScoreColor(audit.overallScore);
 
-    return SubtleCard(
-      padding: EdgeInsets.zero,
+    return _AuditHistoryCardWithHover(
+      audit: audit,
+      scoreColor: scoreColor,
       onTap: () => _loadAuditFromHistory(audit),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    audit.websiteName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    audit.formattedDate,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: scoreColor,
-              ),
-              child: Transform.translate(
-                offset: const Offset(0, 2),
-                child: Center(
-                  child: Text(
-                    '${audit.overallScore.toStringAsFixed(1)}',
-                    style: GoogleFonts.leagueSpartan(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -399,5 +350,114 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHowItWorksSection(BuildContext context) {
     return const ProcessTimeline();
+  }
+}
+
+/// Audit history card with hover state
+class _AuditHistoryCardWithHover extends StatefulWidget {
+  final AuditResult audit;
+  final Color scoreColor;
+  final VoidCallback onTap;
+
+  const _AuditHistoryCardWithHover({
+    required this.audit,
+    required this.scoreColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_AuditHistoryCardWithHover> createState() =>
+      _AuditHistoryCardWithHoverState();
+}
+
+class _AuditHistoryCardWithHoverState extends State<_AuditHistoryCardWithHover> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: _isHovered
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Material(
+          color: _isHovered ? Colors.grey.withOpacity(0.05) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.audit.websiteName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          widget.audit.formattedDate,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.scoreColor,
+                    ),
+                    child: Transform.translate(
+                      offset: const Offset(0, 2),
+                      child: Center(
+                        child: Text(
+                          '${widget.audit.overallScore.toStringAsFixed(1)}',
+                          style: GoogleFonts.leagueSpartan(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
