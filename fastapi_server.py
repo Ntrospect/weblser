@@ -16,6 +16,9 @@ from pathlib import Path
 from typing import Optional, List, Dict
 from io import BytesIO
 
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.httpx import HttpxIntegration
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -95,6 +98,19 @@ class AuditHistoryResponse(BaseModel):
     total: int
 
 
+# ==================== Sentry Setup ====================
+
+sentry_sdk.init(
+    dsn="https://531e3b4a74cbbe4db48be351d88abf9a@o4510235337687040.ingest.us.sentry.io/4510235974959104",
+    integrations=[
+        FastApiIntegration(),
+        HttpxIntegration(),
+    ],
+    traces_sample_rate=1.0,
+    environment="production",
+    send_default_pii=True,
+)
+
 # ==================== FastAPI Setup ====================
 
 app = FastAPI(
@@ -167,6 +183,16 @@ async def root():
         "service": "weblser API",
         "version": "1.0.0"
     }
+
+
+@app.get("/sentry-debug")
+async def sentry_debug():
+    """
+    Test endpoint to verify Sentry integration.
+    This intentionally throws a division by zero error to test error reporting.
+    """
+    division_by_zero = 1 / 0  # This will trigger an error that Sentry captures
+    return {"status": "ok"}  # This line will never execute
 
 
 @app.post("/api/analyze", response_model=AnalysisResult)
