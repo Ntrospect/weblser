@@ -190,8 +190,10 @@ class _ProcessTimelineState extends State<ProcessTimeline>
                       children: [
                         Text(
                           step.title,
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 18,
                               ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
