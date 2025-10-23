@@ -307,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
+                          color: const Color(0xFF2E68DA),
                         ),
                       ),
                       const SizedBox(height: 13),
