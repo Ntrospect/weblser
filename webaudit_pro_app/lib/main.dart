@@ -109,6 +109,9 @@ class _MainAppState extends State<MainApp> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 68,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         title: Consumer<ThemeProvider>(
           builder: (context, themeProvider, _) {
             return SizedBox(
