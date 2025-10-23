@@ -85,20 +85,18 @@ class _ProcessTimelineState extends State<ProcessTimeline>
   }
 
   Widget _buildHorizontalTimeline(BuildContext context, List<dynamic> steps) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(steps.length, (index) {
-            final step = steps[index];
-            final isLast = index == steps.length - 1;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(steps.length, (index) {
+        final step = steps[index];
+        final isLast = index == steps.length - 1;
 
-            return Row(
-              children: [
-                // Step circle
-                Column(
+        return Expanded(
+          child: Row(
+            children: [
+              // Step circle
+              Expanded(
+                child: Column(
                   children: [
                     _buildStepCircle(
                       context,
@@ -126,23 +124,22 @@ class _ProcessTimelineState extends State<ProcessTimeline>
                     ),
                   ],
                 ),
-                // Connecting line (skip for last item)
-                if (!isLast)
-                  SizedBox(
-                    width: 80,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 24),
-                        _buildAnimatedConnector(index),
-                      ],
-                    ),
+              ),
+              // Connecting line (skip for last item)
+              if (!isLast)
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24),
+                      _buildAnimatedConnector(index),
+                    ],
                   ),
-              ],
-            );
-          }),
-        ),
-      ),
+                ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
