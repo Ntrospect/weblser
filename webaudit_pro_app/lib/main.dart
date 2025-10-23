@@ -7,7 +7,6 @@ import 'services/api_service.dart';
 import 'services/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/history_screen.dart';
 import 'screens/settings_screen.dart';
 
 void main() async {
@@ -93,9 +92,10 @@ class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
   bool _isScrolled = false;
 
+  /// Simplified navigation: Home + Settings only
+  /// History is now in HomeScreen's TabBar (unified with Websler summaries)
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HistoryScreen(),
     const SettingsScreen(),
   ];
 
@@ -173,10 +173,6 @@ class _MainAppState extends State<MainApp> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
