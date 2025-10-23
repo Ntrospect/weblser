@@ -282,17 +282,19 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Step number
-                Text(
-                  step.$1,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 72,
-                    height: 1.0,
-                    color: Color(0xFFB9C2D0),
+                // Step number - fixed width
+                SizedBox(
+                  width: 85,
+                  child: Text(
+                    step.$1,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 72,
+                      height: 1.0,
+                      color: Color(0xFFB9C2D0),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
                 // Title and description centered
                 Expanded(
                   child: Column(
@@ -306,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 13),
                       Expanded(
                         child: Text(
                           step.$4,
