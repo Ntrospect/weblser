@@ -29,51 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Widget _buildStepIcon(String stepNumber) {
-    const iconSize = 48.0;
-    const generateIconSize = 52.8; // 10% bigger
-    const exportIconSize = 43.2; // 10% smaller
-    const iconWidget = SizedBox(
-      width: iconSize,
-      height: iconSize,
-    );
-
-    switch (stepNumber) {
-      case '1':
-        return Padding(
-          padding: const EdgeInsets.all(5),
-          child: SizedBox(
-            width: iconSize,
-            height: iconSize,
-            child: Image.asset('assets/input.png', fit: BoxFit.contain),
-          ),
-        );
-      case '2':
-        return SizedBox(
-          width: iconSize,
-          height: iconSize,
-          child: Image.asset('assets/process.png', fit: BoxFit.contain),
-        );
-      case '3':
-        return SizedBox(
-          width: generateIconSize,
-          height: generateIconSize,
-          child: Image.asset('assets/generate.png', fit: BoxFit.contain),
-        );
-      case '4':
-        return Padding(
-          padding: const EdgeInsets.all(5),
-          child: SizedBox(
-            width: exportIconSize,
-            height: exportIconSize,
-            child: Image.asset('assets/export.png', fit: BoxFit.contain),
-          ),
-        );
-      default:
-        return const Text('');
-    }
-  }
-
   void _analyzeUrl() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) {
@@ -330,34 +285,24 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // Step number and title row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Text(
-                            step.$1,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 72,
-                              height: 1.0,
-                              color: Color(0xFFB9C2D0),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            step.$3,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      step.$1,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 72,
+                        height: 1.0,
+                        color: Color(0xFFB9C2D0),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 30),
-                      child: _buildStepIcon(step.$1),
+                    const SizedBox(width: 12),
+                    Text(
+                      step.$3,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
