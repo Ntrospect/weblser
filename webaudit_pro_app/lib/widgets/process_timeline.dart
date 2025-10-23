@@ -94,7 +94,7 @@ class _ProcessTimelineState extends State<ProcessTimeline>
           // Connector line
           final connectorIndex = index ~/ 2;
           return SizedBox(
-            width: 80,
+            width: 140,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
