@@ -77,6 +77,16 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       appBar: AppBar(
         title: Text(widget.criterion),
         elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Image.asset(
+              'assets/websler_pro.png',
+              height: 40,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
