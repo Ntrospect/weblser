@@ -372,7 +372,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 11,
+                                  fontSize: 13,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
