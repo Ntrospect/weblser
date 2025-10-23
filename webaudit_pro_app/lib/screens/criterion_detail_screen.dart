@@ -320,7 +320,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: sortedScores.isEmpty ? 60 : (MediaQuery.of(context).size.width < 600 ? 100 : 80),
+                  reservedSize: sortedScores.isEmpty ? 60 : (MediaQuery.of(context).size.width < 600 ? 60 : 80),
                   getTitlesWidget: (value, meta) {
                     final index = value.toInt();
                     if (index >= 0 && index < sortedScores.length) {
@@ -328,38 +328,59 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                       final abbreviatedCriterion = _getAbbreviatedCriterion(criterion);
                       final isCurrentCriterion = criterion == widget.criterion;
                       final criterionScore = sortedScores[index].value;
-                      final badgeColor = isCurrentCriterion
-                          ? _getScoreColor(widget.score)
-                          : _getScoreColor(criterionScore);
                       final isMobileContext = MediaQuery.of(context).size.width < 600;
 
-                      return SideTitleWidget(
-                        axisSide: meta.axisSide,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: badgeColor.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isMobileContext ? 6 : 8,
-                              vertical: isMobileContext ? 3 : 4,
-                            ),
+                      // Mobile: plain text | Desktop: colored badges
+                      if (isMobileContext) {
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               abbreviatedCriterion,
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: isMobileContext ? 10 : 11,
                               ),
                               textAlign: TextAlign.center,
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        // Desktop: colored badge boxes
+                        final badgeColor = isCurrentCriterion
+                            ? _getScoreColor(widget.score)
+                            : _getScoreColor(criterionScore);
+
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: badgeColor.withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              child: Text(
+                                abbreviatedCriterion,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 11,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                     }
                     return const SizedBox.shrink();
                   },
