@@ -339,7 +339,8 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                             child: Text(
                               abbreviatedCriterion,
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
