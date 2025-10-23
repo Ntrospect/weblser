@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../models/website_analysis.dart';
 import '../theme/spacing.dart';
-import '../widgets/styled_card.dart';
 import '../widgets/process_timeline.dart';
-import 'audit_results_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,56 +12,21 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   late TextEditingController _urlController;
-  late TabController _tabController;
-
   bool _isLoading = false;
-  bool _isLoadingHistory = false;
   String? _error;
-  List<WebsiteAnalysis> _unifiedHistory = [];
 
   @override
   void initState() {
     super.initState();
     _urlController = TextEditingController();
-    _tabController = TabController(length: 2, vsync: this);
-    _loadHistory();
   }
 
   @override
   void dispose() {
     _urlController.dispose();
-    _tabController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadHistory() async {
-    setState(() {
-      _isLoadingHistory = true;
-    });
-
-    try {
-      final apiService = context.read<ApiService>();
-      final history = await apiService.getUnifiedHistory(limit: 50);
-      if (mounted) {
-        setState(() {
-          _unifiedHistory = history;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _unifiedHistory = [];
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingHistory = false;
-        });
-      }
-    }
   }
 
   void _generateSummary() async {
@@ -85,11 +48,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final summary = await apiService.generateWebslerSummary(url);
 
       if (mounted) {
-        // Show summary details in a dialog/sheet
         _showSummaryDialog(summary);
         _urlController.clear();
-        // Refresh history
-        _loadHistory();
       }
     } catch (e) {
       setState(() {
@@ -207,15 +167,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final auditResult = await apiService.upgradeToAudit(summary);
 
       if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                AuditResultsScreen(auditResult: auditResult.auditResult!),
+        // Navigate to history screen to show the new audit
+        DefaultTabController.of(context)?.animateTo(1);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Audit complete! Check the History tab.'),
+            duration: Duration(seconds: 3),
           ),
-        ).then((_) {
-          _loadHistory();
-        });
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -235,71 +194,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  void _loadAuditFromHistory(WebsiteAnalysis analysis) {
-    if (analysis.isAudit && analysis.auditResult != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              AuditResultsScreen(auditResult: analysis.auditResult!),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Tab Bar
-        Material(
-          elevation: 2,
-          child: TabBar(
-            controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorSize: TabBarIndicatorSize.label,
-            tabs: const [
-              Tab(
-                icon: Icon(Icons.summarize),
-                text: 'Websler',
-              ),
-              Tab(
-                icon: Icon(Icons.history),
-                text: 'History',
-              ),
-            ],
-          ),
-        ),
-        // Tab Content
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // Websler Tab - Summary Generation
-              _buildWebslerTab(),
-              // History Tab - Unified History with Upgrade
-              _buildHistoryTab(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWebslerTab() {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.horizontal,
           vertical: AppSpacing.vertical,
-        ),
+        ).copyWith(top: 88, bottom: AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppSpacing.md),
-
-            // Summary Input Card
+            // Websler Summary Input Card
             _buildSummaryInputCard(context),
             const SizedBox(height: AppSpacing.sectionGap),
 
@@ -309,56 +215,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildHistoryTab() {
-    if (_isLoadingHistory) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_unifiedHistory.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.history,
-              size: 64,
-              color: Colors.grey[300],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'No analyses yet',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Generate a summary or run an audit to get started',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[500],
-                  ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.horizontal,
-        vertical: AppSpacing.vertical,
-      ),
-      itemCount: _unifiedHistory.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-      itemBuilder: (context, index) {
-        final analysis = _unifiedHistory[index];
-        return _buildHistoryCard(analysis);
-      },
     );
   }
 
@@ -497,125 +353,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryCard(WebsiteAnalysis analysis) {
-    final color = analysis.isSummary
-        ? Colors.blue
-        : (analysis.auditResult?.overallScore ?? 0) >= 7.5
-            ? Colors.green
-            : (analysis.auditResult?.overallScore ?? 0) >= 5
-                ? Colors.orange
-                : Colors.red;
-
-    return StyledCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  analysis.isSummary ? Icons.summarize : Icons.assessment,
-                  color: color,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      analysis.displayName,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    Text(
-                      analysis.formattedDateTime,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              if (analysis.isAudit && analysis.overallScore != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${analysis.overallScore!.toStringAsFixed(1)}/10',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // URL
-          Text(
-            'URL',
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-          Text(
-            analysis.url,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Summary
-          Text(
-            'Summary',
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-          Text(
-            analysis.summary,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Action Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (analysis.isSummary) ...[
-                OutlinedButton(
-                  onPressed: () => _upgradeToAudit(analysis),
-                  child: const Text('Upgrade to Pro'),
-                ),
-              ] else ...[
-                ElevatedButton.icon(
-                  onPressed: () => _loadAuditFromHistory(analysis),
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: const Text('View Audit'),
-                ),
-              ],
-            ],
-          ),
-        ],
       ),
     );
   }

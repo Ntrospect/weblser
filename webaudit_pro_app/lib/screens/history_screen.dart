@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../services/api_service.dart';
-import '../models/analysis.dart';
-import '../theme/dark_theme.dart';
-import 'results_screen.dart';
+import '../models/website_analysis.dart';
+import '../theme/spacing.dart';
+import '../widgets/styled_card.dart';
+import 'audit_results_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({Key? key}) : super(key: key);
@@ -14,9 +14,10 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  late Future<List<Analysis>> _historyFuture;
-  late ScrollController _scrollController;
+  bool _isLoading = false;
   bool _isScrolled = false;
+  List<WebsiteAnalysis> _history = [];
+  late ScrollController _scrollController;
 
   @override
   void initState() {
@@ -24,6 +25,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     _loadHistory();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _onScroll() {
@@ -38,33 +45,108 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  Future<void> _loadHistory() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-  void _loadHistory() {
-    _historyFuture = context.read<ApiService>().getHistory();
-  }
-
-  void _deleteAnalysis(String id) async {
     try {
-      await context.read<ApiService>().deleteAnalysis(id);
+      final apiService = context.read<ApiService>();
+      final history = await apiService.getUnifiedHistory(limit: 50);
       if (mounted) {
         setState(() {
-          _loadHistory();
+          _history = history;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Analysis deleted')),
-        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text('Error loading history: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _history = [];
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _deleteAnalysis(WebsiteAnalysis analysis) async {
+    try {
+      await context.read<ApiService>().deleteAnalysisUnified(analysis);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Analysis deleted')),
+        );
+        _loadHistory();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
+    }
+  }
+
+  void _upgradeToAudit(WebsiteAnalysis summary) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final apiService = context.read<ApiService>();
+      final auditResult = await apiService.upgradeToAudit(summary);
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                AuditResultsScreen(auditResult: auditResult.auditResult!),
+          ),
+        ).then((_) {
+          _loadHistory();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _viewAudit(WebsiteAnalysis analysis) {
+    if (analysis.isAudit && analysis.auditResult != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              AuditResultsScreen(auditResult: analysis.auditResult!),
+        ),
+      );
     }
   }
 
@@ -73,7 +155,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear History'),
-        content: const Text('Are you sure you want to delete all analyses?'),
+        content: const Text('Are you sure you want to delete all analyses? This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -84,18 +166,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Navigator.pop(context);
               try {
                 await context.read<ApiService>().clearHistory();
+                await context.read<ApiService>().clearAuditHistory();
                 if (mounted) {
-                  setState(() {
-                    _loadHistory();
-                  });
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('History cleared')),
                   );
+                  _loadHistory();
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               }
@@ -109,8 +193,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MMM d, yyyy');
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -119,155 +201,188 @@ class _HistoryScreenState extends State<HistoryScreen> {
         backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            tooltip: 'Clear History',
-            onPressed: _clearHistory,
-          ),
+          if (_history.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Clear History',
+              onPressed: _clearHistory,
+            ),
         ],
       ),
-      body: FutureBuilder<List<Analysis>>(
-        future: _historyFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: ${snapshot.error}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _loadHistory();
-                      });
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final analyses = snapshot.data ?? [];
-
-          if (analyses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 80,
-                    color: Colors.grey[300],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No analyses yet',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Start by analyzing a website on the Home tab',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {
-                _loadHistory();
-              });
-            },
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(0, 80, 0, 0),
-              itemCount: analyses.length,
-              itemBuilder: (context, index) {
-                final analysis = analyses[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.language,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(
-                      analysis.title ?? 'Untitled',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: _loadHistory,
+        child: _isLoading && _history.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : _history.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          analysis.url,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
+                        Icon(
+                          Icons.history,
+                          size: 80,
+                          color: Colors.grey[300],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 16),
                         Text(
-                          dateFormat.format(analysis.createdAt),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
-                          ),
+                          'No analyses yet',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start by analyzing a website on the Home tab',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey[600],
+                              ),
                         ),
                       ],
                     ),
-                    trailing: PopupMenuButton(
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'view',
-                          child: Text('View'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text('Delete', style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        if (value == 'view') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ResultsScreen(analysis: analysis),
-                            ),
-                          );
-                        } else if (value == 'delete') {
-                          _deleteAnalysis(analysis.id);
-                        }
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ResultsScreen(analysis: analysis),
-                        ),
-                      );
+                  )
+                : ListView.separated(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+                    itemCount: _history.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (context, index) {
+                      final analysis = _history[index];
+                      return _buildHistoryCard(analysis);
                     },
                   ),
-                );
-              },
-            ),
-          );
-        },
+      ),
+    );
+  }
+
+  Widget _buildHistoryCard(WebsiteAnalysis analysis) {
+    final color = analysis.isSummary
+        ? Colors.blue
+        : (analysis.auditResult?.overallScore ?? 0) >= 7.5
+            ? Colors.green
+            : (analysis.auditResult?.overallScore ?? 0) >= 5
+                ? Colors.orange
+                : Colors.red;
+
+    return StyledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  analysis.isSummary ? Icons.summarize : Icons.assessment,
+                  color: color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      analysis.displayName,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    Text(
+                      analysis.formattedDateTime,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              if (analysis.isAudit && analysis.overallScore != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${analysis.overallScore!.toStringAsFixed(1)}/10',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // URL
+          Text(
+            'URL',
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+          SelectableText(
+            analysis.url,
+            maxLines: 1,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Summary
+          Text(
+            analysis.isSummary ? 'Summary' : 'Overall Result',
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+          Text(
+            analysis.summary,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Action Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (analysis.isSummary)
+                OutlinedButton(
+                  onPressed: () => _upgradeToAudit(analysis),
+                  child: const Text('Upgrade to Pro'),
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: () => _viewAudit(analysis),
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: const Text('View Audit'),
+                ),
+              const SizedBox(width: AppSpacing.sm),
+              PopupMenuButton(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      'Delete',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+                onSelected: (value) {
+                  if (value == 'delete') {
+                    _deleteAnalysis(analysis);
+                  }
+                },
+                icon: const Icon(Icons.more_vert),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
