@@ -21,6 +21,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
   bool _isGeneratingPdf = false;
   String? _pdfError;
   String? _pdfFilePath;
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   void _generatePdf() async {
     setState(() {
@@ -88,6 +90,31 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.offset > 10) {
+      if (!_isScrolled) {
+        setState(() => _isScrolled = true);
+      }
+    } else {
+      if (_isScrolled) {
+        setState(() => _isScrolled = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Widget _buildMetadataField(BuildContext context, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,10 +155,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final isDesktop = screenWidth > 900;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Analysis Result'),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
           Padding(
@@ -145,8 +173,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(24.0, 104.0, 24.0, 24.0),
           child: isDesktop ? _buildDesktopLayout(context, dateFormat) : _buildMobileLayout(context, dateFormat),
         ),
       ),
