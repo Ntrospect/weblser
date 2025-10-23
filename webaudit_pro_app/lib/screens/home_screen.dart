@@ -384,7 +384,7 @@ class _AuditHistoryCardWithHoverState extends State<_AuditHistoryCardWithHover> 
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withOpacity(0.35),
             width: 1,
           ),
           boxShadow: _isHovered
