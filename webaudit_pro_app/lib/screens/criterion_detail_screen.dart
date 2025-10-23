@@ -287,6 +287,22 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
                   ),
                   borderData: FlBorderData(show: false),
                   barTouchData: BarTouchData(enabled: false),
+                  extraLinesData: ExtraLinesData(
+                    horizontalLines: [
+                      HorizontalLine(
+                        y: widget.overallScore,
+                        color: Colors.grey.withOpacity(0.5),
+                        strokeWidth: 2,
+                        dashArray: [5, 5],
+                        label: HorizontalLineLabel(
+                          show: true,
+                          alignment: Alignment.topLeft,
+                          padding: const EdgeInsets.only(left: 8, top: 4),
+                          labelResolver: (_) => 'Overall: ${widget.overallScore.toStringAsFixed(1)}',
+                        ),
+                      ),
+                    ],
+                  ),
                     ),
                   );
                 },
