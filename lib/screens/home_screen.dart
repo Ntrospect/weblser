@@ -283,15 +283,18 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Step number - fixed width
-                SizedBox(
-                  width: 85,
-                  child: Text(
-                    step.$1,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 72,
-                      height: 1.0,
-                      color: Color(0xFFB9C2D0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: SizedBox(
+                    width: 85,
+                    child: Text(
+                      step.$1,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 79,
+                        height: 1.0,
+                        color: Color(0xFFB9C2D0),
+                      ),
                     ),
                   ),
                 ),
