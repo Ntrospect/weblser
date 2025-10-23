@@ -26,7 +26,7 @@ class AppTheme {
 
       // AppBar Theme
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: offWhiteBackground,
         foregroundColor: charcoalText,
         elevation: 0,
         centerTitle: false,
