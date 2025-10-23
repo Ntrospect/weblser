@@ -65,6 +65,8 @@ class _ProcessTimelineState extends State<ProcessTimeline>
       ),
     ];
 
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -75,80 +77,147 @@ class _ProcessTimelineState extends State<ProcessTimeline>
               ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width > 800
-                  ? MediaQuery.of(context).size.width - AppSpacing.horizontal * 2
-                  : null,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(steps.length, (index) {
-                  final step = steps[index];
-                  final isLast = index == steps.length - 1;
+        isDesktop
+            ? _buildHorizontalTimeline(context, steps)
+            : _buildVerticalTimeline(context, steps),
+      ],
+    );
+  }
 
-                  return Expanded(
-                    child: Row(
+  Widget _buildHorizontalTimeline(BuildContext context, List<dynamic> steps) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(steps.length, (index) {
+            final step = steps[index];
+            final isLast = index == steps.length - 1;
+
+            return Row(
+              children: [
+                // Step circle
+                Column(
+                  children: [
+                    _buildStepCircle(
+                      context,
+                      step.icon,
+                      index + 1,
+                      index,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      step.title,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      step.description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                          ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                // Connecting line (skip for last item)
+                if (!isLast)
+                  SizedBox(
+                    width: 80,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Step circle
-                        Expanded(
-                          child: Column(
-                            children: [
-                              _buildStepCircle(
-                                context,
-                                step.icon,
-                                index + 1,
-                                index,
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                step.title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                step.description,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: Colors.grey,
-                                    ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Connecting line (skip for last item)
-                        if (!isLast)
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 24),
-                                _buildAnimatedConnector(index),
-                              ],
-                            ),
-                          ),
+                        const SizedBox(height: 24),
+                        _buildAnimatedConnector(index),
                       ],
                     ),
-                  );
-                }),
-              ),
-            ),
-          ),
+                  ),
+              ],
+            );
+          }),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalTimeline(BuildContext context, List<dynamic> steps) {
+    return Column(
+      children: List.generate(steps.length, (index) {
+        final step = steps[index];
+        final isLast = index == steps.length - 1;
+
+        return Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left column with circle and connector
+                Column(
+                  children: [
+                    _buildStepCircle(
+                      context,
+                      step.icon,
+                      index + 1,
+                      index,
+                    ),
+                    // Vertical connector (skip for last item)
+                    if (!isLast)
+                      Container(
+                        width: 2,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).primaryColor
+                                  .withOpacity(0.5),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.lg),
+                // Right column with text
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          step.title,
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          step.description,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (!isLast) const SizedBox(height: AppSpacing.componentGap),
+          ],
+        );
+      }),
     );
   }
 
