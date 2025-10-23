@@ -57,7 +57,7 @@ dependencies:
   google_fonts: ^6.1.0
 
   # Sentry error tracking
-  sentry_flutter: ^8.0.0
+  # sentry_flutter: ^8.0.0  # Temporarily disabled for Windows build compatibility
 
 dev_dependencies:
   flutter_test:
