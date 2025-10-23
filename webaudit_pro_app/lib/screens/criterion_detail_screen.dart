@@ -316,22 +316,37 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 60,
+                  reservedSize: 80,
                   getTitlesWidget: (value, meta) {
                     final index = value.toInt();
                     if (index >= 0 && index < sortedScores.length) {
                       final criterion = sortedScores[index].key;
                       final abbreviatedCriterion = _getAbbreviatedCriterion(criterion);
+                      final isCurrentCriterion = criterion == widget.criterion;
+                      final badgeColor = isCurrentCriterion
+                          ? _getScoreColor(widget.score)
+                          : Colors.blue;
+
                       return SideTitleWidget(
                         axisSide: meta.axisSide,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            abbreviatedCriterion,
-                            style: Theme.of(context).textTheme.labelSmall,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: badgeColor.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Text(
+                              abbreviatedCriterion,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                       );
