@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // Step number - fixed width
                 Padding(
-                  padding: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.only(left: 30),
                   child: SizedBox(
                     width: 85,
                     child: Text(
