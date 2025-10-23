@@ -101,15 +101,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _upgradeToAudit(WebsiteAnalysis summary) async {
-    setState(() {
-      _isLoading = true;
-    });
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Running WebAudit Pro...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This may take a minute',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
 
     try {
       final apiService = context.read<ApiService>();
       final auditResult = await apiService.upgradeToAudit(summary);
 
       if (mounted) {
+        // Close loading dialog
+        Navigator.pop(context);
+
+        // Navigate to audit results
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -122,18 +150,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // Close loading dialog
+        Navigator.pop(context);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
