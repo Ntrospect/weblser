@@ -159,8 +159,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
       appBar: AppBar(
         title: const Text('Analysis Result'),
         elevation: 0,
-        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: _isScrolled
+            ? Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8)
+            : Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

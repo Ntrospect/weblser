@@ -20,11 +20,33 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
   late AuditResult _auditResult;
   String? _generatingPdf; // Track which PDF is being generated (null, "audit-report", etc.)
   String? _downloadedPath; // Store path of last downloaded PDF
+  late ScrollController _scrollController;
+  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
     _auditResult = widget.auditResult;
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.offset > 10) {
+      if (!_isScrolled) {
+        setState(() => _isScrolled = true);
+      }
+    } else {
+      if (_isScrolled) {
+        setState(() => _isScrolled = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _downloadPdf(String documentType, String documentName) async {
@@ -91,11 +113,14 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Download Reports'),
         elevation: 0,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: _isScrolled
+            ? Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8)
+            : Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -108,8 +133,9 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
