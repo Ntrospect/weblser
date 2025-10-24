@@ -89,7 +89,8 @@ class AuthCallbackHandler {
         print('📨 Parsing query parameters...');
         print('📨 Query params: ${uri.queryParameters}');
 
-        _accessToken = uri.queryParameters['access_token'];
+        // Supabase email template uses 'token' parameter, not 'access_token'
+        _accessToken = uri.queryParameters['token'] ?? uri.queryParameters['access_token'];
         _refreshToken = uri.queryParameters['refresh_token'];
         _type = uri.queryParameters['type'];
         _expiresIn = uri.queryParameters['expires_in'] != null
@@ -101,6 +102,7 @@ class AuthCallbackHandler {
 
         if (_accessToken != null) {
           print('✅ Auth token received from query: ${_accessToken!.substring(0, 20)}...');
+          print('✅ Token type: ${_type ?? "unknown"}');
           return _successResponse();
         }
       }
