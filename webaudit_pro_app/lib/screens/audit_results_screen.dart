@@ -269,13 +269,16 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '10-Point Evaluation',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+        Center(
+          child: Text(
+            '10-Point Evaluation',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.componentGap),
+        const SizedBox(height: 12),
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
