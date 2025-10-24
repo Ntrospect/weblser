@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../theme/dark_theme.dart';
 import '../services/theme_provider.dart';
@@ -23,6 +24,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _apiUrlController = TextEditingController(text: apiService.apiUrl);
     _companyNameController = TextEditingController();
     _companyDetailsController = TextEditingController();
+    _loadPdfBrandingSettings();
+  }
+
+  Future<void> _loadPdfBrandingSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _companyNameController.text = prefs.getString('pdf_company_name') ?? '';
+      _companyDetailsController.text = prefs.getString('pdf_company_details') ?? '';
+    });
   }
 
   @override
@@ -48,6 +58,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Settings saved successfully')),
     );
+  }
+
+  Future<void> _savePdfBrandingSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final companyName = _companyNameController.text.trim();
+    final companyDetails = _companyDetailsController.text.trim();
+
+    await prefs.setString('pdf_company_name', companyName);
+    await prefs.setString('pdf_company_details', companyDetails);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF branding saved successfully')),
+      );
+    }
   }
 
   void _testConnection() async {
@@ -246,6 +271,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'These will be added to PDF reports you generate.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _savePdfBrandingSettings,
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save PDF Branding'),
                       ),
                     ),
                   ],
