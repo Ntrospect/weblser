@@ -270,7 +270,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       children: [
         Text(
           '10-Point Evaluation',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
           ),
         ),

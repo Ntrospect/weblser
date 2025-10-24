@@ -62,7 +62,7 @@ class _ProcessTimelineState extends State<ProcessTimeline>
       children: [
         Text(
           'How It Works',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
