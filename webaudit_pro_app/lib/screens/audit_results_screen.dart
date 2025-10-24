@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/audit_result.dart';
+import '../services/theme_provider.dart';
 import '../theme/spacing.dart';
 import '../theme/button_styles.dart';
 import '../widgets/styled_card.dart';
@@ -53,7 +55,11 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final isDarkMode = themeProvider.isDarkMode;
+
+        return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Audit Results'),
@@ -67,7 +73,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Image.asset(
-              'assets/websler_pro.png',
+              isDarkMode ? 'assets/websler_pro-dark-theme.png' : 'assets/websler_pro.png',
               height: 40,
               fit: BoxFit.contain,
             ),
@@ -141,6 +147,8 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
