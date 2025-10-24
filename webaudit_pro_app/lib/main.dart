@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
@@ -15,9 +16,11 @@ import 'screens/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize sqflite for Windows/Desktop platforms
+  // Initialize sqflite for Windows/Desktop platforms BEFORE everything else
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     sqfliteFfiInit();
+    // Set the database factory for desktop platforms
+    databaseFactory = databaseFactoryFfi;
   }
 
   // Initialize Supabase
