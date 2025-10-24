@@ -219,43 +219,45 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: isDesktop ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
-          Expanded(
-            flex: isDesktop ? 0 : 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Overall Score',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '${score.toStringAsFixed(1)}/10',
-                  style: TextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -1,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  scoreStatus,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.95),
-                        letterSpacing: 0.3,
-                  ),
-                ),
-              ],
+          if (isDesktop)
+            const Spacer(flex: 1)
+          else
+            Expanded(
+              child: SizedBox.shrink(),
             ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Overall Score',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${score.toStringAsFixed(1)}/10',
+                style: TextStyle(
+                  fontSize: 64,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                scoreStatus,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(0.95),
+                      letterSpacing: 0.3,
+                ),
+              ),
+            ],
           ),
-          if (isDesktop) const Spacer(),
+          if (isDesktop) const Spacer(flex: 1),
           SizedBox(
             width: 140,
             height: 140,
