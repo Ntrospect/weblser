@@ -163,11 +163,14 @@ class _MainAppState extends State<MainApp> {
             surfaceTintColor: bgColor,
             title: Consumer<AuthService>(
               builder: (context, authService, _) {
+                final webslerLogo = themeProvider.isDarkMode
+                    ? 'assets/websler_pro-dark-theme.png'
+                    : 'assets/websler_pro.png';
                 return SizedBox(
                   width: 165,
                   height: 69,
                   child: Image.asset(
-                    'assets/websler_pro.png',
+                    webslerLogo,
                     fit: BoxFit.contain,
                   ),
                 );
@@ -181,7 +184,9 @@ class _MainAppState extends State<MainApp> {
                   width: 151,
                   height: 54,
                   child: Image.asset(
-                    'assets/jumoki_coloured_transparent_bg.png',
+                    themeProvider.isDarkMode
+                        ? 'assets/jumoki_white_transparent_bg.png'
+                        : 'assets/jumoki_coloured_transparent_bg.png',
                     fit: BoxFit.contain,
                   ),
                 ),
