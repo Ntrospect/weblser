@@ -15,9 +15,9 @@ void main() async {
 
   // Initialize Supabase
   await Supabase.initialize(
-    url: 'https://agenticn8.supabase.co',
+    url: 'https://vwnbhsmfpxdfcvqnzddc.supabase.co',
     anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZW50aWNuOCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzI5NjczMTczLCJleHAiOjE4ODc0NDExNzN9.gAzp_F-Jjf7-X_XSYNcBYvTxXpXLqpP0VbJqfzMHkX0',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3bmJoc21mcHhkZmN2cW56ZGRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk2NzMxNzMsImV4cCI6MTg4NzQ0MTE3M30.Hj2dQVSKBnzRpzXaB8c7d9eKlMnOpQrStWxYzK1pM3Q',
   );
 
   runApp(const MyApp());
