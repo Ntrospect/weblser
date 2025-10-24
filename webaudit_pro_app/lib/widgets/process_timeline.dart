@@ -286,24 +286,6 @@ class _ProcessTimelineState extends State<ProcessTimeline>
                       ),
                     ),
                   ),
-                  // Arrow indicator at the end of animated line
-                  if (clampedProgress > 0.5)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Transform.translate(
-                        offset: Offset(
-                          (MediaQuery.of(context).size.width * 0.15 *
-                                  clampedProgress) -
-                              8,
-                          0,
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: Theme.of(context).primaryColor,
-                          size: 16,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
