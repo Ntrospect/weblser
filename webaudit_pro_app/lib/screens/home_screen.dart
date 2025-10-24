@@ -218,6 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final timelineBottomSpacing = isMobile ? 17.0 : 12.0;
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -233,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // How It Works
             _buildHowItWorksSection(context),
-            const SizedBox(height: 12),
+            SizedBox(height: timelineBottomSpacing),
 
             // Motivational Section
             _buildMotivationalSection(context),
