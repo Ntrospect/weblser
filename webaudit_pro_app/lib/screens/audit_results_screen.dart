@@ -533,36 +533,23 @@ class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
         transform: Matrix4.identity()
           ..translate(0.0, _isHovered ? -4 : 0.0),
         decoration: BoxDecoration(
-          gradient: _isHovered
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    widget.bgColor,
-                    widget.bgColor.withOpacity(0.5),
-                  ],
-                )
-              : LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [widget.bgColor, widget.bgColor],
-                ),
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: widget.textColor.withOpacity(_isHovered ? 0.5 : 0.2),
+            color: Colors.grey.withOpacity(_isHovered ? 0.5 : 0.3),
             width: 1.5,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: widget.textColor.withOpacity(0.25),
+                    color: Colors.grey.withOpacity(0.15),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: widget.textColor.withOpacity(0.08),
+                    color: Colors.grey.withOpacity(0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
