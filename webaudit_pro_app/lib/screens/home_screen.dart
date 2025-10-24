@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 21.5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
