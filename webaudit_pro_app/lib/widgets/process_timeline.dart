@@ -112,6 +112,7 @@ class _ProcessTimelineState extends State<ProcessTimeline>
                 step.title,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
+                      fontSize: 15,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -184,7 +185,7 @@ class _ProcessTimelineState extends State<ProcessTimeline>
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: Theme.of(context).primaryColor,
-                                fontSize: 18,
+                                fontSize: 20,
                               ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
