@@ -219,23 +219,25 @@ class _ProcessTimelineState extends State<ProcessTimeline>
     int stepNumber,
     int index,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
+    final iconColor = isDarkMode ? const Color(0xFF64b5f6) : primaryColor;
 
     return Container(
       width: 64,
       height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: primaryColor.withOpacity(0.1),
+        color: iconColor.withOpacity(0.1),
         border: Border.all(
-          color: primaryColor,
+          color: iconColor,
           width: 2,
         ),
       ),
       child: Center(
         child: Icon(
           icon,
-          color: primaryColor,
+          color: iconColor,
           size: 32,
         ),
       ),
