@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-    final timelineBottomSpacing = isMobile ? 17.0 : 12.0;
+    final timelineBottomSpacing = isMobile ? 22.0 : 17.0;
 
     return SingleChildScrollView(
       child: Padding(
