@@ -269,6 +269,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 40),
         Center(
           child: Text(
             '10-Point Evaluation',
@@ -278,7 +279,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 20),
         GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
