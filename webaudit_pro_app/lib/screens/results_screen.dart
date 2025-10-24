@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import '../models/analysis.dart';
 import '../services/api_service.dart';
@@ -32,8 +33,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final companyName = prefs.getString('pdf_company_name');
+      final companyDetails = prefs.getString('pdf_company_details');
+
       final apiService = context.read<ApiService>();
-      final filePath = await apiService.generatePdf(widget.analysis.id);
+      final filePath = await apiService.generatePdf(
+        widget.analysis.id,
+        companyName: companyName,
+        companyDetails: companyDetails,
+      );
 
       setState(() {
         _pdfFilePath = filePath;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/audit_result.dart';
 import '../services/api_service.dart';
 import 'dart:io';
@@ -55,12 +56,17 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
     });
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final companyName = prefs.getString('pdf_company_name') ?? 'WebAudit Pro';
+      final companyDetails = prefs.getString('pdf_company_details');
+
       final apiService = context.read<ApiService>();
       final filepath = await apiService.generateAuditPdf(
         _auditResult.id,
         documentType,
         clientName: _auditResult.websiteName,
-        companyName: 'WebAudit Pro',
+        companyName: companyName,
+        companyDetails: companyDetails,
       );
 
       if (mounted) {
