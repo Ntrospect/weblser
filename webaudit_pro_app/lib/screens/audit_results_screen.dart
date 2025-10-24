@@ -536,7 +536,7 @@ class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
           color: widget.bgColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.grey.withOpacity(_isHovered ? 0.5 : 0.3),
+            color: Colors.grey.withOpacity(_isHovered ? 0.7 : 0.5),
             width: 1.5,
           ),
           boxShadow: _isHovered
