@@ -182,6 +182,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
 
   Widget _buildOverallScoreDisplay(BuildContext context) {
     final score = _auditResult.overallScore;
+    final isDesktop = MediaQuery.of(context).size.width > 800;
     late Color scoreColor, gradientColor;
     late String scoreStatus;
 
@@ -199,8 +200,8 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       scoreStatus = 'Needs Work';
     }
 
-    return Container(
-      width: double.infinity,
+    final scoreContainer = Container(
+      width: isDesktop ? 600 : double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -263,6 +264,8 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         ],
       ),
     );
+
+    return isDesktop ? Center(child: scoreContainer) : scoreContainer;
   }
 
   Widget _buildScoresGrid(BuildContext context) {
