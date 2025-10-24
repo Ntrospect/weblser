@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:convert';
+import 'dart:io';
 
 class LocalDatabase {
   static const String dbName = 'websler_pro.db';
@@ -20,6 +22,11 @@ class LocalDatabase {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, dbName);
+
+    // Use databaseFactoryFfi for desktop platforms
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      databaseFactory = databaseFactoryFfi;
+    }
 
     return await openDatabase(
       path,
