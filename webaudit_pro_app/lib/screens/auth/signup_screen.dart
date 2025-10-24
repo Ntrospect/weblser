@@ -42,7 +42,10 @@ class _SignupScreenState extends State<SignupScreen> {
         fullName: _fullNameController.text.trim(),
       );
 
-      setState(() => _isLoading = false);
+      // Only call setState if widget is still mounted
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
 
       // Check if signup was successful
       if (authService.isAuthenticated && mounted) {
