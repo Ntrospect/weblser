@@ -3,10 +3,12 @@ import 'dart:async';
 import 'dart:convert';
 import '../database/local_db.dart';
 import 'connectivity_service.dart';
+import 'auth_service.dart';
 
 class SyncService extends ChangeNotifier {
   final LocalDatabase _localDb = LocalDatabase();
   final ConnectivityService _connectivity = ConnectivityService();
+  final AuthService _authService = AuthService(); // Reference to auth service
 
   bool _isSyncing = false;
   String? _syncStatus; // Status message for UI
@@ -125,14 +127,32 @@ class SyncService extends ChangeNotifier {
   }
 
   // ============================================
+  // HELPER METHODS
+  // ============================================
+
+  /// Get current user ID for sync operations
+  String? _getCurrentUserId() {
+    return _authService.userId;
+  }
+
+  // ============================================
   // SAVE WITH OFFLINE SUPPORT
   // ============================================
 
   /// Save audit result with offline support
   Future<void> saveAuditWithSync(Map<String, dynamic> auditData) async {
     final id = auditData['id'] as String;
+    final userId = _getCurrentUserId();
 
-    print('💾 Saving audit: $id (${_connectivity.isOnline ? "online" : "offline"})');
+    if (userId == null) {
+      print('❌ Cannot save audit: User not authenticated');
+      throw Exception('User must be authenticated to save audits');
+    }
+
+    // Ensure audit has user_id
+    auditData['user_id'] = userId;
+
+    print('💾 Saving audit: $id for user $userId (${_connectivity.isOnline ? "online" : "offline"})');
 
     // Always save locally first
     await _localDb.saveAuditLocal(auditData);
@@ -166,8 +186,17 @@ class SyncService extends ChangeNotifier {
   /// Save website summary with offline support
   Future<void> saveSummaryWithSync(Map<String, dynamic> summaryData) async {
     final id = summaryData['id'] as String;
+    final userId = _getCurrentUserId();
 
-    print('💾 Saving summary: $id (${_connectivity.isOnline ? "online" : "offline"})');
+    if (userId == null) {
+      print('❌ Cannot save summary: User not authenticated');
+      throw Exception('User must be authenticated to save summaries');
+    }
+
+    // Ensure summary has user_id
+    summaryData['user_id'] = userId;
+
+    print('💾 Saving summary: $id for user $userId (${_connectivity.isOnline ? "online" : "offline"})');
 
     // Always save locally first
     await _localDb.saveSummaryLocal(summaryData);

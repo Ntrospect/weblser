@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/website_analysis.dart';
 import '../theme/spacing.dart';
 import '../widgets/styled_card.dart';
@@ -218,23 +219,37 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Analysis History'),
-        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        elevation: 0,
-        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
-        surfaceTintColor: Colors.white,
-        actions: [
-          if (_history.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_sweep),
-              tooltip: 'Clear History',
-              onPressed: _clearHistory,
+    return Consumer<AuthService>(
+      builder: (context, authService, _) {
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Analysis History'),
+                if (authService.currentUser != null)
+                  Text(
+                    authService.currentUser!.email,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                  ),
+              ],
             ),
-        ],
-      ),
+            titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            elevation: 0,
+            backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
+            surfaceTintColor: Colors.white,
+            actions: [
+              if (_history.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep),
+                  tooltip: 'Clear History',
+                  onPressed: _clearHistory,
+                ),
+            ],
+          ),
       body: RefreshIndicator(
         onRefresh: _loadHistory,
         child: _isLoading && _history.isEmpty
@@ -411,7 +426,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ],
           ),
         ],
-      ),
-    );
+        ),
+      );
+        },
+      );
   }
 }

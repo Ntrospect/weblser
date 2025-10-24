@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/website_analysis.dart';
 import '../theme/spacing.dart';
 import '../widgets/process_timeline.dart';
@@ -248,42 +249,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSummaryInputCard(BuildContext context) {
-    return Material(
-      elevation: 4,
-      borderRadius: BorderRadius.circular(16),
-      shadowColor: const Color(0xFF2E68DA).withOpacity(0.2),
-      child: Container(
-        decoration: BoxDecoration(
+    return Consumer<AuthService>(
+      builder: (context, authService, _) {
+        return Material(
+          elevation: 4,
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0xFF2E68DA),
-              Color(0xFF9018AD),
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.cardPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Analyze Your Website',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: Colors.white,
-                  ),
+          shadowColor: const Color(0xFF2E68DA).withOpacity(0.2),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFF2E68DA),
+                  Color(0xFF9018AD),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Get a quick AI-powered summary of any website',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.85),
-                  ),
-            ),
-            const SizedBox(height: AppSpacing.componentGap),
+            padding: const EdgeInsets.all(AppSpacing.cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Analyze Your Website',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: Colors.white,
+                      ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Text(
+                      'Get a quick AI-powered summary of any website',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.85),
+                          ),
+                    ),
+                    const Spacer(),
+                    if (authService.currentUser != null)
+                      Text(
+                        authService.currentUser!.email,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.componentGap),
 
             // URL Input
             TextField(
@@ -380,9 +395,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          ],
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
