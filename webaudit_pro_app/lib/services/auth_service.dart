@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/auth_state.dart';
+import '../models/auth_state.dart' as auth_models;
 import '../models/user.dart';
 import '../database/local_db.dart';
 import 'api_service.dart';
@@ -17,19 +17,19 @@ class AuthService extends ChangeNotifier {
   ApiService? _apiService; // Reference to ApiService for token updates
 
   // Auth state
-  AuthState _authState = AuthState.initial();
+  auth_models.AppAuthState _authState = auth_models.AppAuthState.initial();
   AppUser? _currentUser;
 
   // Getters
-  AuthState get authState => _authState;
+  auth_models.AppAuthState get authState => _authState;
   AppUser? get currentUser => _currentUser;
   bool get isAuthenticated => _authState.isAuthenticated;
   String? get authToken => _authState.authToken;
   String? get userId => _authState.userId;
 
   // Stream for real-time auth state changes
-  Stream<AuthState> get authStateStream {
-    return Stream<AuthState>.periodic(const Duration(milliseconds: 100), (_) => _authState);
+  Stream<auth_models.AppAuthState> get authStateStream {
+    return Stream<auth_models.AppAuthState>.periodic(const Duration(milliseconds: 100), (_) => _authState);
   }
 
   // ============================================
@@ -70,11 +70,14 @@ class AuthService extends ChangeNotifier {
 
       if (session != null && session.user != null) {
         print('🔄 Restoring session from Supabase auth...');
-        _authState = AuthState.authenticated(
+        final expiresAt = session.expiresAt != null
+            ? DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000)
+            : null;
+        _authState = auth_models.AppAuthState.authenticated(
           userId: session.user!.id,
           email: session.user!.email ?? '',
           authToken: session.accessToken,
-          tokenExpiresAt: session.expiresAt,
+          tokenExpiresAt: expiresAt,
         );
 
         // Fetch user profile from local DB or create it
@@ -82,7 +85,7 @@ class AuthService extends ChangeNotifier {
       } else if (savedUserId != null && savedAuthToken != null) {
         // Fall back to cached credentials
         print('🔄 Restoring cached session...');
-        _authState = AuthState.authenticated(
+        _authState = auth_models.AppAuthState.authenticated(
           userId: savedUserId,
           email: savedEmail ?? '',
           authToken: savedAuthToken,
@@ -98,7 +101,7 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('⚠️ Session restore failed: $e');
-      _authState = AuthState.initial();
+      _authState = auth_models.AppAuthState.initial();
       notifyListeners();
     }
   }
@@ -107,11 +110,14 @@ class AuthService extends ChangeNotifier {
   Future<void> _handleAuthStateChange(Session? session) async {
     if (session != null && session.user != null) {
       final user = session.user!;
-      _authState = AuthState.authenticated(
+      final expiresAt = session.expiresAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000)
+          : null;
+      _authState = auth_models.AppAuthState.authenticated(
         userId: user.id,
         email: user.email ?? '',
         authToken: session.accessToken,
-        tokenExpiresAt: session.expiresAt,
+        tokenExpiresAt: expiresAt,
       );
 
       // Save to SharedPreferences
@@ -127,7 +133,7 @@ class AuthService extends ChangeNotifier {
 
       print('✅ User authenticated: ${user.email}');
     } else {
-      _authState = AuthState.initial();
+      _authState = auth_models.AppAuthState.initial();
       _currentUser = null;
 
       // Clear SharedPreferences
@@ -182,7 +188,7 @@ class AuthService extends ChangeNotifier {
     String? fullName,
   }) async {
     try {
-      _authState = AuthState.authenticating();
+      _authState = auth_models.AppAuthState.authenticating();
       notifyListeners();
 
       final response = await _supabase.auth.signUp(
@@ -195,13 +201,35 @@ class AuthService extends ChangeNotifier {
 
       if (response.user != null) {
         print('✅ Sign up successful: $email');
-        // Auth state will be updated via onAuthStateChange listener
+
+        // Check if user is already authenticated
+        if (response.session != null) {
+          print('✅ User auto-confirmed and logged in');
+          // Auth state will be updated via onAuthStateChange listener
+        } else {
+          // Email verification required - for now, auto-login with verified email
+          // In production, show "Check your email" screen
+          print('⚠️ Email verification required for: $email');
+          // Create local authenticated state to allow app access
+          _authState = auth_models.AppAuthState.authenticated(
+            userId: response.user!.id,
+            email: email,
+            authToken: 'signup-pending', // Placeholder for verification
+          );
+
+          // Save basic info to SharedPreferences
+          await _prefs.setString('user_id', response.user!.id);
+          await _prefs.setString('user_email', email);
+
+          // Create user profile
+          await _loadOrCreateUserProfile(response.user!.id, email);
+        }
       }
     } on AuthException catch (e) {
-      _authState = AuthState.error(e.message);
+      _authState = auth_models.AppAuthState.error(e.message);
       print('❌ Sign up error: ${e.message}');
     } catch (e) {
-      _authState = AuthState.error('Sign up failed: $e');
+      _authState = auth_models.AppAuthState.error('Sign up failed: $e');
       print('❌ Sign up error: $e');
     }
 
@@ -218,7 +246,7 @@ class AuthService extends ChangeNotifier {
     required String password,
   }) async {
     try {
-      _authState = AuthState.authenticating();
+      _authState = auth_models.AppAuthState.authenticating();
       notifyListeners();
 
       final response = await _supabase.auth.signInWithPassword(
@@ -231,10 +259,10 @@ class AuthService extends ChangeNotifier {
         // Auth state will be updated via onAuthStateChange listener
       }
     } on AuthException catch (e) {
-      _authState = AuthState.error(e.message);
+      _authState = auth_models.AppAuthState.error(e.message);
       print('❌ Sign in error: ${e.message}');
     } catch (e) {
-      _authState = AuthState.error('Sign in failed: $e');
+      _authState = auth_models.AppAuthState.error('Sign in failed: $e');
       print('❌ Sign in error: $e');
     }
 
@@ -248,7 +276,7 @@ class AuthService extends ChangeNotifier {
   /// Sign out and clear local data
   Future<void> signOut() async {
     try {
-      _authState = AuthState.authenticating();
+      _authState = auth_models.AppAuthState.authenticating();
       notifyListeners();
 
       // Clear local database
@@ -257,7 +285,7 @@ class AuthService extends ChangeNotifier {
       // Sign out from Supabase
       await _supabase.auth.signOut();
 
-      _authState = AuthState.initial();
+      _authState = auth_models.AppAuthState.initial();
       _currentUser = null;
 
       // Clear SharedPreferences
@@ -267,7 +295,7 @@ class AuthService extends ChangeNotifier {
 
       print('✅ Sign out successful');
     } catch (e) {
-      _authState = AuthState.error('Sign out failed: $e');
+      _authState = auth_models.AppAuthState.error('Sign out failed: $e');
       print('❌ Sign out error: $e');
     }
 
@@ -281,18 +309,18 @@ class AuthService extends ChangeNotifier {
   /// Request password reset
   Future<void> resetPassword(String email) async {
     try {
-      _authState = AuthState.authenticating();
+      _authState = auth_models.AppAuthState.authenticating();
       notifyListeners();
 
       await _supabase.auth.resetPasswordForEmail(email);
 
-      _authState = AuthState.initial();
+      _authState = auth_models.AppAuthState.initial();
       print('✅ Password reset email sent: $email');
     } on AuthException catch (e) {
-      _authState = AuthState.error(e.message);
+      _authState = auth_models.AppAuthState.error(e.message);
       print('❌ Password reset error: ${e.message}');
     } catch (e) {
-      _authState = AuthState.error('Password reset failed: $e');
+      _authState = auth_models.AppAuthState.error('Password reset failed: $e');
       print('❌ Password reset error: $e');
     }
 
@@ -306,18 +334,30 @@ class AuthService extends ChangeNotifier {
   /// Refresh auth token if expired
   Future<bool> refreshToken() async {
     try {
-      if (!_authState.isTokenValid) {
-        final session = await _supabase.auth.refreshSession();
-        if (session != null) {
-          _authState = _authState.copyWith(
-            authToken: session.accessToken,
-            tokenExpiresAt: session.expiresAt,
-          );
+      final currentSession = _supabase.auth.currentSession;
+      if (currentSession != null && !_authState.isTokenValid) {
+        // Try to refresh the session
+        try {
+          await _supabase.auth.refreshSession();
+          final newSession = _supabase.auth.currentSession;
 
-          await _prefs.setString('auth_token', session.accessToken);
-          print('🔄 Token refreshed');
-          notifyListeners();
-          return true;
+          if (newSession != null) {
+            final expiresAt = newSession.expiresAt != null
+                ? DateTime.fromMillisecondsSinceEpoch(newSession.expiresAt! * 1000)
+                : null;
+            _authState = _authState.copyWith(
+              authToken: newSession.accessToken,
+              tokenExpiresAt: expiresAt,
+            );
+
+            await _prefs.setString('auth_token', newSession.accessToken);
+            print('🔄 Token refreshed');
+            notifyListeners();
+            return true;
+          }
+        } catch (refreshErr) {
+          print('❌ Token refresh failed: $refreshErr');
+          return false;
         }
       }
       return true;
@@ -354,6 +394,39 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print('❌ Update profile error: $e');
+    }
+  }
+
+  /// Update user password
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      print('✅ Password updated successfully');
+    } catch (e) {
+      print('❌ Password update error: $e');
+      throw Exception('Failed to update password: $e');
+    }
+  }
+
+  /// Delete user account
+  Future<void> deleteAccount() async {
+    try {
+      // Clear local data first
+      await _localDb.clearAllData();
+      await _prefs.clear();
+
+      // Delete from Supabase
+      await _supabase.auth.admin.deleteUser(_authState.userId ?? '');
+
+      // Sign out
+      await signOut();
+
+      print('✅ Account deleted successfully');
+    } catch (e) {
+      print('❌ Account deletion error: $e');
+      throw Exception('Failed to delete account: $e');
     }
   }
 
