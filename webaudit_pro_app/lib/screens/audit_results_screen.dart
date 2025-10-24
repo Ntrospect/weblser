@@ -221,6 +221,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       child: isDesktop
           ? Row(
               children: [
+                const SizedBox(width: 140),
                 const Spacer(flex: 1),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
