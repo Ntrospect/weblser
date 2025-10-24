@@ -524,7 +524,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                     });
                   },
                   initiallyExpanded: isExpanded,
-                  divider: const Divider(height: 0, color: Colors.transparent),
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   title: Text(
                     '${index + 1}. ${rec.criterion}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
@@ -535,21 +535,23 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ) : null,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Text(
                             rec.recommendation,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               height: 1.6,
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.componentGap),
-                          PriorityBadge(priority: rec.priority),
-                        ],
-                      ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: PriorityBadge(priority: rec.priority),
+                        ),
+                      ],
                     ),
                   ],
                 ),
