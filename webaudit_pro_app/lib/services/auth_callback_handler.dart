@@ -79,7 +79,10 @@ class AuthCallbackHandler {
             : null;
 
         if (_accessToken != null) {
-          print('✅ Auth token received from fragment: ${_accessToken!.substring(0, 20)}...');
+          final preview = _accessToken!.length > 20
+              ? _accessToken!.substring(0, 20) + '...'
+              : _accessToken!;
+          print('✅ Auth token received from fragment: $preview (length: ${_accessToken!.length})');
           return _successResponse();
         }
       }
@@ -101,7 +104,10 @@ class AuthCallbackHandler {
             : null;
 
         if (_accessToken != null) {
-          print('✅ Auth token received from query: ${_accessToken!.substring(0, 20)}...');
+          final preview = _accessToken!.length > 20
+              ? _accessToken!.substring(0, 20) + '...'
+              : _accessToken!;
+          print('✅ Auth token received from query: $preview (length: ${_accessToken!.length})');
           print('✅ Token type: ${_type ?? "unknown"}');
           return _successResponse();
         }

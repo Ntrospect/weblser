@@ -111,6 +111,19 @@ class AuthService extends ChangeNotifier {
   Future<void> _handleAuthStateChange(Session? session) async {
     if (session != null && session.user != null) {
       final user = session.user!;
+
+      // Check if email is verified
+      final isEmailVerified = user.userMetadata?['email_verified'] == true ||
+          user.emailConfirmedAt != null;
+
+      if (!isEmailVerified) {
+        print('⚠️ Email not verified yet for: ${user.email}');
+        print('💭 User will not be logged in until email is confirmed');
+        _authState = auth_models.AuthState.initial();
+        notifyListeners();
+        return;
+      }
+
       final expiresAt = session.expiresAt != null
           ? DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000)
           : null;
@@ -132,7 +145,7 @@ class AuthService extends ChangeNotifier {
       // Load or create user profile
       await _loadOrCreateUserProfile(user.id, user.email ?? '');
 
-      print('✅ User authenticated: ${user.email}');
+      print('✅ User authenticated (email verified): ${user.email}');
     } else {
       _authState = auth_models.AuthState.initial();
       _currentUser = null;
