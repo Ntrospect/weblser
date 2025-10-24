@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // How It Works
             _buildHowItWorksSection(context),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: 22),
 
             // Motivational Section
             _buildMotivationalSection(context),
