@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // How It Works
             _buildHowItWorksSection(context),
-            const SizedBox(height: 17),
+            const SizedBox(height: 12),
 
             // Motivational Section
             _buildMotivationalSection(context),
