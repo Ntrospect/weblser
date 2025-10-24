@@ -293,6 +293,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               onChanged: (value) {
                                 setState(() => _acceptTerms = value ?? false);
                               },
+                              activeColor: Colors.blue.shade600,
+                              checkColor: Colors.white,
                             ),
                             Expanded(
                               child: GestureDetector(
@@ -301,7 +303,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                 },
                                 child: const Text(
                                   'I agree to the Terms & Conditions',
-                                  style: TextStyle(fontSize: 13),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
                             ),
