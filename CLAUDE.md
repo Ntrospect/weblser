@@ -273,6 +273,124 @@ To modify the summarization behavior:
 - **Content Extraction Issues** - Some sites may have unusual HTML structures; the tool tries main/article/content divs first, then falls back to full page text
 - **SSL Certificate Errors** - Ensure requests library is up to date: `pip install --upgrade requests`
 
+## Recent Development (Session Oct 24, 2025) - CONTINUED
+
+### Supabase Integration & Phase 2: Offline Support ✅
+**Complete offline-first architecture with local SQLite + automatic cloud sync**
+
+#### Phase 1: Supabase Foundation ✅
+**Completed:** Supabase PostgreSQL database with full security layer
+- **Project Created**: `websler-pro` on agenticn8 Pro account
+- **Database**: PostgreSQL SMALL instance (2GB RAM, US-East Virginia, $15/month)
+- **API URL**: https://vwnbhsmfpxdfcvqnzddc.supabase.co
+- **Credentials Saved**: Anon Key + Service Role Key in secure location
+
+**Database Schema** (5 tables + security):
+- `users` - User profiles extending Supabase auth
+- `audit_results` - Full 10-point audit results with scores (JSONB)
+- `website_summaries` - Quick Websler summaries
+- `recommendations` - Individual recommendations per audit
+- `pdf_generations` - Track PDF downloads for analytics
+
+**Security Features**:
+- Row-Level Security (RLS) enabled on all tables
+- Each user can only see their own data
+- Auto-trigger creates user profile on signup
+- Primary keys, foreign keys, and constraints
+- Strategic indexes for performance
+- Auto-timestamp triggers for created_at/updated_at
+
+#### Phase 2: Local Offline Support ✅
+**Completed:** Full offline capability with automatic sync when online
+
+**Architecture**:
+```
+User Action (audit/summary)
+  ↓
+Save to Local SQLite (always works)
+  ↓
+Is Online?
+  ├─ YES → Sync to Supabase + mark synced
+  └─ NO → Queue for later sync
+    ↓
+When Online → Auto-sync all queued items
+```
+
+**Files Created**:
+1. **`lib/database/local_db.dart`** - SQLite Database Management (322 lines)
+   - LocalDatabase singleton managing sqflite connection
+   - Mirror schema of Supabase tables (users, audits, summaries, recommendations, sync_queue)
+   - Methods: saveAuditLocal, saveSummaryLocal, getUnsyncedRecords, markSynced, addToSyncQueue
+   - Retry logic with retry_count and last_error tracking
+
+2. **`lib/services/connectivity_service.dart`** - Network Monitoring (26 lines)
+   - Singleton tracking online/offline status
+   - Stream for real-time connectivity changes
+   - isOnline/isOffline getters
+   - Automatic status detection and printing
+
+3. **`lib/services/sync_service.dart`** - Offline Sync Orchestration (240 lines)
+   - ChangeNotifier for Provider integration
+   - Methods: saveAuditWithSync(), saveSummaryWithSync(), syncPendingChanges()
+   - Automatic sync when connectivity restored
+   - Retry logic with error tracking
+   - Sync status for UI (isSyncing, syncStatus, pendingItemsCount)
+
+4. **`lib/widgets/offline_indicator.dart`** - Offline Status UI (32 lines)
+   - Banner showing "You're offline - changes will sync when online"
+   - Auto-hides when online
+   - Professional styling with icon
+
+**Dependencies Added** (pubspec.yaml):
+- `sqflite: ^2.3.0` - Local SQLite database
+- `connectivity_plus: ^5.0.0` - Network status detection
+- `path: ^1.8.3` - Path utilities
+- `uuid: ^4.0.0` - ID generation
+
+**Updated Files**:
+- `lib/main.dart` - Added SyncService to Provider, integrated OfflineIndicator
+
+**Git Commits** (Phase 2):
+- `c0d5f2f` - "feat: Implement Phase 2 - Local offline support with sqflite and sync service"
+- **Snapshot Tag**: `snapshot-phase2-offline-support`
+
+#### Desktop Layout Improvements ✅
+**Session Start**: Fixed audit results screen layout and styling
+
+**UI Fixes**:
+- Fixed ExpansionTile divider lines (removed black lines from expanded recommendations)
+- Centered "Overall Score" on desktop (full-width on mobile)
+- Increased "10-Point Evaluation" title size (32px, 40px top spacing, 4px bottom spacing)
+- Updated "Analysis History" card titles (18px, Raleway font, blue/green color)
+
+**Git Commits** (UI Work):
+- `5ac8bc5` - fix: Restore mobile view while keeping desktop centered layout
+- `6f41ddf` - fix: Account for logo width when centering Overall Score text
+- `256c114` - style: Further reduce spacing below title
+- `6581b32` - style: Increase Analysis History card titles size with Raleway font
+- `a83d39b` - fix: Use valid ExpansionTile parameters for Flutter version
+- **Snapshot Tag**: `snapshot-oct24-desktop-layout-improvements`
+
+#### Current Status
+✅ **Phase 1 & 2 Complete** - Ready for Phase 3 (Authentication)
+- Local SQLite database ready with 6 tables
+- Sync service ready for integration with Supabase
+- Offline indicator working
+- Connectivity monitoring in place
+
+#### Next Steps: Phase 3 (Authentication)
+🔄 **Planned Features**:
+1. Email/password signup/login screens
+2. Supabase auth integration
+3. Session management with user persistence
+4. Protected screens (require authentication)
+5. User profile management in Settings
+6. Logout functionality
+
+**Recommendation**: Start Phase 3 immediately - foundation is solid and ready for auth integration.
+
+---
+
 ## Recent Development (Session Oct 24, 2025)
 
 ### Unified Websler/Pro Workflow Architecture ✅
