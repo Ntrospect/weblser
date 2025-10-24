@@ -99,34 +99,37 @@ class _ProcessTimelineState extends State<ProcessTimeline>
           final stepIndex = index ~/ 2;
           final step = steps[stepIndex];
 
-          return Column(
-            children: [
-              _buildStepCircle(
-                context,
-                step.icon,
-                stepIndex + 1,
-                stepIndex,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                step.title,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                step.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          return SizedBox(
+            height: 155,
+            child: Column(
+              children: [
+                _buildStepCircle(
+                  context,
+                  step.icon,
+                  stepIndex + 1,
+                  stepIndex,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  step.title,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  step.description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           );
         }
       }),
