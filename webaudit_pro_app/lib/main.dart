@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
 import 'services/api_service.dart';
@@ -12,6 +13,10 @@ import 'screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize sqflite for Windows
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
   // Initialize Supabase
   await Supabase.initialize(
