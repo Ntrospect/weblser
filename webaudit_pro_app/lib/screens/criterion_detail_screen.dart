@@ -89,6 +89,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final color = _getScoreColor(widget.score);
     final scoreLabel = _getScoreLabel(widget.score);
 
@@ -106,7 +107,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Image.asset(
-              'assets/websler_pro.png',
+              isDarkMode ? 'assets/websler_pro-dark-theme.png' : 'assets/websler_pro.png',
               height: 40,
               fit: BoxFit.contain,
             ),

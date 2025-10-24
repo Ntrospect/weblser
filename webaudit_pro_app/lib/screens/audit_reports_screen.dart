@@ -118,6 +118,8 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -132,7 +134,7 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Image.asset(
-              'assets/websler_pro.png',
+              isDarkMode ? 'assets/websler_pro-dark-theme.png' : 'assets/websler_pro.png',
               height: 40,
               fit: BoxFit.contain,
             ),

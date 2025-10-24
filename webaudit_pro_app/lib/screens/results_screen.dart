@@ -159,6 +159,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 900;
@@ -176,7 +177,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Image.asset(
-              'assets/websler_pro.png',
+              isDarkMode ? 'assets/websler_pro-dark-theme.png' : 'assets/websler_pro.png',
               height: 40,
               fit: BoxFit.contain,
             ),
