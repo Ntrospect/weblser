@@ -201,7 +201,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
     }
 
     final scoreContainer = Container(
-      width: isDesktop ? 600 : double.infinity,
+      width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -219,10 +219,12 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
         ],
       ),
       child: Row(
+        mainAxisAlignment: isDesktop ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
           Expanded(
+            flex: isDesktop ? 0 : 1,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   'Overall Score',
@@ -253,6 +255,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
               ],
             ),
           ),
+          if (isDesktop) const Spacer(),
           SizedBox(
             width: 140,
             height: 140,
@@ -265,7 +268,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       ),
     );
 
-    return isDesktop ? Center(child: scoreContainer) : scoreContainer;
+    return scoreContainer;
   }
 
   Widget _buildScoresGrid(BuildContext context) {
