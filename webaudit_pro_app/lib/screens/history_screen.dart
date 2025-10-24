@@ -291,6 +291,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildHistoryCard(WebsiteAnalysis analysis) {
@@ -427,8 +429,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
         ),
-      );
-        },
       );
   }
 }
