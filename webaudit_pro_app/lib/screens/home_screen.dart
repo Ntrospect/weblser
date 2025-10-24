@@ -234,6 +234,10 @@ class _HomeScreenState extends State<HomeScreen> {
             // How It Works
             _buildHowItWorksSection(context),
             const SizedBox(height: AppSpacing.xl),
+
+            // Motivational Section
+            _buildMotivationalSection(context),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
@@ -387,6 +391,48 @@ class _HomeScreenState extends State<HomeScreen> {
         'Get instant summary',
         'Optional: Upgrade to Pro Audit',
       ],
+    );
+  }
+
+  Widget _buildMotivationalSection(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.lightbulb_outline,
+              size: 64,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.blue.shade300
+                  : Theme.of(context).primaryColor.withOpacity(0.6),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Risk it for the Biscuit!',
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Fortune favors the hungry; leap first, learn fast, keep swinging until the crumbs turn into whole cakes today.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 75,
+              height: 75,
+              child: Image.asset(
+                'assets/jumoki_AI_robot_gradient.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
