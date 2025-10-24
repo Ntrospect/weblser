@@ -533,7 +533,7 @@ class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
         transform: Matrix4.identity()
           ..translate(0.0, _isHovered ? -4 : 0.0),
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: widget.bgColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Colors.grey.withOpacity(_isHovered ? 0.5 : 0.3),
@@ -542,14 +542,14 @@ class _ScoreCardWithHoverState extends State<_ScoreCardWithHover> {
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.15),
+                    color: widget.textColor.withOpacity(0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: widget.textColor.withOpacity(0.08),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
