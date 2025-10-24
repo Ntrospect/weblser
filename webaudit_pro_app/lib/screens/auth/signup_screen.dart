@@ -295,6 +295,18 @@ class _SignupScreenState extends State<SignupScreen> {
                               },
                               activeColor: Colors.blue.shade600,
                               checkColor: Colors.white,
+                              fillColor: MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                                  if (states.contains(MaterialState.selected)) {
+                                    return Colors.blue.shade600;
+                                  }
+                                  return Colors.grey.shade300;
+                                },
+                              ),
+                              side: BorderSide(
+                                color: Colors.grey.shade400,
+                                width: 1.5,
+                              ),
                             ),
                             Expanded(
                               child: GestureDetector(
