@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import '../services/theme_provider.dart';
 import '../models/auth_state.dart';
 import 'auth/login_screen.dart';
 import 'auth/signup_screen.dart';
@@ -144,65 +145,76 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 68,
-        elevation: 0,
-        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Consumer<AuthService>(
-          builder: (context, authService, _) {
-            return SizedBox(
-              width: 165,
-              height: 69,
-              child: Image.asset(
-                'assets/websler_pro.png',
-                fit: BoxFit.contain,
-              ),
-            );
-          },
-        ),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 32),
-            child: SizedBox(
-              width: 151,
-              height: 54,
-              child: Image.asset(
-                'assets/jumoki_coloured_transparent_bg.png',
-                fit: BoxFit.contain,
-              ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final bgColor = themeProvider.isDarkMode
+            ? const Color(0xFF0F1419)
+            : Colors.white;
+        final scrolledBgColor = themeProvider.isDarkMode
+            ? const Color(0xFF0F1419).withOpacity(0.95)
+            : Colors.white.withOpacity(0.8);
+
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            toolbarHeight: 68,
+            elevation: 0,
+            backgroundColor: _isScrolled ? scrolledBgColor : bgColor,
+            surfaceTintColor: bgColor,
+            title: Consumer<AuthService>(
+              builder: (context, authService, _) {
+                return SizedBox(
+                  width: 165,
+                  height: 69,
+                  child: Image.asset(
+                    'assets/websler_pro.png',
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
             ),
+            centerTitle: false,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 32),
+                child: SizedBox(
+                  width: 151,
+                  height: 54,
+                  child: Image.asset(
+                    'assets/jumoki_coloured_transparent_bg.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          _onScroll(notification);
-          return false;
-        },
-        child: _screens[_selectedIndex],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+          body: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              _onScroll(notification);
+              return false;
+            },
+            child: _screens[_selectedIndex],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
+          bottomNavigationBar: BottomNavigationBar(
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.history),
+                label: 'History',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+        );
+      },
     );
   }
 }
