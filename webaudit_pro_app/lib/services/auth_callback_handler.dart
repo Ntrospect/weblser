@@ -56,15 +56,21 @@ class AuthCallbackHandler {
     try {
       final uri = request.url;
       print('📨 Received request: $uri');
+      print('📨 Full URL: ${request.requestedUri}');
+      print('📨 Fragment: "${uri.fragment}"');
+      print('📨 Path: ${uri.path}');
+      print('📨 Query: ${uri.query}');
+      print('📨 Headers: ${request.headers}');
 
-      // Parse fragment (hash) from the URL
-      // Supabase sends: /#access_token=...&expires_at=...&token_type=bearer&type=signup
+      // Try to get token from fragment first (URL hash)
       if (uri.fragment.isNotEmpty) {
+        print('📨 Parsing fragment...');
         final params = _parseFragment(uri.fragment);
+        print('📨 Fragment params: $params');
 
         _accessToken = params['access_token'];
         _refreshToken = params['refresh_token'];
-        _type = params['type']; // 'signup' or 'recovery'
+        _type = params['type'];
         _expiresIn = params['expires_in'] != null
             ? int.tryParse(params['expires_in']!)
             : null;
@@ -73,11 +79,33 @@ class AuthCallbackHandler {
             : null;
 
         if (_accessToken != null) {
-          print('✅ Auth token received: ${_accessToken!.substring(0, 20)}...');
+          print('✅ Auth token received from fragment: ${_accessToken!.substring(0, 20)}...');
           return _successResponse();
         }
       }
 
+      // Fallback: check query parameters (in case fragment was lost)
+      if (uri.queryParameters.isNotEmpty) {
+        print('📨 Parsing query parameters...');
+        print('📨 Query params: ${uri.queryParameters}');
+
+        _accessToken = uri.queryParameters['access_token'];
+        _refreshToken = uri.queryParameters['refresh_token'];
+        _type = uri.queryParameters['type'];
+        _expiresIn = uri.queryParameters['expires_in'] != null
+            ? int.tryParse(uri.queryParameters['expires_in']!)
+            : null;
+        _expiresAt = uri.queryParameters['expires_at'] != null
+            ? int.tryParse(uri.queryParameters['expires_at']!)
+            : null;
+
+        if (_accessToken != null) {
+          print('✅ Auth token received from query: ${_accessToken!.substring(0, 20)}...');
+          return _successResponse();
+        }
+      }
+
+      print('⚠️ No token found in fragment or query parameters');
       return _errorResponse('No auth token found in request');
     } catch (e) {
       print('❌ Error handling auth callback: $e');

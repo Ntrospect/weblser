@@ -192,28 +192,20 @@ class AuthService extends ChangeNotifier {
 
       if (response.user != null) {
         print('✅ Sign up successful: $email');
+        print('📧 Confirmation email sent - waiting for user to verify...');
 
-        // Check if user is already authenticated
+        // Check if user is already authenticated (no email verification required)
         if (response.session != null) {
           print('✅ User auto-confirmed and logged in');
           // Auth state will be updated via onAuthStateChange listener
         } else {
-          // Email verification required - for now, auto-login with verified email
-          // In production, show "Check your email" screen
+          // Email verification required - keep user unauthenticated
           print('⚠️ Email verification required for: $email');
-          // Create local authenticated state to allow app access
-          _authState = auth_models.AuthState.authenticated(
-            userId: response.user!.id,
-            email: email,
-            authToken: 'signup-pending', // Placeholder for verification
-          );
+          print('💭 User NOT logged in until email is confirmed');
 
-          // Save basic info to SharedPreferences
-          await _prefs.setString('user_id', response.user!.id);
-          await _prefs.setString('user_email', email);
-
-          // Create user profile
-          await _loadOrCreateUserProfile(response.user!.id, email);
+          // Keep user in initial state (not authenticated)
+          // They will be logged in when callback handler receives token from email
+          _authState = auth_models.AuthState.initial();
         }
       }
     } on AuthException catch (e) {
