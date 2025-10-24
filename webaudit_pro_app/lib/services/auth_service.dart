@@ -212,13 +212,12 @@ class AuthService extends ChangeNotifier {
           print('✅ User auto-confirmed and logged in');
           // Auth state will be updated via onAuthStateChange listener
         } else {
-          // Email verification required - keep user unauthenticated
+          // Email verification required - show "check your email" message
           print('⚠️ Email verification required for: $email');
-          print('💭 User NOT logged in until email is confirmed');
+          print('📧 Waiting for user to click confirmation link...');
 
-          // Keep user in initial state (not authenticated)
-          // They will be logged in when callback handler receives token from email
-          _authState = auth_models.AuthState.initial();
+          // Set authenticating state to signal UI to show "Check your email" message
+          _authState = auth_models.AuthState.authenticating();
         }
       }
     } on AuthException catch (e) {
@@ -449,28 +448,31 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Handle token received from email confirmation callback
-  Future<void> _handleCallbackToken(String accessToken) async {
+  Future<void> _handleCallbackToken(String token) async {
     try {
-      // Set the session with the received token
-      final expiresAt = _callbackHandler.expiresAt;
-      final expiresAtDateTime = expiresAt != null
-          ? DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000)
-          : null;
+      print('🔑 Attempting to verify email with token...');
 
-      // Update auth state
-      _authState = auth_models.AuthState.authenticated(
-        authToken: accessToken,
-        userId: '', // Will be populated when Supabase updates session
-        email: '', // Will be populated when Supabase updates session
-        tokenExpiresAt: expiresAtDateTime,
+      // Use the token to verify the email via Supabase OTP
+      // The token from the email is an OTP that needs to be verified
+      final response = await _supabase.auth.verifyOTP(
+        token: token,
+        type: OtpType.signup,
       );
 
-      // Notify listeners that we received a token
-      notifyListeners();
+      if (response.session != null && response.user != null) {
+        print('✅ Email verified successfully!');
+        print('✅ User authenticated: ${response.user!.email}');
+        // Auth state will be updated via onAuthStateChange listener
+      } else {
+        print('⚠️ OTP verification succeeded but no session returned');
+        _authState = auth_models.AuthState.error('Email verification failed - no session');
+      }
 
-      // The Supabase auth state listener will pick up the session update
-      // and call _handleAuthStateChange with the full user data
-      print('✅ Callback token processed');
+      notifyListeners();
+    } on AuthException catch (e) {
+      print('❌ Error verifying email: ${e.message}');
+      _authState = auth_models.AuthState.error('Email verification failed: ${e.message}');
+      notifyListeners();
     } catch (e) {
       print('❌ Error handling callback token: $e');
       _authState = auth_models.AuthState.error('Token callback failed: $e');
