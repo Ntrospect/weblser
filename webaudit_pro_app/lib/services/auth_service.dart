@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/auth_state.dart' as auth_models;
 import '../models/user.dart';
 import 'api_service.dart';
+import 'auth_callback_handler.dart';
 
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
@@ -13,6 +14,7 @@ class AuthService extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
   late SharedPreferences _prefs;
   ApiService? _apiService; // Reference to ApiService for token updates
+  final AuthCallbackHandler _callbackHandler = AuthCallbackHandler();
 
   // Auth state
   auth_models.AuthState _authState = auth_models.AuthState.initial();
@@ -46,12 +48,19 @@ class AuthService extends ChangeNotifier {
   /// Initialize auth service and restore session
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
+
+    // Start the auth callback handler server
+    await _callbackHandler.startServer();
+
     await _restoreSession();
 
     // Listen for Supabase auth state changes
     _supabase.auth.onAuthStateChange.listen((data) {
       _handleAuthStateChange(data.session);
     });
+
+    // Poll for callback tokens (checks every 500ms for 30 seconds)
+    _monitorCallbackToken();
 
     print('✅ AuthService initialized');
   }
@@ -408,11 +417,69 @@ class AuthService extends ChangeNotifier {
   }
 
   // ============================================
+  // AUTH CALLBACK MONITORING
+  // ============================================
+
+  /// Monitor for incoming auth callback tokens
+  /// Checks every 500ms for a token received via email confirmation
+  void _monitorCallbackToken() {
+    Future.delayed(const Duration(milliseconds: 100), () async {
+      int attempts = 0;
+      const maxAttempts = 60; // 30 seconds at 500ms intervals
+
+      while (attempts < maxAttempts) {
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Check if callback handler received a token
+        if (_callbackHandler.hasToken && _callbackHandler.accessToken != null) {
+          print('🎉 Auth callback token detected: ${_callbackHandler.accessToken!.substring(0, 20)}...');
+          await _handleCallbackToken(_callbackHandler.accessToken!);
+          _callbackHandler.clearToken();
+          break;
+        }
+
+        attempts++;
+      }
+    });
+  }
+
+  /// Handle token received from email confirmation callback
+  Future<void> _handleCallbackToken(String accessToken) async {
+    try {
+      // Set the session with the received token
+      final expiresAt = _callbackHandler.expiresAt;
+      final expiresAtDateTime = expiresAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(expiresAt * 1000)
+          : null;
+
+      // Update auth state
+      _authState = auth_models.AuthState.authenticated(
+        authToken: accessToken,
+        userId: '', // Will be populated when Supabase updates session
+        email: '', // Will be populated when Supabase updates session
+        tokenExpiresAt: expiresAtDateTime,
+      );
+
+      // Notify listeners that we received a token
+      notifyListeners();
+
+      // The Supabase auth state listener will pick up the session update
+      // and call _handleAuthStateChange with the full user data
+      print('✅ Callback token processed');
+    } catch (e) {
+      print('❌ Error handling callback token: $e');
+      _authState = auth_models.AuthState.error('Token callback failed: $e');
+      notifyListeners();
+    }
+  }
+
+  // ============================================
   // CLEANUP
   // ============================================
 
   @override
   void dispose() {
+    _callbackHandler.stopServer();
     super.dispose();
   }
 }

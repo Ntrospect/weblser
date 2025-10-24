@@ -62,6 +62,9 @@ dependencies:
   # Charts for data visualization
   fl_chart: ^0.68.0
 
+  # HTTP server for auth callback handling
+  shelf: ^1.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
