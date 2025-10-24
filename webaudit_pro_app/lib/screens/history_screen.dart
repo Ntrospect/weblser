@@ -313,9 +313,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   children: [
                     Text(
                       analysis.displayName,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: color,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'Raleway',
+                            fontSize: 18,
                           ),
                     ),
                     Text(
