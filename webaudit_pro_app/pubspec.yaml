@@ -59,6 +59,12 @@ dependencies:
   # Charts for data visualization
   fl_chart: ^0.68.0
 
+  # Offline & Sync
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  connectivity_plus: ^5.0.0
+  uuid: ^4.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

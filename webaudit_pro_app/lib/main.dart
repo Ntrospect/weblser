@@ -5,10 +5,12 @@ import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
 import 'services/api_service.dart';
 import 'services/theme_provider.dart';
+import 'services/sync_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/settings_screen.dart';
+import 'widgets/offline_indicator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,9 @@ class MyApp extends StatelessWidget {
               ),
               ChangeNotifierProvider(
                 create: (_) => ApiService(snapshot.data!),
+              ),
+              ChangeNotifierProvider(
+                create: (_) => SyncService(),
               ),
             ],
             child: Consumer<ThemeProvider>(
@@ -165,12 +170,19 @@ class _MainAppState extends State<MainApp> {
           ),
         ],
       ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          _onScroll(notification);
-          return false;
-        },
-        child: _screens[_selectedIndex],
+      body: Column(
+        children: [
+          const OfflineIndicator(),
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                _onScroll(notification);
+                return false;
+              },
+              child: _screens[_selectedIndex],
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
