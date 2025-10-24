@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
 import 'services/api_service.dart';
+import 'services/auth_service.dart';
 import 'services/theme_provider.dart';
 import 'services/sync_service.dart';
-import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/history_screen.dart';
-import 'screens/settings_screen.dart';
-import 'widgets/offline_indicator.dart';
+import 'screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://agenticn8.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnZW50aWNuOCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzI5NjczMTczLCJleHAiOjE4ODc0NDExNzN9.gAzp_F-Jjf7-X_XSYNcBYvTxXpXLqpP0VbJqfzMHkX0',
+  );
+
   runApp(const MyApp());
 }
 
@@ -28,6 +34,9 @@ class MyApp extends StatelessWidget {
         if (snapshot.hasData) {
           return MultiProvider(
             providers: [
+              ChangeNotifierProvider(
+                create: (_) => AuthService(),
+              ),
               ChangeNotifierProvider(
                 create: (_) => ThemeProvider(snapshot.data!),
               ),
@@ -45,7 +54,7 @@ class MyApp extends StatelessWidget {
                   theme: themeProvider.isDarkMode
                       ? DarkAppTheme.darkTheme
                       : LightAppTheme.lightTheme,
-                  home: const AppNavigation(),
+                  home: const AuthWrapper(),
                 );
               },
             ),
@@ -56,152 +65,6 @@ class MyApp extends StatelessWidget {
           body: const Center(child: CircularProgressIndicator()),
         );
       },
-    );
-  }
-}
-
-class AppNavigation extends StatefulWidget {
-  const AppNavigation({Key? key}) : super(key: key);
-
-  @override
-  State<AppNavigation> createState() => _AppNavigationState();
-}
-
-class _AppNavigationState extends State<AppNavigation> {
-  bool _showSplash = true;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_showSplash) {
-      return SplashScreen(
-        onSplashComplete: () {
-          if (mounted) {
-            setState(() {
-              _showSplash = false;
-            });
-          }
-        },
-      );
-    }
-    return const MainApp();
-  }
-}
-
-class MainApp extends StatefulWidget {
-  const MainApp({Key? key}) : super(key: key);
-
-  @override
-  State<MainApp> createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  int _selectedIndex = 0;
-  bool _isScrolled = false;
-
-  /// Clean navigation structure:
-  /// - Home: Websler summary generator
-  /// - History: Unified history (summaries + audits with upgrade option)
-  /// - Settings: Theme & preferences
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const HistoryScreen(),
-    const SettingsScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      _isScrolled = false;
-    });
-  }
-
-  void _onScroll(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification) {
-      final isScrolled = notification.metrics.pixels > 10;
-      if (isScrolled != _isScrolled) {
-        setState(() {
-          _isScrolled = isScrolled;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 68,
-        elevation: 0,
-        backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
-            return SizedBox(
-              width: 165,
-              height: 69,
-              child: Image.asset(
-                themeProvider.isDarkMode
-                    ? 'assets/websler_pro-dark-theme.png'
-                    : 'assets/websler_pro.png',
-                fit: BoxFit.contain,
-              ),
-            );
-          },
-        ),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8, right: 32),
-            child: Consumer<ThemeProvider>(
-              builder: (context, themeProvider, _) {
-                return SizedBox(
-                  width: 151,
-                  height: 54,
-                  child: Image.asset(
-                    themeProvider.isDarkMode
-                        ? 'assets/jumoki_white_transparent_bg.png'
-                        : 'assets/jumoki_coloured_transparent_bg.png',
-                    fit: BoxFit.contain,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const OfflineIndicator(),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                _onScroll(notification);
-                return false;
-              },
-              child: _screens[_selectedIndex],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
     );
   }
 }

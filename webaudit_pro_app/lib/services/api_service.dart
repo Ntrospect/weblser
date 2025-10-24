@@ -12,15 +12,18 @@ import '../models/website_analysis.dart';
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
   late String _apiUrl;
+  String? _authToken;
 
   static const String _apiUrlKey = 'api_url';
   static const String _defaultApiUrl = 'http://140.99.254.83:8000';
 
   ApiService(this._prefs) {
     _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
+    _authToken = _prefs.getString('auth_token');
   }
 
   String get apiUrl => _apiUrl;
+  String? get authToken => _authToken;
 
   void setApiUrl(String url) {
     _apiUrl = url;
@@ -28,11 +31,36 @@ class ApiService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set auth token (called by AuthService when user logs in)
+  void setAuthToken(String? token) {
+    _authToken = token;
+    if (token != null) {
+      _prefs.setString('auth_token', token);
+    } else {
+      _prefs.remove('auth_token');
+    }
+    notifyListeners();
+  }
+
+  /// Build headers with auth token if available
+  Map<String, String> _buildHeaders({Map<String, String>? customHeaders}) {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      ...?customHeaders,
+    };
+
+    if (_authToken != null) {
+      headers['Authorization'] = 'Bearer $_authToken';
+    }
+
+    return headers;
+  }
+
   Future<Analysis> analyzeUrl(String url) async {
     try {
       final response = await http.post(
         Uri.parse('$_apiUrl/api/analyze'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({'url': url}),
       ).timeout(const Duration(seconds: 30));
 
@@ -91,7 +119,7 @@ class ApiService extends ChangeNotifier {
     try {
       final response = await http.post(
         Uri.parse('$_apiUrl/api/pdf'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({
           'analysis_id': analysisId,
           'logo_url': logoUrl,
@@ -167,7 +195,7 @@ class ApiService extends ChangeNotifier {
 
       final response = await http.post(
         Uri.parse('$_apiUrl/api/audit/analyze'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({
           'url': url,
           'timeout': timeout,
@@ -251,7 +279,7 @@ class ApiService extends ChangeNotifier {
 
       final response = await http.post(
         Uri.parse('$_apiUrl/api/audit/generate-pdf/$auditId/$documentType'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({
           'audit_id': auditId,
           'document_type': documentType,
