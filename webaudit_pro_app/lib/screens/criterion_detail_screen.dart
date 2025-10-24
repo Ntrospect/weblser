@@ -96,6 +96,7 @@ class _CriterionDetailScreenState extends State<CriterionDetailScreen> with Tick
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(widget.criterion),
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         elevation: 0,
         backgroundColor: _isScrolled
             ? Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8)
