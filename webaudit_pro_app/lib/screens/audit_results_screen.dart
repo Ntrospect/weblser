@@ -91,6 +91,8 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
               // 10 Criterion Scores Grid
               _buildScoresGrid(context),
               const SizedBox(height: AppSpacing.sectionGap),
+              Divider(color: Colors.grey.withOpacity(0.3), thickness: 1),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // Key Strengths
               _buildSection(
@@ -101,6 +103,8 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                 _auditResult.keyStrengths,
               ),
               const SizedBox(height: AppSpacing.componentGap),
+              Divider(color: Colors.grey.withOpacity(0.3), thickness: 1),
+              const SizedBox(height: AppSpacing.sectionGap),
 
               // Critical Issues
               _buildSection(
