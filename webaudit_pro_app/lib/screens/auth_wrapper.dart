@@ -9,7 +9,6 @@ import 'splash_screen.dart';
 import 'home_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
-import '../widgets/offline_indicator.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({Key? key}) : super(key: key);
@@ -179,19 +178,12 @@ class _MainAppState extends State<MainApp> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const OfflineIndicator(),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                _onScroll(notification);
-                return false;
-              },
-              child: _screens[_selectedIndex],
-            ),
-          ),
-        ],
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          _onScroll(notification);
+          return false;
+        },
+        child: _screens[_selectedIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
