@@ -60,43 +60,46 @@ class WebAuditReportGenerator:
         styles['Normal'].textColor = self.COLOR_TEXT
         styles['Normal'].fontName = 'Helvetica'
 
-        # Custom styles
-        styles.add(ParagraphStyle(
-            name='CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=28,
-            textColor=self.COLOR_PRIMARY,
-            spaceAfter=12,
-            alignment=TA_CENTER,
-            fontName='Helvetica-Bold'
-        ))
+        # Custom styles - only add if they don't already exist
+        custom_styles = [
+            ('CustomTitle', ParagraphStyle(
+                name='CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=28,
+                textColor=self.COLOR_PRIMARY,
+                spaceAfter=12,
+                alignment=TA_CENTER,
+                fontName='Helvetica-Bold'
+            )),
+            ('SectionHeader', ParagraphStyle(
+                name='SectionHeader',
+                parent=styles['Heading2'],
+                fontSize=14,
+                textColor=self.COLOR_ACCENT,
+                spaceAfter=8,
+                spaceBefore=8,
+                fontName='Helvetica-Bold'
+            )),
+            ('SubHeader', ParagraphStyle(
+                name='SubHeader',
+                parent=styles['Heading3'],
+                fontSize=11,
+                textColor=self.COLOR_TEXT,
+                spaceAfter=6,
+                fontName='Helvetica-Bold'
+            )),
+            ('BodyText', ParagraphStyle(
+                name='BodyText',
+                parent=styles['Normal'],
+                fontSize=10,
+                alignment=TA_JUSTIFY,
+                spaceAfter=6
+            )),
+        ]
 
-        styles.add(ParagraphStyle(
-            name='SectionHeader',
-            parent=styles['Heading2'],
-            fontSize=14,
-            textColor=self.COLOR_ACCENT,
-            spaceAfter=8,
-            spaceBefore=8,
-            fontName='Helvetica-Bold'
-        ))
-
-        styles.add(ParagraphStyle(
-            name='SubHeader',
-            parent=styles['Heading3'],
-            fontSize=11,
-            textColor=self.COLOR_TEXT,
-            spaceAfter=6,
-            fontName='Helvetica-Bold'
-        ))
-
-        styles.add(ParagraphStyle(
-            name='BodyText',
-            parent=styles['Normal'],
-            fontSize=10,
-            alignment=TA_JUSTIFY,
-            spaceAfter=6
-        ))
+        for style_name, style in custom_styles:
+            if style_name not in styles:
+                styles.add(style)
 
         return styles
 
