@@ -67,7 +67,7 @@ class _ProcessTimelineState extends State<ProcessTimeline>
               ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        const SizedBox(height: 40),
+        const SizedBox(height: 25),
         isDesktop
             ? _buildHorizontalTimeline(context, structuredSteps)
             : _buildVerticalTimeline(context, structuredSteps),
