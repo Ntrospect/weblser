@@ -122,6 +122,7 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Download Reports'),
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         elevation: 0,
         backgroundColor: _isScrolled
             ? Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8)

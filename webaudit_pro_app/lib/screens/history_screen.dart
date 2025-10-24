@@ -222,6 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Analysis History'),
+        titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         elevation: 0,
         backgroundColor: _isScrolled ? Colors.white.withOpacity(0.8) : Colors.white,
         surfaceTintColor: Colors.white,
