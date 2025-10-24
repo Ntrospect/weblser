@@ -285,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               const Text(
                                 "Don't have an account? ",
-                                style: TextStyle(fontSize: 13),
+                                style: TextStyle(fontSize: 13, color: Colors.black87),
                               ),
                               TextButton(
                                 onPressed: widget.onSwitchToSignup,

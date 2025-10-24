@@ -343,7 +343,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             children: [
                               const Text(
                                 'Already have an account? ',
-                                style: TextStyle(fontSize: 13),
+                                style: TextStyle(fontSize: 13, color: Colors.black87),
                               ),
                               TextButton(
                                 onPressed: widget.onSwitchToLogin,
