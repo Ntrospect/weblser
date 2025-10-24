@@ -218,56 +218,97 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          if (isDesktop)
-            const Spacer(flex: 1)
-          else
-            Expanded(
-              child: SizedBox.shrink(),
+      child: isDesktop
+          ? Row(
+              children: [
+                const Spacer(flex: 1),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Overall Score',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${score.toStringAsFixed(1)}/10',
+                      style: TextStyle(
+                        fontSize: 64,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      scoreStatus,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.95),
+                            letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(flex: 1),
+                SizedBox(
+                  width: 140,
+                  height: 140,
+                  child: Image.asset(
+                    'assets/websler-logo-robot-WHITE.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Overall Score',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '${score.toStringAsFixed(1)}/10',
+                        style: TextStyle(
+                          fontSize: 64,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        scoreStatus,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.white.withOpacity(0.95),
+                              letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 140,
+                  height: 140,
+                  child: Image.asset(
+                    'assets/websler-logo-robot-WHITE.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Overall Score',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '${score.toStringAsFixed(1)}/10',
-                style: TextStyle(
-                  fontSize: 64,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                scoreStatus,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.95),
-                      letterSpacing: 0.3,
-                ),
-              ),
-            ],
-          ),
-          if (isDesktop) const Spacer(flex: 1),
-          SizedBox(
-            width: 140,
-            height: 140,
-            child: Image.asset(
-              'assets/websler-logo-robot-WHITE.png',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ],
-      ),
     );
 
     return scoreContainer;
