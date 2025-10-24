@@ -91,7 +91,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             children: [
                               Image.asset(
                                 'assets/websler_pro.png',
-                                width: 120,
+                                width: 240,
                                 fit: BoxFit.contain,
                               ),
                               const SizedBox(height: 24),
@@ -100,6 +100,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -138,10 +139,16 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextFormField(
                           controller: _fullNameController,
                           enabled: !_isLoading,
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Full Name (Optional)',
+                            labelStyle: const TextStyle(color: Colors.black87),
                             hintText: 'John Doe',
+                            hintStyle: const TextStyle(color: Colors.black45),
                             prefixIcon: const Icon(Icons.person_outlined),
+                            prefixIconColor: Colors.black54,
+                            filled: true,
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -153,10 +160,16 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextFormField(
                           controller: _emailController,
                           enabled: !_isLoading,
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Email Address',
+                            labelStyle: const TextStyle(color: Colors.black87),
                             hintText: 'you@example.com',
+                            hintStyle: const TextStyle(color: Colors.black45),
                             prefixIcon: const Icon(Icons.email_outlined),
+                            prefixIconColor: Colors.black54,
+                            filled: true,
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -178,18 +191,25 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextFormField(
                           controller: _passwordController,
                           enabled: !_isLoading,
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Password',
+                            labelStyle: const TextStyle(color: Colors.black87),
                             hintText: 'At least 8 characters',
+                            hintStyle: const TextStyle(color: Colors.black45),
                             prefixIcon: const Icon(Icons.lock_outlined),
+                            prefixIconColor: Colors.black54,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _showPassword ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.black54,
                               ),
                               onPressed: () {
                                 setState(() => _showPassword = !_showPassword);
                               },
                             ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -229,18 +249,25 @@ class _SignupScreenState extends State<SignupScreen> {
                         TextFormField(
                           controller: _confirmPasswordController,
                           enabled: !_isLoading,
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             labelText: 'Confirm Password',
+                            labelStyle: const TextStyle(color: Colors.black87),
                             hintText: 'Re-enter your password',
+                            hintStyle: const TextStyle(color: Colors.black45),
                             prefixIcon: const Icon(Icons.lock_outlined),
+                            prefixIconColor: Colors.black54,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _showConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.black54,
                               ),
                               onPressed: () {
                                 setState(() => _showConfirmPassword = !_showConfirmPassword);
                               },
                             ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
