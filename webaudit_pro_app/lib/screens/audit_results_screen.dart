@@ -524,6 +524,7 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                     });
                   },
                   initiallyExpanded: isExpanded,
+                  divider: const Divider(height: 0, color: Colors.transparent),
                   title: Text(
                     '${index + 1}. ${rec.criterion}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
