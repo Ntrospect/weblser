@@ -20,6 +20,9 @@ class AuthService extends ChangeNotifier {
   auth_models.AuthState _authState = auth_models.AuthState.initial();
   AppUser? _currentUser;
 
+  // Token monitoring state
+  bool _isMonitoring = false;
+
   // Getters
   auth_models.AuthState get authState => _authState;
   AppUser? get currentUser => _currentUser;
@@ -218,6 +221,12 @@ class AuthService extends ChangeNotifier {
 
           // Set authenticating state to signal UI to show "Check your email" message
           _authState = auth_models.AuthState.authenticating();
+
+          // CRITICAL FIX: Restart monitoring for this signup attempt
+          // (monitoring only runs once during app init, so we need to restart it)
+          print('🔄 Restarting token monitoring for this signup...');
+          _callbackHandler.clearToken(); // Clear any old token first
+          _restartMonitoringForSignup();
         }
       }
     } on AuthException catch (e) {
@@ -423,6 +432,17 @@ class AuthService extends ChangeNotifier {
   // ============================================
   // AUTH CALLBACK MONITORING
   // ============================================
+
+  /// Restart token monitoring for a new signup attempt
+  /// This is called when a user signs up, ensuring we actively monitor for
+  /// their specific verification email token.
+  void _restartMonitoringForSignup() {
+    if (_isMonitoring) {
+      print('⚠️ Monitoring already active, skipping restart');
+      return;
+    }
+    _monitorCallbackToken();
+  }
 
   /// Monitor for incoming auth callback tokens
   /// Checks every 500ms for a token received via email confirmation
