@@ -20,6 +20,9 @@ class AuthService extends ChangeNotifier {
   auth_models.AuthState _authState = auth_models.AuthState.initial();
   AppUser? _currentUser;
 
+  // Pending signup email (stored during signup, used for OTP verification)
+  String? _pendingSignupEmail;
+
   // Getters
   auth_models.AuthState get authState => _authState;
   AppUser? get currentUser => _currentUser;
@@ -215,6 +218,10 @@ class AuthService extends ChangeNotifier {
           // Email verification required - show "check your email" message
           print('⚠️ Email verification required for: $email');
           print('📧 Waiting for user to click confirmation link...');
+
+          // Store email for use in OTP verification (verifyOTP requires email or phone)
+          _pendingSignupEmail = email;
+          print('💾 Stored pending signup email for verification: $email');
 
           // Set authenticating state to signal UI to show "Check your email" message
           _authState = auth_models.AuthState.authenticating();
@@ -491,9 +498,17 @@ class AuthService extends ChangeNotifier {
       print('🔑 Attempting to verify email with token: $token');
       print('📍 Calling verifyOTP with type=OtpType.signup...');
 
+      // Verify the email - Supabase requires either email or phone to be specified
+      if (_pendingSignupEmail == null) {
+        throw Exception('No pending signup email found - cannot verify OTP');
+      }
+
+      print('📧 Using email for OTP verification: $_pendingSignupEmail');
+
       // Use the token to verify the email via Supabase OTP
       // The token from the email is an OTP that needs to be verified
       final response = await _supabase.auth.verifyOTP(
+        email: _pendingSignupEmail!,
         token: token,
         type: OtpType.signup,
       );
@@ -510,10 +525,12 @@ class AuthService extends ChangeNotifier {
         final tokenPreview = sessionToken.length > 20 ? '${sessionToken.substring(0, 20)}...' : sessionToken;
         print('✅ Session token: $tokenPreview');
         // Auth state will be updated via onAuthStateChange listener
+        _pendingSignupEmail = null; // Clear pending email after successful verification
       } else {
         print('⚠️ OTP verification succeeded but incomplete response');
         print('   - Setting error state and notifying listeners');
         _authState = auth_models.AuthState.error('Email verification failed - no session');
+        _pendingSignupEmail = null; // Clear pending email on failure
       }
 
       notifyListeners();
@@ -522,11 +539,13 @@ class AuthService extends ChangeNotifier {
       print('   - Code: ${e.statusCode}');
       print('   - Message: ${e.message}');
       _authState = auth_models.AuthState.error('Email verification failed: ${e.message}');
+      _pendingSignupEmail = null; // Clear pending email on error
       notifyListeners();
     } catch (e) {
       print('❌ Unexpected error handling callback token: $e');
       print('   - Type: ${e.runtimeType}');
       _authState = auth_models.AuthState.error('Token callback failed: $e');
+      _pendingSignupEmail = null; // Clear pending email on error
       notifyListeners();
     }
   }
