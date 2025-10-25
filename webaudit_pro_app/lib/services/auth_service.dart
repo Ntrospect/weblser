@@ -431,6 +431,8 @@ class AuthService extends ChangeNotifier {
       int attempts = 0;
       const maxAttempts = 60; // 30 seconds at 500ms intervals
 
+      print('⏱️ Starting email verification monitoring (30 second timeout)...');
+
       while (attempts < maxAttempts) {
         await Future.delayed(const Duration(milliseconds: 500));
 
@@ -439,18 +441,34 @@ class AuthService extends ChangeNotifier {
           print('🎉 Auth callback token detected: ${_callbackHandler.accessToken!.substring(0, 20)}...');
           await _handleCallbackToken(_callbackHandler.accessToken!);
           _callbackHandler.clearToken();
-          break;
+          return; // Exit monitoring
         }
 
         attempts++;
+
+        // Log progress every 10 attempts (every 5 seconds)
+        if (attempts % 10 == 0) {
+          final secondsElapsed = attempts ~/ 2;
+          print('⏳ Still waiting for email confirmation... ($secondsElapsed seconds elapsed)');
+        }
       }
+
+      // Monitoring timed out
+      print('❌ Email verification monitoring timed out after 30 seconds');
+      print('⚠️ The callback server may not have received the confirmation link');
+      print('💡 Check that:');
+      print('   1. You clicked the confirmation link in the email');
+      print('   2. The link starts with http://localhost:3000');
+      print('   3. Your browser can reach localhost:3000');
+      print('   4. The Flask callback server is still running');
     });
   }
 
   /// Handle token received from email confirmation callback
   Future<void> _handleCallbackToken(String token) async {
     try {
-      print('🔑 Attempting to verify email with token...');
+      print('🔑 Attempting to verify email with token: $token');
+      print('📍 Calling verifyOTP with type=OtpType.signup...');
 
       // Use the token to verify the email via Supabase OTP
       // The token from the email is an OTP that needs to be verified
@@ -459,22 +477,31 @@ class AuthService extends ChangeNotifier {
         type: OtpType.signup,
       );
 
+      print('✅ verifyOTP response received');
+      print('   - Session: ${response.session != null ? 'Yes' : 'No'}');
+      print('   - User: ${response.user != null ? 'Yes (${response.user?.email})' : 'No'}');
+
       if (response.session != null && response.user != null) {
         print('✅ Email verified successfully!');
         print('✅ User authenticated: ${response.user!.email}');
+        print('✅ Session token: ${response.session!.accessToken.substring(0, 20)}...');
         // Auth state will be updated via onAuthStateChange listener
       } else {
-        print('⚠️ OTP verification succeeded but no session returned');
+        print('⚠️ OTP verification succeeded but incomplete response');
+        print('   - Setting error state and notifying listeners');
         _authState = auth_models.AuthState.error('Email verification failed - no session');
       }
 
       notifyListeners();
     } on AuthException catch (e) {
-      print('❌ Error verifying email: ${e.message}');
+      print('❌ AuthException during email verification');
+      print('   - Code: ${e.statusCode}');
+      print('   - Message: ${e.message}');
       _authState = auth_models.AuthState.error('Email verification failed: ${e.message}');
       notifyListeners();
     } catch (e) {
-      print('❌ Error handling callback token: $e');
+      print('❌ Unexpected error handling callback token: $e');
+      print('   - Type: ${e.runtimeType}');
       _authState = auth_models.AuthState.error('Token callback failed: $e');
       notifyListeners();
     }
