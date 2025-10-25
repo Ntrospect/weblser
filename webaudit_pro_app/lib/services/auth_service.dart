@@ -467,8 +467,12 @@ class AuthService extends ChangeNotifier {
           final token = _callbackHandler.accessToken!;
           final preview = token.length > 20 ? '${token.substring(0, 20)}...' : token;
           print('🎉 Auth callback token detected: $preview');
-          await _handleCallbackToken(token);
+
+          // CRITICAL: Clear token immediately to prevent concurrent monitoring loops from reusing it
+          // If we clear AFTER processing, a second monitoring loop might detect it first
           _callbackHandler.clearToken();
+
+          await _handleCallbackToken(token);
           return; // Exit monitoring
         }
 
