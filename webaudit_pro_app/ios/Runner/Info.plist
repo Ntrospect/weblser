@@ -47,5 +47,11 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>This app uses local network access for email verification callbacks</string>
+		<key>NSBonjourServices</key>
+		<array>
+			<string>_http._tcp</string>
+		</array>
 	</dict>
 </plist>

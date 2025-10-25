@@ -1,0 +1,21 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "38BQCMMR5C.io.jumoki.weblser",
+        "paths": [
+          "/verify",
+          "/verify?*",
+          "/auth/callback",
+          "/auth/callback?*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "38BQCMMR5C.io.jumoki.weblser"
+    ]
+  }
+}
