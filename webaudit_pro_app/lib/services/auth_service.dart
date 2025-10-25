@@ -446,12 +446,14 @@ class AuthService extends ChangeNotifier {
 
   /// Monitor for incoming auth callback tokens
   /// Checks every 500ms for a token received via email confirmation
+  /// CRITICAL: Increased timeout from 30s to 120s to account for email delivery delays
   void _monitorCallbackToken() {
+    _isMonitoring = true;
     Future.delayed(const Duration(milliseconds: 100), () async {
       int attempts = 0;
-      const maxAttempts = 60; // 30 seconds at 500ms intervals
+      const maxAttempts = 240; // 120 seconds at 500ms intervals (was 30 seconds, too short!)
 
-      print('⏱️ Starting email verification monitoring (30 second timeout)...');
+      print('⏱️ Starting email verification monitoring (120 second timeout)...');
 
       while (attempts < maxAttempts) {
         await Future.delayed(const Duration(milliseconds: 500));
@@ -461,6 +463,7 @@ class AuthService extends ChangeNotifier {
           print('🎉 Auth callback token detected: ${_callbackHandler.accessToken!.substring(0, 20)}...');
           await _handleCallbackToken(_callbackHandler.accessToken!);
           _callbackHandler.clearToken();
+          _isMonitoring = false;
           return; // Exit monitoring
         }
 
@@ -474,7 +477,8 @@ class AuthService extends ChangeNotifier {
       }
 
       // Monitoring timed out
-      print('❌ Email verification monitoring timed out after 30 seconds');
+      _isMonitoring = false;
+      print('❌ Email verification monitoring timed out after 120 seconds');
       print('⚠️ The callback server may not have received the confirmation link');
       print('💡 Check that:');
       print('   1. You clicked the confirmation link in the email');
