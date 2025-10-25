@@ -20,9 +20,6 @@ class AuthService extends ChangeNotifier {
   auth_models.AuthState _authState = auth_models.AuthState.initial();
   AppUser? _currentUser;
 
-  // Token monitoring state
-  bool _isMonitoring = false;
-
   // Getters
   auth_models.AuthState get authState => _authState;
   AppUser? get currentUser => _currentUser;
@@ -437,18 +434,17 @@ class AuthService extends ChangeNotifier {
   /// This is called when a user signs up, ensuring we actively monitor for
   /// their specific verification email token.
   void _restartMonitoringForSignup() {
-    if (_isMonitoring) {
-      print('⚠️ Monitoring already active, skipping restart');
-      return;
-    }
+    // Always start a new monitoring loop for this signup attempt
+    // Multiple concurrent monitoring loops are fine and use negligible resources
+    print('🔄 Starting fresh monitoring for this signup attempt');
     _monitorCallbackToken();
   }
 
   /// Monitor for incoming auth callback tokens
   /// Checks every 500ms for a token received via email confirmation
   /// CRITICAL: Increased timeout from 30s to 120s to account for email delivery delays
+  /// Multiple concurrent monitoring loops are allowed (no state tracking needed)
   void _monitorCallbackToken() {
-    _isMonitoring = true;
     Future.delayed(const Duration(milliseconds: 100), () async {
       int attempts = 0;
       const maxAttempts = 240; // 120 seconds at 500ms intervals (was 30 seconds, too short!)
@@ -460,10 +456,12 @@ class AuthService extends ChangeNotifier {
 
         // Check if callback handler received a token
         if (_callbackHandler.hasToken && _callbackHandler.accessToken != null) {
-          print('🎉 Auth callback token detected: ${_callbackHandler.accessToken!.substring(0, 20)}...');
-          await _handleCallbackToken(_callbackHandler.accessToken!);
+          // Safely preview token (handle short OTP codes like "123456")
+          final token = _callbackHandler.accessToken!;
+          final preview = token.length > 20 ? '${token.substring(0, 20)}...' : token;
+          print('🎉 Auth callback token detected: $preview');
+          await _handleCallbackToken(token);
           _callbackHandler.clearToken();
-          _isMonitoring = false;
           return; // Exit monitoring
         }
 
@@ -477,7 +475,6 @@ class AuthService extends ChangeNotifier {
       }
 
       // Monitoring timed out
-      _isMonitoring = false;
       print('❌ Email verification monitoring timed out after 120 seconds');
       print('⚠️ The callback server may not have received the confirmation link');
       print('💡 Check that:');
@@ -508,7 +505,10 @@ class AuthService extends ChangeNotifier {
       if (response.session != null && response.user != null) {
         print('✅ Email verified successfully!');
         print('✅ User authenticated: ${response.user!.email}');
-        print('✅ Session token: ${response.session!.accessToken.substring(0, 20)}...');
+        // Safely preview session token
+        final sessionToken = response.session!.accessToken;
+        final tokenPreview = sessionToken.length > 20 ? '${sessionToken.substring(0, 20)}...' : sessionToken;
+        print('✅ Session token: $tokenPreview');
         // Auth state will be updated via onAuthStateChange listener
       } else {
         print('⚠️ OTP verification succeeded but incomplete response');
