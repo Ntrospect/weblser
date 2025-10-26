@@ -5,10 +5,12 @@ Uses Claude API to generate meaningful summaries of website purpose and content.
 """
 
 import argparse
+import base64
 import json
 import os
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 from urllib.parse import urlparse
@@ -17,12 +19,19 @@ import requests
 from anthropic import Anthropic
 from bs4 import BeautifulSoup
 from io import BytesIO
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, PageTemplate, Frame
 from reportlab.lib import colors
+
+try:
+    from playwright.sync_api import sync_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 
 class WebsiteAnalyzer:
@@ -50,6 +59,16 @@ class WebsiteAnalyzer:
             )
 
         self.client = Anthropic(api_key=self.api_key)
+
+        # Setup Jinja2 template environment
+        templates_dir = Path(__file__).parent / 'templates'
+        if templates_dir.exists():
+            self.jinja_env = Environment(
+                loader=FileSystemLoader(str(templates_dir)),
+                autoescape=select_autoescape(['html', 'xml'])
+            )
+        else:
+            self.jinja_env = None
 
     def analyze(self, url: str) -> Dict:
         """
@@ -383,6 +402,151 @@ Summary:"""
         except Exception as e:
             raise Exception(f"Failed to generate PDF: {str(e)}")
 
+    def _encode_image_to_base64(self, image_path: str) -> Optional[str]:
+        """
+        Encode image file to base64 for embedding in HTML.
+
+        Args:
+            image_path: Path to the image file
+
+        Returns:
+            Base64 encoded image string or None if file not found
+        """
+        try:
+            path = Path(image_path)
+            if not path.exists():
+                return None
+
+            with open(path, 'rb') as f:
+                image_data = f.read()
+                return base64.b64encode(image_data).decode('utf-8')
+        except Exception:
+            return None
+
+    def generate_pdf_playwright(
+        self,
+        result: Dict,
+        is_audit: bool = False,
+        output_path: Optional[str] = None,
+        logo_path: Optional[str] = None,
+        company_name: Optional[str] = None,
+        company_details: Optional[str] = None,
+        use_dark_theme: bool = False,
+        audit_data: Optional[Dict] = None
+    ) -> str:
+        """
+        Generate a professional HTML/CSS PDF using Playwright for pixel-perfect rendering.
+
+        Args:
+            result: Dictionary returned from analyze()
+            is_audit: True for audit report, False for summary
+            output_path: Optional custom output path
+            logo_path: Optional path to logo image file or URL
+            company_name: Optional company name for header
+            company_details: Optional company contact details for footer
+            use_dark_theme: Whether to use dark theme styling
+            audit_data: Optional dictionary with audit-specific data (categories, recommendations, strengths)
+
+        Returns:
+            Path to the generated PDF file
+        """
+        if not PLAYWRIGHT_AVAILABLE:
+            raise Exception("Playwright not installed. Install with: pip install playwright")
+
+        if self.jinja_env is None:
+            raise Exception("Template directory not found. Cannot generate HTML-based PDF.")
+
+        # Generate filename from URL if not provided
+        if not output_path:
+            url = result['url']
+            domain = urlparse(url).netloc or 'website'
+            domain = re.sub(r'[^a-z0-9-]', '-', domain.lower())
+            domain = re.sub(r'-+', '-', domain).strip('-')
+
+            if is_audit:
+                output_path = f"{domain}-webaudit-report.pdf"
+            else:
+                output_path = f"{domain}-summary-report.pdf"
+
+        # Select template based on type and theme
+        if is_audit:
+            template_name = 'audit_report_dark.html' if use_dark_theme else 'audit_report_light.html'
+        else:
+            template_name = 'summary_report_dark.html' if use_dark_theme else 'summary_report_light.html'
+
+        try:
+            template = self.jinja_env.get_template(template_name)
+        except Exception as e:
+            raise Exception(f"Template not found: {template_name}. Error: {str(e)}")
+
+        # Prepare context data for template
+        context = {
+            'url': result['url'],
+            'title': result.get('title', 'Website Analysis'),
+            'page_title': result.get('title'),
+            'meta_description': result.get('meta_description'),
+            'summary': result.get('summary'),
+            'report_date': datetime.now().strftime('%B %d, %Y'),
+            'timestamp': datetime.now().strftime('%B %d, %Y at %I:%M %p'),
+            'company_name': company_name,
+            'company_details': company_details,
+        }
+
+        # Add logos as base64 encoded data
+        websler_logo_path = Path(__file__).parent / 'weblser_logo.png'
+        jumoki_logo_path = Path(__file__).parent / 'jumoki_coloured_transparent_bg.png'
+
+        if websler_logo_path.exists():
+            context['websler_logo'] = self._encode_image_to_base64(str(websler_logo_path))
+        if jumoki_logo_path.exists():
+            context['jumoki_logo'] = self._encode_image_to_base64(str(jumoki_logo_path))
+
+        # Add audit-specific data if provided
+        if is_audit and audit_data:
+            context.update({
+                'overall_score': audit_data.get('overall_score', 0),
+                'categories': audit_data.get('categories', []),
+                'recommendations': audit_data.get('recommendations', []),
+                'strengths': audit_data.get('strengths', []),
+            })
+
+        # Render HTML template
+        html_content = template.render(context)
+
+        # Generate PDF using Playwright
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page(
+                    viewport={'width': 1024, 'height': 1280}
+                )
+
+                # Set the HTML content
+                page.set_content(html_content)
+
+                # Wait for any images to load
+                page.wait_for_load_state('networkidle')
+
+                # Generate PDF
+                page.pdf(
+                    path=output_path,
+                    format='A4',
+                    margin={
+                        'top': '0.5in',
+                        'right': '0.5in',
+                        'bottom': '0.5in',
+                        'left': '0.5in'
+                    },
+                    print_background=True
+                )
+
+                browser.close()
+
+            return output_path
+
+        except Exception as e:
+            raise Exception(f"Failed to generate PDF with Playwright: {str(e)}")
+
 
 def main():
     """Main entry point for the CLI."""
@@ -426,6 +590,22 @@ def main():
         '--company-details',
         help='Company contact details for PDF footer (address, phone, email, etc.)'
     )
+    parser.add_argument(
+        '--theme',
+        choices=['light', 'dark'],
+        default='light',
+        help='PDF theme: light or dark (default: light)'
+    )
+    parser.add_argument(
+        '--use-playwright',
+        action='store_true',
+        help='Use Playwright for professional HTML/CSS PDF rendering instead of ReportLab'
+    )
+    parser.add_argument(
+        '--audit',
+        action='store_true',
+        help='Generate audit report instead of summary report'
+    )
 
     args = parser.parse_args()
 
@@ -444,14 +624,28 @@ def main():
     elif args.pdf:
         if result['success']:
             try:
-                pdf_path = analyzer.generate_pdf(
-                    result,
-                    output_path=args.output,
-                    logo_path=args.logo,
-                    company_name=args.company_name,
-                    company_details=args.company_details
-                )
-                print(f"PDF report generated: {pdf_path}")
+                # Use Playwright for HTML/CSS PDF if requested
+                if args.use_playwright:
+                    pdf_path = analyzer.generate_pdf_playwright(
+                        result,
+                        is_audit=args.audit,
+                        output_path=args.output,
+                        logo_path=args.logo,
+                        company_name=args.company_name,
+                        company_details=args.company_details,
+                        use_dark_theme=(args.theme == 'dark')
+                    )
+                    print(f"Professional PDF report generated (Playwright): {pdf_path}")
+                else:
+                    # Fall back to ReportLab for classic PDF
+                    pdf_path = analyzer.generate_pdf(
+                        result,
+                        output_path=args.output,
+                        logo_path=args.logo,
+                        company_name=args.company_name,
+                        company_details=args.company_details
+                    )
+                    print(f"PDF report generated (ReportLab): {pdf_path}")
             except Exception as e:
                 print(f"Error generating PDF: {str(e)}", file=sys.stderr)
                 sys.exit(1)

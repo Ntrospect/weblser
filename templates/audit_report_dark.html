@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAudit Pro Report - {{ title or 'Website Audit' }}</title>
+    <link rel="stylesheet" href="report_styles.css">
+    <style>
+        /* Inline styles for PDF generation - Dark Theme */
+        body {
+            background-color: #0F1419;
+            color: #FFFFFF;
+        }
+
+        .report-container {
+            background-color: #1A1F2E;
+            padding: 0.75in;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="report-container">
+        <!-- HEADER WITH LOGOS -->
+        <div class="report-header">
+            <div class="header-logos">
+                {% if websler_logo %}
+                <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler Logo" class="header-logo websler-logo">
+                {% endif %}
+                {% if jumoki_logo %}
+                <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki Logo" class="header-logo jumoki-logo">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- COMPANY INFO -->
+        {% if company_name %}
+        <div class="company-info">
+            <div class="company-name">{{ company_name }}</div>
+            <div class="company-tagline">Professional Website Audit & Analysis</div>
+        </div>
+        {% endif %}
+
+        <!-- REPORT TITLE -->
+        <div class="content-section">
+            <h1 class="report-title">WebAudit Pro Report</h1>
+            <p class="section-subheading">Comprehensive 10-Point Website Evaluation</p>
+        </div>
+
+        <!-- URL METADATA -->
+        <div class="metadata-section spacing-medium">
+            <div class="metadata-label">Audited Website</div>
+            <div class="metadata-value">{{ url }}</div>
+        </div>
+
+        <!-- OVERALL SCORE -->
+        <div class="content-section spacing-large" style="text-align: center; page-break-inside: avoid;">
+            <div class="audit-score-label">Overall Score</div>
+            <div class="audit-score">
+                {{ overall_score }}<span class="score-out-of">/10</span>
+            </div>
+            <div style="text-align: center; margin-top: 0.2in;">
+                {% if overall_score >= 8 %}
+                <span class="score-indicator score-excellent">Excellent</span>
+                {% elif overall_score >= 6 %}
+                <span class="score-indicator score-good">Good</span>
+                {% elif overall_score >= 4 %}
+                <span class="score-indicator score-fair">Fair</span>
+                {% else %}
+                <span class="score-indicator score-poor">Needs Improvement</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PAGE TITLE & DESCRIPTION -->
+        {% if page_title %}
+        <div class="content-section">
+            <div class="section-heading">Page Title</div>
+            <div class="summary-content">{{ page_title }}</div>
+        </div>
+        {% endif %}
+
+        {% if meta_description %}
+        <div class="content-section">
+            <div class="section-heading">Meta Description</div>
+            <div class="summary-content">{{ meta_description }}</div>
+        </div>
+        {% endif %}
+
+        <!-- DETAILED SCORES TABLE -->
+        <div class="content-section spacing-large">
+            <div class="section-heading">Detailed Evaluation Scores</div>
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>Audit Category</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="score-metric">{{ category.name }}</td>
+                        <td class="score-value">{{ category.score }}/10</td>
+                        <td>
+                            {% if category.score >= 8 %}
+                            <span class="score-indicator score-excellent">Pass</span>
+                            {% elif category.score >= 6 %}
+                            <span class="score-indicator score-good">Good</span>
+                            {% elif category.score >= 4 %}
+                            <span class="score-indicator score-fair">Fair</span>
+                            {% else %}
+                            <span class="score-indicator score-poor">Fail</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SUMMARY ANALYSIS -->
+        {% if summary %}
+        <div class="content-section spacing-large">
+            <div class="section-heading">Executive Summary</div>
+            <div class="summary-content">
+                <p>{{ summary }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- RECOMMENDATIONS -->
+        {% if recommendations %}
+        <div class="content-section spacing-large page-break">
+            <div class="section-heading">Recommendations & Action Items</div>
+            <div class="recommendations-list">
+                {% for rec in recommendations %}
+                <div class="recommendation-item">
+                    <div style="margin-bottom: 0.08in;">
+                        {% if rec.priority == 'high' %}
+                        <span class="recommendation-priority priority-high">High Priority</span>
+                        {% elif rec.priority == 'medium' %}
+                        <span class="recommendation-priority priority-medium">Medium Priority</span>
+                        {% else %}
+                        <span class="recommendation-priority priority-low">Low Priority</span>
+                        {% endif %}
+                        <span class="recommendation-title" style="margin-left: 0.1in;">{{ rec.title }}</span>
+                    </div>
+                    <div class="recommendation-description">{{ rec.description }}</div>
+                    {% if rec.impact %}
+                    <div class="recommendation-description" style="margin-top: 0.05in; font-style: italic;">
+                        <strong>Impact:</strong> {{ rec.impact }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- STRENGTHS -->
+        {% if strengths %}
+        <div class="content-section spacing-large">
+            <div class="section-heading">Notable Strengths</div>
+            <div class="recommendations-list">
+                {% for strength in strengths %}
+                <div class="recommendation-item" style="border-left-color: #10B981;">
+                    <div class="recommendation-title" style="color: #10B981;">✓ {{ strength.title }}</div>
+                    <div class="recommendation-description">{{ strength.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ANALYSIS METADATA -->
+        <div class="content-section spacing-large">
+            <div class="section-heading">Report Details</div>
+            <table>
+                <tr>
+                    <td style="font-weight: 600;">Analysis Type</td>
+                    <td>WebAudit Pro - Full Evaluation</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 600;">Report Date</td>
+                    <td>{{ report_date }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 600;">AI Analysis Engine</td>
+                    <td>Claude 3.5 Sonnet</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 600;">Evaluation Framework</td>
+                    <td>10-Point WebAudit Pro Standard</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- NEXT STEPS -->
+        <div class="content-section spacing-large">
+            <div class="section-heading">Next Steps</div>
+            <div class="summary-content" style="background-color: #252D3D; border-left: 4px solid #2052b6;">
+                <p><strong>Prioritize:</strong> Start with the high-priority recommendations to achieve the most significant improvements quickly.</p>
+                <p><strong>Implement:</strong> Address medium-priority items in the next 2-4 weeks to steadily improve your score.</p>
+                <p><strong>Schedule Follow-up:</strong> Re-run this audit in 30 days to measure progress and track improvements.</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="report-footer">
+            <div class="footer-divider"></div>
+            {% if company_details %}
+            <div class="contact-info">
+                {{ company_details }}
+            </div>
+            {% else %}
+            <div class="contact-info">
+                <div class="contact-detail">Generated by Websler Pro - Professional Website Analysis</div>
+                <div class="contact-detail" style="margin-top: 0.1in; font-size: 8pt;">
+                    For more information or to re-run this audit, visit websler.com
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

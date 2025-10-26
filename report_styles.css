@@ -1,0 +1,562 @@
+/* ============================================
+   Websler Pro - PDF Report Styling System
+   Jumoki/Websler Professional Branding
+   ============================================ */
+
+/* ============================================
+   IMPORTS & FONT DEFINITIONS
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap');
+
+/* Print optimization */
+@media print {
+  body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  page {
+    margin: 0;
+  }
+}
+
+/* ============================================
+   LIGHT THEME (Default)
+   ============================================ */
+
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #F4F3F2;
+  --bg-lighter: #FFFFFF;
+  --text-primary: #0B1220;
+  --text-secondary: #6B7280;
+  --accent-primary: #7c3aed;
+  --accent-secondary: #2052b6;
+  --border-color: #E5E7EB;
+  --card-bg: #F3F4F6;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+}
+
+/* Light theme specific overrides */
+body.light-theme {
+  --bg-primary: #F4F3F2;
+  --bg-lighter: #FFFFFF;
+  --text-primary: #0B1220;
+  --text-secondary: #6B7280;
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+
+body.dark-theme {
+  --bg-primary: #0F1419;
+  --bg-lighter: #1A1F2E;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B5C1;
+  --border-color: #3A4452;
+  --card-bg: #252D3D;
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-lighter);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ============================================
+   PAGE LAYOUT
+   ============================================ */
+
+.report-container {
+  width: 100%;
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.75in;
+  background-color: var(--bg-lighter);
+}
+
+/* ============================================
+   HEADER / BRANDING SECTION
+   ============================================ */
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5in;
+  padding-bottom: 0.3in;
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+.header-logos {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.header-logo {
+  max-height: 0.6in;
+  width: auto;
+}
+
+.websler-logo {
+  max-width: 1.2in;
+}
+
+.jumoki-logo {
+  max-width: 1.3in;
+}
+
+.company-info {
+  text-align: center;
+  margin-bottom: 0.4in;
+}
+
+.company-name {
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 0.1in;
+}
+
+.company-tagline {
+  font-size: 10pt;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ============================================
+   REPORT TITLE & METADATA
+   ============================================ */
+
+.report-title {
+  font-size: 28pt;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.3in;
+  line-height: 1.2;
+}
+
+.report-subtitle {
+  font-size: 14pt;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  margin-bottom: 0.2in;
+}
+
+.metadata-section {
+  background-color: var(--card-bg);
+  border-left: 4px solid var(--accent-primary);
+  padding: 0.25in;
+  margin: 0.3in 0;
+  border-radius: 4px;
+}
+
+.metadata-label {
+  font-weight: 600;
+  font-size: 10pt;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
+.metadata-value {
+  font-size: 11pt;
+  color: var(--text-primary);
+  word-break: break-word;
+  margin-top: 0.05in;
+}
+
+/* ============================================
+   SECTIONS & CONTENT
+   ============================================ */
+
+.content-section {
+  margin-bottom: 0.4in;
+  page-break-inside: avoid;
+}
+
+.section-heading {
+  font-size: 16pt;
+  font-weight: 700;
+  color: var(--accent-primary);
+  border-bottom: 2px solid var(--accent-secondary);
+  padding-bottom: 0.1in;
+  margin-bottom: 0.25in;
+  margin-top: 0.3in;
+}
+
+.section-subheading {
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  margin-top: 0.2in;
+  margin-bottom: 0.15in;
+}
+
+/* ============================================
+   SUMMARY SPECIFIC STYLES
+   ============================================ */
+
+.summary-content {
+  background-color: var(--bg-primary);
+  padding: 0.3in;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  line-height: 1.8;
+  font-size: 11pt;
+  color: var(--text-primary);
+}
+
+.summary-badge {
+  display: inline-block;
+  background-color: var(--accent-primary);
+  color: white;
+  padding: 0.1in 0.2in;
+  border-radius: 20px;
+  font-size: 9pt;
+  font-weight: 600;
+  margin-bottom: 0.2in;
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
+/* ============================================
+   AUDIT SPECIFIC STYLES
+   ============================================ */
+
+.audit-score {
+  font-size: 42pt;
+  font-weight: 800;
+  color: var(--accent-primary);
+  text-align: center;
+  margin: 0.3in 0;
+}
+
+.audit-score-label {
+  font-size: 12pt;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 0.1in;
+}
+
+.score-out-of {
+  font-size: 20pt;
+  color: var(--text-secondary);
+}
+
+/* Score table for audit results */
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.25in 0;
+  background-color: var(--card-bg);
+}
+
+.score-table thead {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.score-table th {
+  padding: 0.15in;
+  text-align: left;
+  font-weight: 600;
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
+.score-table td {
+  padding: 0.12in 0.15in;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 10pt;
+}
+
+.score-table tr:nth-child(even) {
+  background-color: var(--bg-primary);
+}
+
+.score-metric {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.score-value {
+  text-align: right;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+/* Score indicator badges */
+.score-indicator {
+  display: inline-block;
+  padding: 0.05in 0.1in;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 9pt;
+  text-align: center;
+  min-width: 0.4in;
+}
+
+.score-excellent {
+  background-color: var(--success);
+  color: white;
+}
+
+.score-good {
+  background-color: #06B6D4;
+  color: white;
+}
+
+.score-fair {
+  background-color: var(--warning);
+  color: white;
+}
+
+.score-poor {
+  background-color: var(--error);
+  color: white;
+}
+
+/* ============================================
+   RECOMMENDATIONS & LIST ITEMS
+   ============================================ */
+
+.recommendations-list {
+  margin: 0.2in 0;
+}
+
+.recommendation-item {
+  background-color: var(--bg-primary);
+  padding: 0.2in;
+  margin: 0.1in 0;
+  border-left: 3px solid var(--accent-secondary);
+  border-radius: 3px;
+  page-break-inside: avoid;
+}
+
+.recommendation-priority {
+  display: inline-block;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 0.05in 0.1in;
+  border-radius: 3px;
+  margin-right: 0.1in;
+  text-transform: uppercase;
+}
+
+.priority-high {
+  background-color: var(--error);
+  color: white;
+}
+
+.priority-medium {
+  background-color: var(--warning);
+  color: white;
+}
+
+.priority-low {
+  background-color: var(--success);
+  color: white;
+}
+
+.recommendation-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 11pt;
+  margin-bottom: 0.05in;
+}
+
+.recommendation-description {
+  font-size: 10pt;
+  color: var(--text-secondary);
+  margin-left: 0.15in;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.2in 0;
+  background-color: var(--card-bg);
+}
+
+thead {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+th {
+  padding: 0.12in;
+  text-align: left;
+  font-weight: 600;
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
+td {
+  padding: 0.1in 0.12in;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 10pt;
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-primary);
+}
+
+/* ============================================
+   VISUALIZATIONS & CHARTS
+   ============================================ */
+
+.chart-container {
+  margin: 0.3in 0;
+  page-break-inside: avoid;
+  text-align: center;
+}
+
+.chart-title {
+  font-size: 12pt;
+  font-weight: 600;
+  margin-bottom: 0.15in;
+  color: var(--text-primary);
+}
+
+.chart-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+/* ============================================
+   FOOTER & CONTACT INFO
+   ============================================ */
+
+.report-footer {
+  margin-top: 0.5in;
+  padding-top: 0.25in;
+  border-top: 1px solid var(--border-color);
+  font-size: 9pt;
+  color: var(--text-secondary);
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+.footer-divider {
+  width: 60%;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.15in auto 0.15in;
+}
+
+.contact-info {
+  text-align: center;
+  line-height: 1.5;
+  font-size: 10pt;
+  color: var(--text-secondary);
+}
+
+.contact-detail {
+  margin: 0.05in 0;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.text-accent {
+  color: var(--accent-primary);
+}
+
+.text-secondary-accent {
+  color: var(--accent-secondary);
+}
+
+.spacing-small {
+  margin-bottom: 0.1in;
+}
+
+.spacing-medium {
+  margin-bottom: 0.2in;
+}
+
+.spacing-large {
+  margin-bottom: 0.3in;
+}
+
+.page-break {
+  page-break-after: always;
+}
+
+.no-break {
+  page-break-inside: avoid;
+}
+
+/* ============================================
+   PRINT MEDIA ADJUSTMENTS
+   ============================================ */
+
+@media print {
+  body {
+    background-color: var(--bg-lighter);
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a {
+    color: var(--accent-secondary);
+    text-decoration: underline;
+  }
+
+  .report-container {
+    max-width: 100%;
+    padding: 0.75in;
+    box-shadow: none;
+  }
+}
