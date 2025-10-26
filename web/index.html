@@ -109,7 +109,7 @@
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(90deg, #9018AD 0%, #2E68DA 100%);
             color: white;
             padding: 6rem 2rem;
             text-align: center;
@@ -507,6 +507,21 @@
                 font-size: 2rem;
             }
 
+            /* Hero grid - stack on mobile */
+            .hero-container > div {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+            }
+
+            .hero-robot {
+                order: -1;
+            }
+
+            /* Mobile robot size - 50% smaller */
+            .hero-robot img {
+                width: 160px !important;
+            }
+
             .audit-grid {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -576,11 +591,20 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-container">
-            <h1>Professional Website Analysis at Your Fingertips</h1>
-            <p>WebAudit Pro is an AI-powered tool that analyzes websites and delivers comprehensive audits with intelligent insights. Get actionable data to improve your web presence.</p>
-            <div class="hero-buttons">
-                <a href="#download" class="btn-primary">Download for Windows</a>
-                <a href="#download" class="btn-secondary">View on TestFlight</a>
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem; align-items: center;">
+                <!-- Left Column: Text Content -->
+                <div class="hero-content">
+                    <h1>Professional Website Analysis at Your Fingertips</h1>
+                    <p>WebAudit Pro is an AI-powered tool that analyzes websites and delivers comprehensive audits with intelligent insights. Get actionable data to improve your web presence.</p>
+                    <div class="hero-buttons">
+                        <a href="#download" class="btn-primary">Download for Windows</a>
+                        <a href="#download" class="btn-secondary">View on TestFlight</a>
+                    </div>
+                </div>
+                <!-- Right Column: Robot Logo -->
+                <div class="hero-robot" style="display: flex; justify-content: center; align-items: center;">
+                    <img src="./websler_pro_robot.svg" alt="WebAudit Pro Robot" style="width: 320px; height: auto; max-width: 100%;">
+                </div>
             </div>
         </div>
     </section>
