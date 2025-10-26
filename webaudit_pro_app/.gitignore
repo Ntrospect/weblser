@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Security: Never commit secrets or credentials
+.env
+.env.local
+.env.*.local
+*secret*
+*.txt
+.mcp.json
+*.key
+*.pem
+credentials.json
+auth-tokens.json
+firebase-key.json

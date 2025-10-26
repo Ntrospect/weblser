@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,11 +13,23 @@ import 'screens/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
+  // Load environment variables from .env file
+  await dotenv.load(fileName: '.env');
+
+  // Initialize Supabase with credentials from environment variables
+  final supabaseUrl = dotenv.env['SUPABASE_URL'];
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+  if (supabaseUrl == null || supabaseAnonKey == null) {
+    throw Exception(
+      'Missing Supabase credentials in .env file. '
+      'Please copy .env.example to .env and add your credentials.',
+    );
+  }
+
   await Supabase.initialize(
-    url: 'https://vwnbhsmfpxdfcvqnzddc.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3bmJoc21mcHhkZmN2cW56ZGRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyODUzMTAsImV4cCI6MjA3Njg2MTMxMH0.2jZlqeawew5BjkqqPlab7KU0bmu9bbZMQl5Q_qaBpKA',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
   runApp(const MyApp());

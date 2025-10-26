@@ -8,6 +8,7 @@ import 'dart:async';
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
 import '../models/website_analysis.dart';
+import '../utils/env_loader.dart';
 
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -15,10 +16,9 @@ class ApiService extends ChangeNotifier {
   String? _authToken;
 
   static const String _apiUrlKey = 'api_url';
-  static const String _defaultApiUrl = 'http://140.99.254.83:8000';
 
   ApiService(this._prefs) {
-    _apiUrl = _prefs.getString(_apiUrlKey) ?? _defaultApiUrl;
+    _apiUrl = _prefs.getString(_apiUrlKey) ?? EnvConfig.getApiUrl();
     _authToken = _prefs.getString('auth_token');
   }
 

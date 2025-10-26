@@ -65,6 +65,9 @@ dependencies:
   # HTTP server for auth callback handling
   shelf: ^1.4.1
 
+  # Environment variables for secure configuration
+  flutter_dotenv: ^5.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
