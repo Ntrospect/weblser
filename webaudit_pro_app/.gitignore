@@ -48,8 +48,9 @@ app.*.map.json
 .env
 .env.local
 .env.*.local
-*secret*
-*.txt
+*secret*.json
+*secret*.txt
+*secret*.key
 .mcp.json
 *.key
 *.pem
