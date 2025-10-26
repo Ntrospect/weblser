@@ -432,6 +432,12 @@
             margin-bottom: 0.25rem;
         }
 
+        .platform-icon {
+            height: 24px;
+            width: 24px;
+            object-fit: contain;
+        }
+
         /* Footer */
         footer {
             background: var(--text-dark);
@@ -745,11 +751,11 @@
 
             <div class="download-buttons">
                 <a href="https://github.com/Ntrospect/websler/releases/latest" class="download-button" target="_blank">
-                    <span class="platform-label">Windows</span>
+                    <img src="./windows-applications.svg" alt="Windows" class="platform-icon">
                     <strong>Download Installer</strong>
                 </a>
                 <a href="https://testflight.apple.com" class="download-button" target="_blank">
-                    <span class="platform-label">iPhone & iPad</span>
+                    <img src="./ios.svg" alt="iPhone & iPad" class="platform-icon">
                     <strong>Join TestFlight</strong>
                 </a>
             </div>
