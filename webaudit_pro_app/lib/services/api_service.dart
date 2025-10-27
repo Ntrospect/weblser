@@ -115,6 +115,8 @@ class ApiService extends ChangeNotifier {
     String? logoUrl,
     String? companyName,
     String? companyDetails,
+    String template = 'jumoki',
+    String theme = 'light',
   }) async {
     try {
       final response = await http.post(
@@ -125,6 +127,8 @@ class ApiService extends ChangeNotifier {
           'logo_url': logoUrl,
           'company_name': companyName,
           'company_details': companyDetails,
+          'template': template,
+          'theme': theme,
         }),
       ).timeout(const Duration(seconds: 30));
 

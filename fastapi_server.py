@@ -55,6 +55,8 @@ class PDFRequest(BaseModel):
     logo_url: Optional[str] = None
     company_name: Optional[str] = None
     company_details: Optional[str] = None
+    template: str = 'jumoki'  # Template set: 'default' or 'jumoki'
+    theme: str = 'light'      # Theme: 'light' or 'dark'
 
 
 class HistoryResponse(BaseModel):
@@ -341,12 +343,15 @@ async def generate_pdf(request: PDFRequest):
 
         # Generate PDF to BytesIO
         pdf_path = f"/tmp/{request.analysis_id}.pdf"
-        analyzer.generate_pdf(
+        analyzer.generate_pdf_playwright(
             result,
+            is_audit=False,
             output_path=pdf_path,
             logo_path=request.logo_url,
             company_name=request.company_name,
-            company_details=request.company_details
+            company_details=request.company_details,
+            use_dark_theme=(request.theme == 'dark'),
+            template=request.template
         )
 
         # Return PDF file
