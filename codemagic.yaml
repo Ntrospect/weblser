@@ -2,6 +2,7 @@ workflows:
   ios-workflow:
     name: iOS Workflow - TestFlight
     max_build_duration: 120
+    # Cache invalidation: Force fresh workflow configuration (Oct 27 update)
     instance_type: mac_mini_m2
     environment:
       flutter: 3.35.6
