@@ -405,6 +405,7 @@ Summary:"""
     def _encode_image_to_base64(self, image_path: str) -> Optional[str]:
         """
         Encode image file to base64 for embedding in HTML.
+        Handles both PNG/JPG (binary) and SVG (text) files.
 
         Args:
             image_path: Path to the image file
@@ -417,10 +418,20 @@ Summary:"""
             if not path.exists():
                 return None
 
-            with open(path, 'rb') as f:
-                image_data = f.read()
-                return base64.b64encode(image_data).decode('utf-8')
-        except Exception:
+            # Check if it's an SVG file
+            if path.suffix.lower() == '.svg':
+                # Read SVG as text and base64 encode (works better with Playwright)
+                with open(path, 'r', encoding='utf-8') as f:
+                    svg_content = f.read()
+                    # Base64 encode the SVG for reliable PDF rendering
+                    return base64.b64encode(svg_content.encode('utf-8')).decode('utf-8')
+            else:
+                # Binary image file (PNG, JPG, etc.)
+                with open(path, 'rb') as f:
+                    image_data = f.read()
+                    return base64.b64encode(image_data).decode('utf-8')
+        except Exception as e:
+            print(f"Error encoding image {image_path}: {str(e)}")
             return None
 
     def generate_pdf_playwright(
@@ -432,7 +443,8 @@ Summary:"""
         company_name: Optional[str] = None,
         company_details: Optional[str] = None,
         use_dark_theme: bool = False,
-        audit_data: Optional[Dict] = None
+        audit_data: Optional[Dict] = None,
+        template: str = 'default'
     ) -> str:
         """
         Generate a professional HTML/CSS PDF using Playwright for pixel-perfect rendering.
@@ -446,6 +458,7 @@ Summary:"""
             company_details: Optional company contact details for footer
             use_dark_theme: Whether to use dark theme styling
             audit_data: Optional dictionary with audit-specific data (categories, recommendations, strengths)
+            template: Template set to use ('default' or 'jumoki')
 
         Returns:
             Path to the generated PDF file
@@ -468,11 +481,12 @@ Summary:"""
             else:
                 output_path = f"{domain}-summary-report.pdf"
 
-        # Select template based on type and theme
+        # Select template based on type, theme, and template set
+        template_prefix = 'jumoki_' if template == 'jumoki' else ''
         if is_audit:
-            template_name = 'audit_report_dark.html' if use_dark_theme else 'audit_report_light.html'
+            template_name = f'{template_prefix}audit_report_dark.html' if use_dark_theme else f'{template_prefix}audit_report_light.html'
         else:
-            template_name = 'summary_report_dark.html' if use_dark_theme else 'summary_report_light.html'
+            template_name = f'{template_prefix}summary_report_dark.html' if use_dark_theme else f'{template_prefix}summary_report_light.html'
 
         try:
             template = self.jinja_env.get_template(template_name)
@@ -493,8 +507,8 @@ Summary:"""
         }
 
         # Add logos as base64 encoded data
-        websler_logo_path = Path(__file__).parent / 'weblser_logo.png'
-        jumoki_logo_path = Path(__file__).parent / 'jumoki_coloured_transparent_bg.png'
+        websler_logo_path = Path(__file__).parent / 'websler_pro.svg'
+        jumoki_logo_path = Path(__file__).parent / 'jumoki_logov3.svg'
 
         if websler_logo_path.exists():
             context['websler_logo'] = self._encode_image_to_base64(str(websler_logo_path))
@@ -606,6 +620,12 @@ def main():
         action='store_true',
         help='Generate audit report instead of summary report'
     )
+    parser.add_argument(
+        '--template',
+        choices=['default', 'jumoki'],
+        default='default',
+        help='Template set to use: default (standard templates) or jumoki (Jumoki-branded templates) (default: default)'
+    )
 
     args = parser.parse_args()
 
@@ -633,7 +653,8 @@ def main():
                         logo_path=args.logo,
                         company_name=args.company_name,
                         company_details=args.company_details,
-                        use_dark_theme=(args.theme == 'dark')
+                        use_dark_theme=(args.theme == 'dark'),
+                        template=args.template
                     )
                     print(f"Professional PDF report generated (Playwright): {pdf_path}")
                 else:
