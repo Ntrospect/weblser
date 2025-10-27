@@ -48,15 +48,15 @@ workflows:
             archive
       - name: Export IPA
         script: |
-          cd weblser_app/ios
+          cd webaudit_pro_app/ios
           xcodebuild -exportArchive \
             -archivePath build/ios_build/Runner.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
             -exportPath build/ios_build/ipa \
             -allowProvisioningUpdates
     artifacts:
-      - weblser_app/build/ios_build/ipa/*.ipa
-      - weblser_app/build/ios_build/Runner.xcarchive
+      - webaudit_pro_app/build/ios_build/ipa/*.ipa
+      - webaudit_pro_app/build/ios_build/Runner.xcarchive
     publishing:
       app_store_connect:
         api_key: $AUTH_KEY
