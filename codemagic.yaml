@@ -8,7 +8,7 @@ workflows:
       groups:
         - ios-signing
       vars:
-        XCODE_WORKSPACE: "weblser_app/ios/Runner.xcworkspace"
+        XCODE_WORKSPACE: "webaudit_pro_app/ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "io.jumoki.weblser"
         APP_ID_NAME: "weblser - AI Website Analyzer"
@@ -22,21 +22,21 @@ workflows:
           dart --version
       - name: Get Flutter packages
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           pwd
           ls -la pubspec.yaml
           flutter pub get -v
       - name: Clean Flutter build cache
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           flutter clean
       - name: Build iOS App
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           flutter build ios --release --no-codesign -t lib/main.dart
       - name: Build and archive
         script: |
-          cd weblser_app/ios
+          cd webaudit_pro_app/ios
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
@@ -75,19 +75,19 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           flutter pub get -v
       - name: Build APK
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           flutter build apk --release
       - name: Build AppBundle
         script: |
-          cd weblser_app
+          cd webaudit_pro_app
           flutter build appbundle --release
     artifacts:
-      - weblser_app/build/app/outputs/flutter-apk/*.apk
-      - weblser_app/build/app/outputs/bundle/release/*.aab
+      - webaudit_pro_app/build/app/outputs/flutter-apk/*.apk
+      - webaudit_pro_app/build/app/outputs/bundle/release/*.aab
     publishing:
       google_play:
         credentials: $ANDROID_KEYSTORE_CREDENTIALS
