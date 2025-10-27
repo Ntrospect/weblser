@@ -62,8 +62,15 @@ class AuthService extends ChangeNotifier {
       _handleAuthStateChange(data.session);
     });
 
-    // Poll for callback tokens (checks every 500ms for 30 seconds)
-    _monitorCallbackToken();
+    // CRITICAL FIX: Only start monitoring if NOT already authenticated
+    // (during signup flow). Don't start for existing authenticated users
+    // as this causes unnecessary 120-second timeout on app restart.
+    if (!_authState.isAuthenticated) {
+      print('⏳ Not yet authenticated - starting email verification monitoring');
+      _monitorCallbackToken();
+    } else {
+      print('✅ Already authenticated - skipping email verification monitoring');
+    }
 
     print('✅ AuthService initialized');
   }
