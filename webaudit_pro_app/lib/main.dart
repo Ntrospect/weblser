@@ -80,9 +80,15 @@ class MyApp extends StatelessWidget {
             ),
           );
         }
-        return Scaffold(
-          backgroundColor: const Color(0xFFF6F8FF),
-          body: const Center(child: CircularProgressIndicator()),
+        // Show loading screen while initializing SharedPreferences
+        // Wrap with MaterialApp to provide Directionality context
+        return MaterialApp(
+          title: 'WebAudit Pro - Website Audit Tool',
+          theme: ThemeData(useMaterial3: true),
+          home: Scaffold(
+            backgroundColor: const Color(0xFFF6F8FF),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
         );
       },
     );
