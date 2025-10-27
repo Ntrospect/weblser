@@ -1,133 +1,188 @@
 <!DOCTYPE html>
-<html lang="en" class="dark-theme">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Summary Report - {{ title or 'Websler' }}</title>
-    <link rel="stylesheet" href="report_styles.css">
+    <title>Website Summary Report</title>
     <style>
-        /* Inline styles for PDF generation - Dark Theme */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #0F1419;
-            color: #FFFFFF;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e5e7eb;
+            background: #1f2937;
         }
-
-        .report-container {
-            background-color: #1A1F2E;
-            padding: 0.75in;
+        .container { max-width: 100%; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-height: 50px;
+            width: auto;
+            filter: brightness(1.1);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .metadata {
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .metadata-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            margin-bottom: 12px;
+            align-items: start;
+        }
+        .metadata-row:last-child { margin-bottom: 0; }
+        .metadata-label {
+            font-weight: 600;
+            color: #60a5fa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metadata-value {
+            color: #d1d5db;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        .summary-section { margin-bottom: 30px; }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f3f4f6;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .summary-box {
+            background: #2d3748;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 6px;
+            line-height: 1.8;
+            font-size: 14px;
+            color: #bfdbfe;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            padding: 30px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        .cta-box h3 { font-size: 18px; margin-bottom: 10px; }
+        .cta-box p { font-size: 13px; line-height: 1.6; margin-bottom: 15px; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #4b5563;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .footer-company {
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 5px;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #4b5563;
         }
     </style>
 </head>
-<body class="dark-theme">
-    <div class="report-container">
-        <!-- HEADER WITH LOGOS -->
-        <div class="report-header">
-            <div class="header-logos">
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
                 {% if websler_logo %}
-                <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler Logo" class="header-logo websler-logo">
+                    <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler">
                 {% endif %}
                 {% if jumoki_logo %}
-                <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki Logo" class="header-logo jumoki-logo">
+                    <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki">
                 {% endif %}
             </div>
+            <h1>Website Summary Report</h1>
+            <p class="subtitle">Professional Analysis - {{ report_date }}</p>
         </div>
 
-        <!-- COMPANY INFO -->
-        {% if company_name %}
-        <div class="company-info">
-            <div class="company-name">{{ company_name }}</div>
-            <div class="company-tagline">AI-Powered Website Analysis</div>
-        </div>
-        {% endif %}
-
-        <!-- REPORT TITLE -->
-        <div class="content-section">
-            <h1 class="report-title">Website Summary</h1>
-            <p class="section-subheading">Quick AI-Generated Analysis</p>
-        </div>
-
-        <!-- URL METADATA -->
-        <div class="metadata-section spacing-medium">
-            <div class="metadata-label">Analyzed URL</div>
-            <div class="metadata-value">{{ url }}</div>
-        </div>
-
-        <!-- PAGE TITLE -->
-        {% if page_title %}
-        <div class="content-section">
-            <div class="section-heading">Page Title</div>
-            <div class="summary-content">{{ page_title }}</div>
-        </div>
-        {% endif %}
-
-        <!-- META DESCRIPTION -->
-        {% if meta_description %}
-        <div class="content-section">
-            <div class="section-heading">Meta Description</div>
-            <div class="summary-content">{{ meta_description }}</div>
-        </div>
-        {% endif %}
-
-        <!-- SUMMARY BADGE -->
-        <div class="spacing-medium">
-            <span class="summary-badge">AI Summary</span>
-        </div>
-
-        <!-- SUMMARY CONTENT -->
-        {% if summary %}
-        <div class="content-section spacing-large">
-            <div class="summary-content">
-                <p>{{ summary }}</p>
+        <div class="metadata">
+            <div class="metadata-row">
+                <span class="metadata-label">URL</span>
+                <span class="metadata-value">{{ url }}</span>
             </div>
-        </div>
-        {% endif %}
-
-        <!-- ANALYSIS METADATA -->
-        <div class="content-section spacing-large">
-            <div class="section-heading">Analysis Details</div>
-            <table>
-                <tr>
-                    <td style="font-weight: 600;">Analysis Type</td>
-                    <td>Websler Summary</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 600;">Timestamp</td>
-                    <td>{{ timestamp }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 600;">AI Model</td>
-                    <td>Claude 3.5 Sonnet</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 600;">Status</td>
-                    <td><span class="score-indicator score-excellent">Complete</span></td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- RECOMMENDATIONS CTA -->
-        <div class="content-section spacing-large">
-            <div class="section-heading">Want More Details?</div>
-            <div class="summary-content" style="background-color: #252D3D; border-left: 4px solid #2052b6;">
-                <p>This summary was generated using Websler, our quick AI analysis tool. For a comprehensive 10-point website audit including security, performance, SEO, and accessibility analysis, upgrade to <strong>WebAudit Pro</strong>.</p>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="report-footer">
-            <div class="footer-divider"></div>
-            {% if company_details %}
-            <div class="contact-info">
-                {{ company_details }}
-            </div>
-            {% else %}
-            <div class="contact-info">
-                <div class="contact-detail">Generated by Websler Pro - AI-Powered Website Analysis</div>
-                <div class="contact-detail" style="margin-top: 0.1in; font-size: 8pt;">
-                    This report was automatically generated on {{ report_date }}
-                </div>
+            {% if title %}
+            <div class="metadata-row">
+                <span class="metadata-label">Page Title</span>
+                <span class="metadata-value">{{ title }}</span>
             </div>
             {% endif %}
+            {% if meta_description %}
+            <div class="metadata-row">
+                <span class="metadata-label">Description</span>
+                <span class="metadata-value">{{ meta_description }}</span>
+            </div>
+            {% endif %}
+            <div class="metadata-row">
+                <span class="metadata-label">Generated</span>
+                <span class="metadata-value">{{ timestamp }}</span>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h2 class="section-title">Executive Summary</h2>
+            <div class="summary-box">
+                {{ summary }}
+            </div>
+        </div>
+
+        <div class="summary-section cta-box">
+            <h3>Want a Detailed Audit?</h3>
+            <p>Upgrade to our comprehensive WebAudit Pro to get detailed recommendations across 10 key criteria.</p>
+            <div style="font-weight: 600;">Contact us for a complete audit evaluation</div>
+        </div>
+
+        <div class="footer">
+            {% if company_name %}
+            <div class="footer-company">{{ company_name }}</div>
+            {% endif %}
+            {% if company_details %}
+            <div>{{ company_details }}</div>
+            {% endif %}
+            <div>© 2025 All rights reserved.</div>
+        </div>
+
+        <div class="timestamp">
+            Generated on {{ timestamp }}
         </div>
     </div>
 </body>

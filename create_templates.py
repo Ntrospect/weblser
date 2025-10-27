@@ -1,0 +1,886 @@
+#!/usr/bin/env python3
+"""Create Playwright HTML templates for PDF generation"""
+
+import os
+from pathlib import Path
+
+templates_dir = Path(__file__).parent / 'templates'
+templates_dir.mkdir(exist_ok=True)
+
+# Summary Light Theme
+summary_light = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Summary Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #ffffff;
+        }
+        .container { max-width: 100%; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-height: 50px;
+            width: auto;
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
+        .metadata {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .metadata-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            margin-bottom: 12px;
+            align-items: start;
+        }
+        .metadata-row:last-child { margin-bottom: 0; }
+        .metadata-label {
+            font-weight: 600;
+            color: #2563eb;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metadata-value {
+            color: #374151;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        .summary-section { margin-bottom: 30px; }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2563eb;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+            border-left: 4px solid #2563eb;
+            padding: 20px;
+            border-radius: 6px;
+            line-height: 1.8;
+            font-size: 14px;
+            color: #1e40af;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            padding: 30px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        .cta-box h3 { font-size: 18px; margin-bottom: 10px; }
+        .cta-box p { font-size: 13px; line-height: 1.6; margin-bottom: 15px; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+        .footer-company {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                {% if websler_logo %}
+                    <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler">
+                {% endif %}
+                {% if jumoki_logo %}
+                    <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki">
+                {% endif %}
+            </div>
+            <h1>Website Summary Report</h1>
+            <p class="subtitle">Professional Analysis - {{ report_date }}</p>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-row">
+                <span class="metadata-label">URL</span>
+                <span class="metadata-value">{{ url }}</span>
+            </div>
+            {% if title %}
+            <div class="metadata-row">
+                <span class="metadata-label">Page Title</span>
+                <span class="metadata-value">{{ title }}</span>
+            </div>
+            {% endif %}
+            {% if meta_description %}
+            <div class="metadata-row">
+                <span class="metadata-label">Description</span>
+                <span class="metadata-value">{{ meta_description }}</span>
+            </div>
+            {% endif %}
+            <div class="metadata-row">
+                <span class="metadata-label">Generated</span>
+                <span class="metadata-value">{{ timestamp }}</span>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h2 class="section-title">Executive Summary</h2>
+            <div class="summary-box">
+                {{ summary }}
+            </div>
+        </div>
+
+        <div class="summary-section cta-box">
+            <h3>Want a Detailed Audit?</h3>
+            <p>Upgrade to our comprehensive WebAudit Pro to get detailed recommendations across 10 key criteria.</p>
+            <div style="font-weight: 600;">Contact us for a complete audit evaluation</div>
+        </div>
+
+        <div class="footer">
+            {% if company_name %}
+            <div class="footer-company">{{ company_name }}</div>
+            {% endif %}
+            {% if company_details %}
+            <div>{{ company_details }}</div>
+            {% endif %}
+            <div>© 2025 All rights reserved.</div>
+        </div>
+
+        <div class="timestamp">
+            Generated on {{ timestamp }}
+        </div>
+    </div>
+</body>
+</html>"""
+
+# Summary Dark Theme
+summary_dark = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Summary Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e5e7eb;
+            background: #1f2937;
+        }
+        .container { max-width: 100%; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-height: 50px;
+            width: auto;
+            filter: brightness(1.1);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .metadata {
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .metadata-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            margin-bottom: 12px;
+            align-items: start;
+        }
+        .metadata-row:last-child { margin-bottom: 0; }
+        .metadata-label {
+            font-weight: 600;
+            color: #60a5fa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metadata-value {
+            color: #d1d5db;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        .summary-section { margin-bottom: 30px; }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f3f4f6;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .summary-box {
+            background: #2d3748;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 6px;
+            line-height: 1.8;
+            font-size: 14px;
+            color: #bfdbfe;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            padding: 30px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        .cta-box h3 { font-size: 18px; margin-bottom: 10px; }
+        .cta-box p { font-size: 13px; line-height: 1.6; margin-bottom: 15px; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #4b5563;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .footer-company {
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 5px;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                {% if websler_logo %}
+                    <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler">
+                {% endif %}
+                {% if jumoki_logo %}
+                    <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki">
+                {% endif %}
+            </div>
+            <h1>Website Summary Report</h1>
+            <p class="subtitle">Professional Analysis - {{ report_date }}</p>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-row">
+                <span class="metadata-label">URL</span>
+                <span class="metadata-value">{{ url }}</span>
+            </div>
+            {% if title %}
+            <div class="metadata-row">
+                <span class="metadata-label">Page Title</span>
+                <span class="metadata-value">{{ title }}</span>
+            </div>
+            {% endif %}
+            {% if meta_description %}
+            <div class="metadata-row">
+                <span class="metadata-label">Description</span>
+                <span class="metadata-value">{{ meta_description }}</span>
+            </div>
+            {% endif %}
+            <div class="metadata-row">
+                <span class="metadata-label">Generated</span>
+                <span class="metadata-value">{{ timestamp }}</span>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h2 class="section-title">Executive Summary</h2>
+            <div class="summary-box">
+                {{ summary }}
+            </div>
+        </div>
+
+        <div class="summary-section cta-box">
+            <h3>Want a Detailed Audit?</h3>
+            <p>Upgrade to our comprehensive WebAudit Pro to get detailed recommendations across 10 key criteria.</p>
+            <div style="font-weight: 600;">Contact us for a complete audit evaluation</div>
+        </div>
+
+        <div class="footer">
+            {% if company_name %}
+            <div class="footer-company">{{ company_name }}</div>
+            {% endif %}
+            {% if company_details %}
+            <div>{{ company_details }}</div>
+            {% endif %}
+            <div>© 2025 All rights reserved.</div>
+        </div>
+
+        <div class="timestamp">
+            Generated on {{ timestamp }}
+        </div>
+    </div>
+</body>
+</html>"""
+
+# Audit Light Theme
+audit_light = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAudit Pro Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #ffffff;
+        }
+        .container { max-width: 100%; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-height: 50px;
+            width: auto;
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        .metadata {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .metadata-label {
+            font-weight: 600;
+            color: #2563eb;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .metadata-value {
+            color: #374151;
+            font-size: 13px;
+        }
+        .overall-score {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .score-number {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #2563eb;
+        }
+        .scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .scores-table thead {
+            background: #2563eb;
+            color: white;
+        }
+        .scores-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .scores-table td {
+            padding: 12px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+        .scores-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .list-item {
+            margin-bottom: 12px;
+            padding-left: 20px;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            padding: 30px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .cta-box h3 { font-size: 18px; margin-bottom: 10px; }
+        .cta-box p { font-size: 13px; line-height: 1.6; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                {% if websler_logo %}
+                    <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler">
+                {% endif %}
+                {% if jumoki_logo %}
+                    <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki">
+                {% endif %}
+            </div>
+            <h1>WebAudit Pro Report</h1>
+            <p class="subtitle">Comprehensive 10-Point Website Evaluation</p>
+        </div>
+
+        <div class="metadata">
+            <div>
+                <div class="metadata-label">Website URL</div>
+                <div class="metadata-value">{{ url }}</div>
+            </div>
+            <div>
+                <div class="metadata-label">Audit Date</div>
+                <div class="metadata-value">{{ report_date }}</div>
+            </div>
+            <div>
+                <div class="metadata-label">Overall Score</div>
+                <div class="metadata-value" style="color: #2563eb; font-weight: 600;">{{ overall_score|round(1) }}/10</div>
+            </div>
+        </div>
+
+        <div class="overall-score">
+            <div class="score-number">{{ overall_score|round(1) }}</div>
+            <div style="font-size: 16px; font-weight: 500;">Overall Website Score</div>
+        </div>
+
+        <div style="margin-bottom: 40px;">
+            <h2 class="section-title">10-Point Evaluation</h2>
+            <table class="scores-table">
+                <thead>
+                    <tr>
+                        <th>Criterion</th>
+                        <th style="width: 100px; text-align: center;">Score</th>
+                        <th style="width: 120px; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for criterion, score in categories.items() %}
+                    <tr>
+                        <td>{{ criterion }}</td>
+                        <td style="text-align: center; font-weight: 600;">{{ score|round(1) }}/10</td>
+                        <td style="text-align: center; font-weight: 600;">
+                            {% if score >= 8 %}
+                                Excellent
+                            {% elif score >= 6 %}
+                                Good
+                            {% else %}
+                                Needs Work
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 40px;">
+            <h2 class="section-title">Key Strengths</h2>
+            {% for strength in strengths %}
+            <div class="list-item">• {{ strength }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="cta-box">
+            <h3>Ready to Improve?</h3>
+            <p>Get a detailed Website Improvement Plan with actionable recommendations prioritized by impact.</p>
+            <div style="font-weight: 600;">Contact us for your improvement strategy session</div>
+        </div>
+
+        <div class="footer">
+            {% if company_name %}
+            <div style="font-weight: 600; margin-bottom: 5px;">{{ company_name }}</div>
+            {% endif %}
+            {% if company_details %}
+            <div>{{ company_details }}</div>
+            {% endif %}
+            <div>© 2025 All rights reserved.</div>
+        </div>
+
+        <div class="timestamp">
+            Generated on {{ timestamp }}
+        </div>
+    </div>
+</body>
+</html>"""
+
+# Audit Dark Theme
+audit_dark = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAudit Pro Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e5e7eb;
+            background: #1f2937;
+        }
+        .container { max-width: 100%; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-height: 50px;
+            width: auto;
+            filter: brightness(1.1);
+        }
+        .header h1 {
+            font-size: 32px;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .metadata {
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .metadata-label {
+            font-weight: 600;
+            color: #60a5fa;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .metadata-value {
+            color: #d1d5db;
+            font-size: 13px;
+        }
+        .overall-score {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .score-number {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f3f4f6;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background: #2d3748;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+        }
+        .scores-table thead {
+            background: #3b82f6;
+            color: white;
+        }
+        .scores-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .scores-table td {
+            padding: 12px;
+            border-top: 1px solid #4b5563;
+            font-size: 13px;
+            color: #e5e7eb;
+        }
+        .scores-table tbody tr:nth-child(even) {
+            background: #374151;
+        }
+        .list-item {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            color: #bfdbfe;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            padding: 30px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .cta-box h3 { font-size: 18px; margin-bottom: 10px; }
+        .cta-box p { font-size: 13px; line-height: 1.6; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #4b5563;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .timestamp {
+            text-align: right;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                {% if websler_logo %}
+                    <img src="data:image/png;base64,{{ websler_logo }}" alt="Websler">
+                {% endif %}
+                {% if jumoki_logo %}
+                    <img src="data:image/png;base64,{{ jumoki_logo }}" alt="Jumoki">
+                {% endif %}
+            </div>
+            <h1>WebAudit Pro Report</h1>
+            <p class="subtitle">Comprehensive 10-Point Website Evaluation</p>
+        </div>
+
+        <div class="metadata">
+            <div>
+                <div class="metadata-label">Website URL</div>
+                <div class="metadata-value">{{ url }}</div>
+            </div>
+            <div>
+                <div class="metadata-label">Audit Date</div>
+                <div class="metadata-value">{{ report_date }}</div>
+            </div>
+            <div>
+                <div class="metadata-label">Overall Score</div>
+                <div class="metadata-value" style="color: #60a5fa; font-weight: 600;">{{ overall_score|round(1) }}/10</div>
+            </div>
+        </div>
+
+        <div class="overall-score">
+            <div class="score-number">{{ overall_score|round(1) }}</div>
+            <div style="font-size: 16px; font-weight: 500;">Overall Website Score</div>
+        </div>
+
+        <div style="margin-bottom: 40px;">
+            <h2 class="section-title">10-Point Evaluation</h2>
+            <table class="scores-table">
+                <thead>
+                    <tr>
+                        <th>Criterion</th>
+                        <th style="width: 100px; text-align: center;">Score</th>
+                        <th style="width: 120px; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for criterion, score in categories.items() %}
+                    <tr>
+                        <td>{{ criterion }}</td>
+                        <td style="text-align: center; font-weight: 600; color: #60a5fa;">{{ score|round(1) }}/10</td>
+                        <td style="text-align: center; font-weight: 600;">
+                            {% if score >= 8 %}
+                                Excellent
+                            {% elif score >= 6 %}
+                                Good
+                            {% else %}
+                                Needs Work
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-bottom: 40px;">
+            <h2 class="section-title">Key Strengths</h2>
+            {% for strength in strengths %}
+            <div class="list-item">• {{ strength }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="cta-box">
+            <h3>Ready to Improve?</h3>
+            <p>Get a detailed Website Improvement Plan with actionable recommendations prioritized by impact.</p>
+            <div style="font-weight: 600;">Contact us for your improvement strategy session</div>
+        </div>
+
+        <div class="footer">
+            {% if company_name %}
+            <div style="font-weight: 600; margin-bottom: 5px; color: #f3f4f6;">{{ company_name }}</div>
+            {% endif %}
+            {% if company_details %}
+            <div>{{ company_details }}</div>
+            {% endif %}
+            <div>© 2025 All rights reserved.</div>
+        </div>
+
+        <div class="timestamp">
+            Generated on {{ timestamp }}
+        </div>
+    </div>
+</body>
+</html>"""
+
+# Write all templates
+(templates_dir / 'summary_report_light.html').write_text(summary_light, encoding='utf-8')
+(templates_dir / 'summary_report_dark.html').write_text(summary_dark, encoding='utf-8')
+(templates_dir / 'audit_report_light.html').write_text(audit_light, encoding='utf-8')
+(templates_dir / 'audit_report_dark.html').write_text(audit_dark, encoding='utf-8')
+
+print("[OK] summary_report_light.html created")
+print("[OK] summary_report_dark.html created")
+print("[OK] audit_report_light.html created")
+print("[OK] audit_report_dark.html created")
+print("\nAll 4 Playwright templates ready for PDF generation!")
