@@ -14,23 +14,34 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables from .env file
-  await dotenv.load(fileName: '.env');
-
-  // Initialize Supabase with credentials from environment variables
-  final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
-
-  if (supabaseUrl == null || supabaseAnonKey == null) {
-    throw Exception(
-      'Missing Supabase credentials in .env file. '
-      'Please copy .env.example to .env and add your credentials.',
-    );
+  try {
+    await dotenv.load(fileName: '.env');
+    print('✅ .env file loaded successfully');
+  } catch (e) {
+    print('⚠️ Note: .env file not found, using hardcoded credentials');
+    // Fallback to hardcoded credentials if .env is not available
   }
+
+  // Get Supabase credentials from .env or use hardcoded fallback
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
+      'https://vwnbhsmfpxdfcvqnzddc.supabase.co';
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3bmJoc21mcHhkZmN2cW56ZGRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MjAwOTMsImV4cCI6MjA3NzA5NjA5M30.2u4Fh_hrolEBeu5u_ADwZV_j3Bzq9szMBdkLZlc3b5M';
+
+  // Verify credentials are available
+  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+    throw Exception('Supabase credentials not configured. Check .env file or hardcoded values.');
+  }
+
+  print('🔐 Supabase URL: $supabaseUrl');
+  print('🔐 Initializing Supabase...');
 
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
   );
+
+  print('✅ Supabase initialized successfully');
 
   runApp(const MyApp());
 }

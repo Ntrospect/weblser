@@ -5,30 +5,40 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class EnvConfig {
   static String? _cachedApiUrl;
 
+  /// Safely get a value from dotenv environment, handling NotInitializedError
+  static String? _safeGet(String key) {
+    try {
+      return dotenv.env[key];
+    } catch (e) {
+      print('⚠️ EnvConfig: .env not initialized, returning null for $key');
+      return null;
+    }
+  }
+
   /// Get API base URL from environment or return default
   static String getApiUrl() {
-    _cachedApiUrl ??= dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000';
+    _cachedApiUrl ??= _safeGet('API_BASE_URL') ?? 'http://localhost:8000';
     return _cachedApiUrl!;
   }
 
   /// Get Supabase URL from environment
   static String? getSupabaseUrl() {
-    return dotenv.env['SUPABASE_URL'];
+    return _safeGet('SUPABASE_URL');
   }
 
   /// Get Supabase anon key from environment
   static String? getSupabaseAnonKey() {
-    return dotenv.env['SUPABASE_ANON_KEY'];
+    return _safeGet('SUPABASE_ANON_KEY');
   }
 
   /// Get Supabase service role key from environment (backend only!)
   static String? getSupabaseServiceRoleKey() {
-    return dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
+    return _safeGet('SUPABASE_SERVICE_ROLE_KEY');
   }
 
   /// Get environment (development, staging, production)
   static String getEnvironment() {
-    return dotenv.env['ENVIRONMENT'] ?? 'development';
+    return _safeGet('ENVIRONMENT') ?? 'development';
   }
 
   /// Check if in production environment

@@ -98,6 +98,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    # Environment configuration
+    - .env
+    - .env.example
+    # App images and logos
     - assets/logo.png
     - assets/websler-logo_new.png
     - assets/websler-logo_new_white.png
