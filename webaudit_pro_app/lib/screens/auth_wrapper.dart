@@ -38,9 +38,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Initialize auth and restore session
     await authService.initialize();
 
-    // Hide splash after initialization
+    // Hide splash after SplashScreen's internal animation completes (2 seconds)
+    // No additional delay needed as SplashScreen handles its own timing
     if (mounted) {
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 100));
       setState(() => _showSplash = false);
     }
   }
