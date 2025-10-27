@@ -25,7 +25,8 @@ workflows:
           cd webaudit_pro_app
           pwd
           ls -la pubspec.yaml
-          flutter pub get -v
+          flutter pub cache clean
+          flutter pub get --verbose
       - name: Clean Flutter build cache
         script: |
           cd webaudit_pro_app
