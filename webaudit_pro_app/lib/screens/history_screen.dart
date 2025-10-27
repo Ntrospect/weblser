@@ -62,12 +62,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading history: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Only show error if it's not a connection error (backend not running)
+        // Connection errors are expected when backend is not running - just show empty state
+        final errorStr = e.toString().toLowerCase();
+        if (!errorStr.contains('refused') && !errorStr.contains('connection') && !errorStr.contains('localhost')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading history: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         setState(() {
           _history = [];
         });
