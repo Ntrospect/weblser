@@ -38,6 +38,18 @@ def load_logo_as_base64(logo_path):
 class PDFPreviewHandler(SimpleHTTPRequestHandler):
     """HTTP handler for PDF preview server"""
 
+    def do_POST(self):
+        """Handle POST requests"""
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length).decode('utf-8')
+
+        if path == '/api/template':
+            self.save_template(body)
+        else:
+            self.send_error(404)
+
     def do_GET(self):
         """Handle GET requests"""
         parsed_path = urllib.parse.urlparse(self.path)
@@ -56,6 +68,8 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
         # API endpoints
         if path == '/':
             self.serve_dashboard()
+        elif path == '/api/template' and 'type' in query:
+            self.get_template(query)
         elif path.startswith('/api/preview/'):
             self.preview_pdf(path, query)
         elif path.startswith('/api/generate/'):
@@ -337,6 +351,62 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(logo_data)
         except Exception as e:
+            self.send_error(500, str(e))
+
+    def get_template(self, query):
+        """Load and serve a template file"""
+        try:
+            template_type = query.get('type', ['summary'])[0]
+            theme = query.get('theme', ['light'])[0]
+
+            templates_dir = Path(__file__).parent / 'templates'
+            template_file = f'jumoki_{template_type}_report_{theme}.html'
+            template_path = templates_dir / template_file
+
+            if not template_path.exists():
+                self.send_error(404, f'Template not found: {template_file}')
+                return
+
+            with open(template_path, 'r', encoding='utf-8') as f:
+                template_content = f.read()
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', str(len(template_content.encode('utf-8'))))
+            self.end_headers()
+            self.wfile.write(template_content.encode('utf-8'))
+        except Exception as e:
+            print(f"Error in get_template: {e}")
+            self.send_error(500, str(e))
+
+    def save_template(self, body):
+        """Save template file"""
+        try:
+            data = json.loads(body)
+            template_type = data.get('type')
+            theme = data.get('theme')
+            content = data.get('content')
+
+            if not all([template_type, theme, content]):
+                self.send_error(400, 'Missing template_type, theme, or content')
+                return
+
+            templates_dir = Path(__file__).parent / 'templates'
+            template_file = f'jumoki_{template_type}_report_{theme}.html'
+            template_path = templates_dir / template_file
+
+            # Write the template file
+            with open(template_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            print(f"Template saved: {template_file}")
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True, 'message': 'Template saved'}).encode('utf-8'))
+        except Exception as e:
+            print(f"Error in save_template: {e}")
             self.send_error(500, str(e))
 
     def preview_pdf(self, path, query):
