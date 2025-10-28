@@ -60,8 +60,8 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 
     def serve_dashboard(self):
         """Serve the development dashboard"""
-        # Load Jumoki logo for the dashboard header
-        jumoki_logo_path = Path(__file__).parent / 'assets' / 'jumoki_coloured_transparent_bg.png'
+        # Load Jumoki white logo for the dashboard header
+        jumoki_logo_path = Path(__file__).parent / 'assets' / 'jumoki_white_transparent_bg.png'
         jumoki_logo_base64 = ""
         if jumoki_logo_path.exists():
             with open(jumoki_logo_path, 'rb') as f:
@@ -348,7 +348,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
     def get_test_data(self, source, template_type):
         """Get test data for preview"""
         # Load logos
-        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'assets' / 'jumoki_coloured_transparent_bg.png')
+        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'assets' / 'jumoki_white_transparent_bg.png')
 
         if source == 'example':
             return {
@@ -453,31 +453,28 @@ def start_server(port=8888):
     """Start the PDF development server"""
     server_address = ('', port)
     httpd = HTTPServer(server_address, PDFPreviewHandler)
-    print(f"""
-╔══════════════════════════════════════════════════════════════╗
-║          🎨 PDF Development Preview Server Started          ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║  📍 Open in browser:  http://localhost:{port}                   ║
-║                                                              ║
-║  ✨ Features:                                                ║
-║     • Live PDF preview                                      ║
-║     • Template editor with hot-reload                       ║
-║     • Multiple test datasets                                ║
-║     • Light/Dark theme preview                              ║
-║                                                              ║
-║  📝 How to use:                                              ║
-║     1. Select template type (Summary/Audit)                 ║
-║     2. Choose theme (Light/Dark)                            ║
-║     3. Pick test data (Example/GitHub)                      ║
-║     4. Click "Load Preview"                                 ║
-║     5. Edit template on the right                           ║
-║     6. Click "Save & Reload" to see changes                 ║
-║                                                              ║
-║  Press Ctrl+C to stop                                        ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-    """)
+    startup_msg = """
+PDF Development Preview Server Started
+======================================
+Open in browser: http://localhost:""" + str(port) + """
+
+Features:
+- Live PDF preview
+- Template editor with hot-reload
+- Multiple test datasets
+- Light/Dark theme preview
+
+How to use:
+1. Select template type (Summary/Audit)
+2. Choose theme (Light/Dark)
+3. Pick test data (Example/GitHub)
+4. Click "Load Preview"
+5. Edit template on the right
+6. Click "Save & Reload" to see changes
+
+Press Ctrl+C to stop
+"""
+    print(startup_msg)
     httpd.serve_forever()
 
 
