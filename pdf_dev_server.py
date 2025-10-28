@@ -27,8 +27,14 @@ from analyzer import WebsiteAnalyzer
 def load_logo_as_base64(logo_path):
     """Load an image file and encode as base64 data URI"""
     try:
+        logo_path = Path(logo_path)
+        if not logo_path.exists():
+            print(f"Warning: Logo file does not exist: {logo_path}")
+            return None
+
         with open(logo_path, 'rb') as f:
             logo_data = base64.b64encode(f.read()).decode('utf-8')
+        print(f"Successfully loaded logo: {logo_path} ({len(logo_data)} bytes base64)")
         return logo_data
     except Exception as e:
         print(f"Warning: Could not load logo {logo_path}: {e}")
