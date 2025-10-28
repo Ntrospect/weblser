@@ -256,6 +256,11 @@
         </div>
 
         <div class="footer">
+            {% if jumoki_logo %}
+            <div style="margin-bottom: 12px;">
+                <img src="data:image/svg+xml,{{ jumoki_logo }}" alt="Jumoki" style="height: 30px; width: auto;">
+            </div>
+            {% endif %}
             {% if company_name %}
             <div class="footer-company">{{ company_name }}</div>
             {% endif %}

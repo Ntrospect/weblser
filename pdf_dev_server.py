@@ -459,7 +459,8 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
     def get_test_data(self, source, template_type):
         """Get test data for preview"""
         # Load logos
-        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'websler_pro.svg')
+        websler_pro_logo = load_logo_as_base64(Path(__file__).parent / 'websler_pro.svg')
+        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'jumoki_logov3.svg')
 
         if source == 'example':
             return {
@@ -491,7 +492,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
                 ] if template_type == 'audit' else None,
                 'company_name': 'Jumoki Agency LLC',
                 'company_details': '1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency',
-                'websler_logo': None,
+                'websler_logo': websler_pro_logo,
                 'jumoki_logo': jumoki_logo
             }
         elif source == 'github':
@@ -524,7 +525,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
                 ] if template_type == 'audit' else None,
                 'company_name': 'Jumoki Agency LLC',
                 'company_details': '1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency',
-                'websler_logo': None,
+                'websler_logo': websler_pro_logo,
                 'jumoki_logo': jumoki_logo
             }
 
