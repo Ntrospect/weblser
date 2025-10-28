@@ -60,7 +60,14 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 
     def serve_dashboard(self):
         """Serve the development dashboard"""
-        dashboard_html = """
+        # Load Jumoki logo for the dashboard header
+        jumoki_logo_path = Path(__file__).parent / 'assets' / 'jumoki_coloured_transparent_bg.png'
+        jumoki_logo_base64 = ""
+        if jumoki_logo_path.exists():
+            with open(jumoki_logo_path, 'rb') as f:
+                jumoki_logo_base64 = base64.b64encode(f.read()).decode('utf-8')
+
+        dashboard_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,9 +83,36 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
             max-width: 1600px;
             margin: 0 auto;
         }
-        h1 {
-            color: #1f2937;
+        .header-section {
+            background: linear-gradient(135deg, #9018ad 0%, #7b1293 100%);
+            padding: 30px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 6px rgba(144, 24, 173, 0.2);
+        }
+        .logo-section {
+            flex-shrink: 0;
+        }
+        .logo-section img {
+            height: 60px;
+            width: auto;
+        }
+        .header-text {
+            flex: 1;
+        }
+        h1 {
+            color: white;
+            margin: 0;
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        .subtitle-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
         }
         .controls {
             background: white;
@@ -173,7 +207,15 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 </head>
 <body>
     <div class="container">
-        <h1>🎨 PDF Template Development Preview</h1>
+        <div class="header-section">
+            <div class="logo-section">
+                <img src="data:image/png;base64,{jumoki_logo_base64}" alt="Jumoki" style="height: 60px; width: auto;">
+            </div>
+            <div class="header-text">
+                <h1>🎨 PDF Template Studio</h1>
+                <p class="subtitle-text">Professional PDF development with live preview • Powered by Jumoki</p>
+            </div>
+        </div>
 
         <div class="info">
             ℹ️ <strong>How to use:</strong> Select a template type and test data, then preview the PDF.
