@@ -44,6 +44,11 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
         path = parsed_path.path
         query = urllib.parse.parse_qs(parsed_path.query)
 
+        # Serve logo
+        if path == '/logo.png':
+            self.serve_logo()
+            return
+
         # Serve static files
         if path.endswith('.css') or path.endswith('.js') or path.endswith('.html'):
             return super().do_GET()
@@ -60,13 +65,6 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 
     def serve_dashboard(self):
         """Serve the development dashboard"""
-        # Load Jumoki white logo for the dashboard header
-        jumoki_logo_path = Path(__file__).parent / 'assets' / 'jumoki_white_transparent_bg.png'
-        jumoki_logo_base64 = ""
-        if jumoki_logo_path.exists():
-            with open(jumoki_logo_path, 'rb') as f:
-                jumoki_logo_base64 = base64.b64encode(f.read()).decode('utf-8')
-
         dashboard_html = """<!DOCTYPE html>
 <html>
 <head>
@@ -208,7 +206,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
     <div class="container">
         <div class="header-section">
             <div class="logo-section">
-                <img src="data:image/png;base64,LOGO_PLACEHOLDER" alt="Jumoki" style="height: 60px; width: auto;">
+                <img src="/logo.png" alt="Jumoki" style="height: 60px; width: auto;">
             </div>
             <div class="header-text">
                 <h1>PDF Template Studio</h1>
@@ -315,13 +313,31 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 </body>
 </html>
         """
-        # Replace the logo placeholder
-        dashboard_html = dashboard_html.replace('LOGO_PLACEHOLDER', jumoki_logo_base64)
-
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(dashboard_html.encode())
+
+    def serve_logo(self):
+        """Serve the Jumoki logo file"""
+        logo_path = Path(__file__).parent / 'assets' / 'jumoki_white_transparent_bg.png'
+
+        if not logo_path.exists():
+            self.send_error(404, 'Logo not found')
+            return
+
+        try:
+            with open(logo_path, 'rb') as f:
+                logo_data = f.read()
+
+            self.send_response(200)
+            self.send_header('Content-type', 'image/png')
+            self.send_header('Content-Length', str(len(logo_data)))
+            self.send_header('Cache-Control', 'public, max-age=3600')
+            self.end_headers()
+            self.wfile.write(logo_data)
+        except Exception as e:
+            self.send_error(500, str(e))
 
     def preview_pdf(self, path, query):
         """Generate and serve PDF preview"""
