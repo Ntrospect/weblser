@@ -335,15 +335,23 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
             test_data = self.get_test_data(data_source, template_type)
 
             # Render PDF
+            print(f"Rendering PDF: {template_type} ({theme}) with {data_source} data...")
             pdf_bytes = self.render_pdf_to_bytes(template_type, theme, test_data)
+            print(f"PDF rendered successfully: {len(pdf_bytes)} bytes")
 
             self.send_response(200)
             self.send_header('Content-type', 'application/pdf')
             self.send_header('Content-Length', str(len(pdf_bytes)))
+            self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
             self.wfile.write(pdf_bytes)
+            print("PDF sent successfully")
         except Exception as e:
-            self.send_error(500, str(e))
+            print(f"Error in preview_pdf: {e}")
+            try:
+                self.send_error(500, str(e))
+            except:
+                pass  # Connection already closed
 
     def get_test_data(self, source, template_type):
         """Get test data for preview"""
@@ -435,14 +443,19 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
         html_content = template.render(**data)
 
         # Convert HTML to PDF using Playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.set_content(html_content)
-            pdf_bytes = page.pdf()
-            browser.close()
-
-        return pdf_bytes
+        try:
+            with sync_playwright() as p:
+                # Launch browser with optimizations
+                browser = p.chromium.launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])
+                page = browser.new_page()
+                page.set_content(html_content, wait_until='networkidle')
+                pdf_bytes = page.pdf(format='A4')
+                page.close()
+                browser.close()
+            return pdf_bytes
+        except Exception as e:
+            print(f"PDF rendering error: {e}")
+            raise
 
     def log_message(self, format, *args):
         """Suppress default logging"""
