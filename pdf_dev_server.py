@@ -67,8 +67,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
             with open(jumoki_logo_path, 'rb') as f:
                 jumoki_logo_base64 = base64.b64encode(f.read()).decode('utf-8')
 
-        dashboard_html = f"""
-<!DOCTYPE html>
+        dashboard_html = """<!DOCTYPE html>
 <html>
 <head>
     <title>PDF Development Preview</title>
@@ -209,7 +208,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
     <div class="container">
         <div class="header-section">
             <div class="logo-section">
-                <img src="data:image/png;base64,{jumoki_logo_base64}" alt="Jumoki" style="height: 60px; width: auto;">
+                <img src="data:image/png;base64,LOGO_PLACEHOLDER" alt="Jumoki" style="height: 60px; width: auto;">
             </div>
             <div class="header-text">
                 <h1>🎨 PDF Template Studio</h1>
@@ -316,6 +315,9 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 </body>
 </html>
         """
+        # Replace the logo placeholder
+        dashboard_html = dashboard_html.replace('LOGO_PLACEHOLDER', jumoki_logo_base64)
+
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
