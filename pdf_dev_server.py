@@ -211,13 +211,13 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
                 <img src="data:image/png;base64,LOGO_PLACEHOLDER" alt="Jumoki" style="height: 60px; width: auto;">
             </div>
             <div class="header-text">
-                <h1>🎨 PDF Template Studio</h1>
-                <p class="subtitle-text">Professional PDF development with live preview • Powered by Jumoki</p>
+                <h1>PDF Template Studio</h1>
+                <p class="subtitle-text">Professional PDF development with live preview - Powered by Jumoki</p>
             </div>
         </div>
 
         <div class="info">
-            ℹ️ <strong>How to use:</strong> Select a template type and test data, then preview the PDF.
+            <strong>How to use:</strong> Select a template type and test data, then preview the PDF.
             Edit the template HTML on the right to see changes instantly.
         </div>
 
@@ -252,15 +252,15 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 
         <div class="preview-area">
             <div class="preview-panel">
-                <div class="panel-header">📄 PDF Preview</div>
+                <div class="panel-header">PDF Preview</div>
                 <iframe id="pdfFrame" src="about:blank"></iframe>
                 <div class="status">Rendering PDF...</div>
             </div>
 
             <div class="preview-panel editor-panel">
-                <div class="panel-header">✏️ Template Editor</div>
+                <div class="panel-header">Template Editor</div>
                 <textarea id="templateEditor" placeholder="Template HTML will appear here..."></textarea>
-                <button style="margin: 10px; border-radius: 0;" onclick="saveAndReload()">💾 Save & Reload</button>
+                <button style="margin: 10px; border-radius: 0;" onclick="saveAndReload()">Save & Reload</button>
             </div>
         </div>
     </div>
