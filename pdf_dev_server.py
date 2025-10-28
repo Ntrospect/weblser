@@ -32,6 +32,17 @@ def load_logo_as_base64(logo_path):
             print(f"Warning: Logo file does not exist: {logo_path}")
             return None
 
+        # For SVG files, read as text and URL encode
+        if str(logo_path).endswith('.svg'):
+            with open(logo_path, 'r', encoding='utf-8') as f:
+                svg_content = f.read()
+            # URL encode the SVG for data URI
+            import urllib.parse
+            svg_encoded = urllib.parse.quote(svg_content)
+            print(f"Successfully loaded SVG logo: {logo_path}")
+            return svg_encoded
+
+        # For other files, use base64 encoding
         with open(logo_path, 'rb') as f:
             logo_data = base64.b64encode(f.read()).decode('utf-8')
         print(f"Successfully loaded logo: {logo_path} ({len(logo_data)} bytes base64)")
