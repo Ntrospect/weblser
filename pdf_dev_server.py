@@ -7,6 +7,7 @@ Allows iterative development with hot-reload of PDF templates
 import json
 import os
 import sys
+import base64
 from datetime import datetime
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -21,6 +22,17 @@ except ImportError:
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from analyzer import WebsiteAnalyzer
+
+
+def load_logo_as_base64(logo_path):
+    """Load an image file and encode as base64 data URI"""
+    try:
+        with open(logo_path, 'rb') as f:
+            logo_data = base64.b64encode(f.read()).decode('utf-8')
+        return logo_data
+    except Exception as e:
+        print(f"Warning: Could not load logo {logo_path}: {e}")
+        return None
 
 
 class PDFPreviewHandler(SimpleHTTPRequestHandler):
@@ -291,6 +303,9 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
 
     def get_test_data(self, source, template_type):
         """Get test data for preview"""
+        # Load logos
+        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'assets' / 'jumoki_coloured_transparent_bg.png')
+
         if source == 'example':
             return {
                 'url': 'https://example.com',
@@ -322,7 +337,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
                 'company_name': 'Jumoki Agency LLC',
                 'company_details': '1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency',
                 'websler_logo': None,
-                'jumoki_logo': None
+                'jumoki_logo': jumoki_logo
             }
         elif source == 'github':
             return {
@@ -355,7 +370,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
                 'company_name': 'Jumoki Agency LLC',
                 'company_details': '1309 Coffeen Avenue STE 1200, Sheridan WY 82801, 1(307)650-2395, info@jumoki.agency',
                 'websler_logo': None,
-                'jumoki_logo': None
+                'jumoki_logo': jumoki_logo
             }
 
     def render_pdf_to_bytes(self, template_type, theme, data):
