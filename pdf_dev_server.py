@@ -448,7 +448,7 @@ class PDFPreviewHandler(SimpleHTTPRequestHandler):
     def get_test_data(self, source, template_type):
         """Get test data for preview"""
         # Load logos
-        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'assets' / 'jumoki_white_transparent_bg.png')
+        jumoki_logo = load_logo_as_base64(Path(__file__).parent / 'websler_pro.svg')
 
         if source == 'example':
             return {
