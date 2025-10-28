@@ -815,18 +815,18 @@
 
 | Document | Owner | Contact |
 |----------|-------|---------|
-| PHASE_1_START_HERE.md | Project Lead | [Email] |
-| PHASE_1_EXECUTIVE_SUMMARY.md | Leadership | [Email] |
-| PHASE_1_IMPLEMENTATION_PLAN.md | Project Lead | [Email] |
-| PHASE_1_QUICK_START.md | Team Lead | [Email] |
-| PDF_MAKER_PROJECT_ROADMAP.md | Product Manager | [Email] |
-| TEMPLATE_VARIABLES_REFERENCE.md | Backend Lead | [Email] |
-| PDF_MAKER_USER_GUIDE.md | Technical Writer | [Email] |
-| TEMPLATE_EDITING_GUIDE.md | Developer Lead | [Email] |
-| PDF_MAKER_TROUBLESHOOTING.md | DevOps Lead | [Email] |
-| SESSION_BACKUP_OCT28_PDF_DEVELOPMENT.md | Technical Team | [Email] |
-| GIT_COMMIT_LOG_OCT28.md | Developer | [Email] |
-| TECHNICAL_IMPLEMENTATION_OCT28.md | Tech Lead | [Email] |
+| PHASE_1_START_HERE.md | Project Lead | dean@jumoki.agency |
+| PHASE_1_EXECUTIVE_SUMMARY.md | Leadership | [TBD - CEO] |
+| PHASE_1_IMPLEMENTATION_PLAN.md | Project Lead | dean@jumoki.agency |
+| PHASE_1_QUICK_START.md | Team Lead | dean@jumoki.agency |
+| PDF_MAKER_PROJECT_ROADMAP.md | Product Manager | [TBD - Product Manager] |
+| TEMPLATE_VARIABLES_REFERENCE.md | Backend Lead | [TBD - Backend Developer] |
+| PDF_MAKER_USER_GUIDE.md | Technical Writer | [TBD - Technical Writer] |
+| TEMPLATE_EDITING_GUIDE.md | Developer Lead | [TBD - Backend Developer] |
+| PDF_MAKER_TROUBLESHOOTING.md | DevOps Lead | [TBD - DevOps Lead] |
+| SESSION_BACKUP_OCT28_PDF_DEVELOPMENT.md | Technical Team | dean@jumoki.agency |
+| GIT_COMMIT_LOG_OCT28.md | Developer | [TBD - Backend Developer] |
+| TECHNICAL_IMPLEMENTATION_OCT28.md | Tech Lead | dean@jumoki.agency |
 
 ### Questions?
 

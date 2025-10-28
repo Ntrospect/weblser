@@ -887,11 +887,11 @@ Week 5+: Internal Usage & Feedback
 
 ## Key Contacts & Responsibilities
 
-**DevOps Lead:** [Name] - VPS deployment, systems
-**Backend Developer:** [Name] - Template integration, backend updates
-**Product Manager:** [Name] - Feedback, roadmap, stakeholder alignment
-**Designer:** [Name] - Template refinement, visual improvements
-**Technical Writer:** [Name] - Documentation, guides
+**DevOps Lead:** [TBD - DevOps Lead] - VPS deployment, systems
+**Backend Developer:** [TBD - Backend Developer] - Template integration, backend updates
+**Product Manager:** [TBD - Product Manager] - Feedback, roadmap, stakeholder alignment
+**Designer:** [TBD - Designer] - Template refinement, visual improvements
+**Technical Writer:** [TBD - Technical Writer] - Documentation, guides
 
 ---
 

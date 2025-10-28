@@ -1,9 +1,9 @@
 # Phase 1 Quick Start Checklist
 ## Jumoki Agency PDF Maker - Internal Tool Deployment
 
-**Start Date:** [Insert Date]
+**Start Date:** Oct 28, 2025
 **Expected Completion:** 6 weeks
-**Project Lead:** [Name]
+**Project Lead:** Dean Taggart
 
 ---
 
@@ -551,10 +551,10 @@ Target: Generate 20+ PDFs in first month
 
 ## Key Contact Information
 
-**Project Lead:** [Name] - [Email]
-**DevOps Lead:** [Name] - [Email]
-**Backend Developer:** [Name] - [Email]
-**Product Manager:** [Name] - [Email]
+**Project Lead:** Dean Taggart - dean@jumoki.agency
+**DevOps Lead:** [TBD - DevOps Lead] - [TBD - Email]
+**Backend Developer:** [TBD - Backend Developer] - [TBD - Email]
+**Product Manager:** [TBD - Product Manager] - [TBD - Email]
 
 **VPS Information:**
 - **Host:** 140.99.254.83

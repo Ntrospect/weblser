@@ -1367,6 +1367,6 @@ openssl x509 -in /etc/letsencrypt/live/pdf-maker.jumoki.agency/fullchain.pem -no
 
 ---
 
-**Need help?** Contact DevOps: [Name] - [Email]
+**Need help?** Contact DevOps: [TBD - DevOps Lead] - [TBD - Email]
 
 **Found a new issue?** Add it here and create a PR to update this guide.

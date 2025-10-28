@@ -279,7 +279,7 @@ PDFs automatically save to your computer's Downloads folder:
    Please review and let me know if you have questions.
 
    Best regards,
-   [Your Name]
+   Dean Taggart
    Jumoki Agency
    ```
 
@@ -564,9 +564,9 @@ For faster workflow:
 ### Issues Not Listed Above?
 
 **Contact Information:**
-- **DevOps Lead:** [Name] - [Email] (for server/access issues)
-- **Product Manager:** [Name] - [Email] (for feature requests, template changes)
-- **Technical Lead:** [Name] - [Email] (for integration issues)
+- **DevOps Lead:** [TBD - DevOps Lead] - [TBD - Email] (for server/access issues)
+- **Product Manager:** [TBD - Product Manager] - [TBD - Email] (for feature requests, template changes)
+- **Technical Lead:** [TBD - Backend Developer] - [TBD - Email] (for integration issues)
 
 ### Before You Contact Support, Try:
 1. ✅ Refresh the page (Ctrl+R)
