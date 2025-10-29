@@ -182,81 +182,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  void _clearHistory() async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear History'),
-        content: const Text('Are you sure you want to delete all analyses? This cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                // Clear summaries first
-                try {
-                  await context.read<ApiService>().clearHistory();
-                } catch (e) {
-                  debugPrint('⚠️ Error clearing summaries: $e');
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error clearing summaries: $e'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                }
-
-                // Then clear audits
-                try {
-                  await context.read<ApiService>().clearAuditHistory();
-                } catch (e) {
-                  debugPrint('⚠️ Error clearing audits: $e');
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error clearing audits: $e'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                }
-
-                // Reload history
-                if (mounted) {
-                  debugPrint('🔄 Reloading history after delete...');
-                  _loadHistory();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✓ History cleared successfully'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              } catch (e) {
-                debugPrint('❌ Unexpected error in _clearHistory: $e');
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Unexpected error: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Delete All', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
@@ -290,14 +215,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 elevation: 0,
                 backgroundColor: _isScrolled ? scrolledBgColor : bgColor,
                 surfaceTintColor: bgColor,
-            actions: [
-              if (_history.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.delete_sweep),
-                  tooltip: 'Clear History',
-                  onPressed: _clearHistory,
-                ),
-            ],
           ),
           body: RefreshIndicator(
             onRefresh: _loadHistory,
