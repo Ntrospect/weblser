@@ -623,8 +623,8 @@ def main():
     parser.add_argument(
         '--template',
         choices=['default', 'jumoki'],
-        default='default',
-        help='Template set to use: default (standard templates) or jumoki (Jumoki-branded templates) (default: default)'
+        default='jumoki',
+        help='Template set to use: default (standard templates) or jumoki (Jumoki-branded templates) (default: jumoki)'
     )
 
     args = parser.parse_args()
