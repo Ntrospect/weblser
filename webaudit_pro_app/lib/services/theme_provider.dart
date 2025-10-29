@@ -9,7 +9,7 @@ class ThemeProvider extends ChangeNotifier {
   late bool _isDarkMode;
 
   ThemeProvider(this._prefs) {
-    _isDarkMode = _prefs.getBool(_themeKey) ?? true; // Default to dark mode
+    _isDarkMode = _prefs.getBool(_themeKey) ?? false; // Default to light mode
   }
 
   bool get isDarkMode => _isDarkMode;
