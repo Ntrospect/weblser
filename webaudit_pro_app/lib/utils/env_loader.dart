@@ -17,7 +17,7 @@ class EnvConfig {
 
   /// Get API base URL from environment or return default
   static String getApiUrl() {
-    _cachedApiUrl ??= _safeGet('API_BASE_URL') ?? 'http://localhost:8000';
+    _cachedApiUrl ??= _safeGet('API_BASE_URL') ?? 'https://api.websler.pro';
     return _cachedApiUrl!;
   }
 

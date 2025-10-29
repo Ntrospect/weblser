@@ -281,7 +281,7 @@ Format your response as JSON:
 
         try:
             message = self.client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-sonnet-4-5",
                 max_tokens=500,
                 messages=[
                     {"role": "user", "content": prompt}
@@ -291,6 +291,7 @@ Format your response as JSON:
             # Parse Claude's response
             import json
             response_text = message.content[0].text
+            print(f"📝 Claude response for {criterion}: {response_text[:100]}...")
 
             # Extract JSON from response
             json_start = response_text.find('{')
@@ -298,8 +299,10 @@ Format your response as JSON:
             if json_start >= 0 and json_end > json_start:
                 json_str = response_text[json_start:json_end]
                 result = json.loads(json_str)
+                print(f"✅ Parsed score for {criterion}: {result.get('score', 'N/A')}")
             else:
                 # Fallback if JSON parsing fails
+                print(f"⚠️ Failed to find JSON in response for {criterion}")
                 result = {
                     "score": 5,
                     "observations": ["Unable to fully evaluate"],
@@ -318,6 +321,7 @@ Format your response as JSON:
 
         except Exception as e:
             # Fallback scoring on error
+            print(f"❌ Error evaluating {criterion}: {str(e)}")
             return 5.0, CriterionScore(
                 name=criterion,
                 score=5.0,
