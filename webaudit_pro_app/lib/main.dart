@@ -9,6 +9,7 @@ import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/theme_provider.dart';
 import 'screens/auth_wrapper.dart';
+import 'config/environment.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,21 +19,27 @@ void main() async {
     await dotenv.load(fileName: '.env');
     print('✅ .env file loaded successfully');
   } catch (e) {
-    print('⚠️ Note: .env file not found, using hardcoded credentials');
-    // Fallback to hardcoded credentials if .env is not available
+    print('⚠️ Note: .env file not found, using environment-based credentials');
   }
 
-  // Get Supabase credentials from .env or use hardcoded fallback
+  // Get Supabase credentials
+  // Priority: .env overrides > AppConfig (environment-aware staging/production)
   final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
-      'https://vwnbhsmfpxdfcvqnzddc.supabase.co';
+      AppConfig.supabaseConfig.url;
   final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3bmJoc21mcHhkZmN2cW56ZGRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MjAwOTMsImV4cCI6MjA3NzA5NjA5M30.2u4Fh_hrolEBeu5u_ADwZV_j3Bzq9szMBdkLZlc3b5M';
+      AppConfig.supabaseConfig.anonKey;
 
   // Verify credentials are available
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-    throw Exception('Supabase credentials not configured. Check .env file or hardcoded values.');
+    throw Exception('Supabase credentials not configured. Check .env file or environment config.');
   }
 
+  // Determine which environment we're running in
+  final environmentName = AppConfig.environmentName;
+  final projectName = AppConfig.supabaseProjectName;
+
+  print('🌍 Environment: $environmentName');
+  print('📦 Supabase Project: $projectName');
   print('🔐 Supabase URL: $supabaseUrl');
   print('🔐 Initializing Supabase...');
 
@@ -41,7 +48,7 @@ void main() async {
     anonKey: supabaseAnonKey,
   );
 
-  print('✅ Supabase initialized successfully');
+  print('✅ Supabase initialized successfully for $environmentName');
 
   runApp(const MyApp());
 }
