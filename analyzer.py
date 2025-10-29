@@ -605,12 +605,6 @@ def main():
         help='Company contact details for PDF footer (address, phone, email, etc.)'
     )
     parser.add_argument(
-        '--theme',
-        choices=['light', 'dark'],
-        default='light',
-        help='PDF theme: light or dark (default: light)'
-    )
-    parser.add_argument(
         '--use-playwright',
         action='store_true',
         help='Use Playwright for professional HTML/CSS PDF rendering instead of ReportLab'
@@ -653,7 +647,7 @@ def main():
                         logo_path=args.logo,
                         company_name=args.company_name,
                         company_details=args.company_details,
-                        use_dark_theme=(args.theme == 'dark'),
+                        use_dark_theme=False,
                         template=args.template
                     )
                     print(f"Professional PDF report generated (Playwright): {pdf_path}")

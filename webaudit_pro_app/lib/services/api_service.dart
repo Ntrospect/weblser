@@ -111,7 +111,7 @@ class ApiService extends ChangeNotifier {
     }
   }
 
-  /// Generate PDF from a summary analysis
+  /// Generate PDF from a summary analysis (light theme only for printing)
   /// Returns: filepath (desktop/mobile) or empty string (web, opens in new tab)
   Future<String> generatePdf(
     String analysisId, {
@@ -119,10 +119,9 @@ class ApiService extends ChangeNotifier {
     String? companyName,
     String? companyDetails,
     String template = 'jumoki',
-    String theme = 'light',
   }) async {
     try {
-      debugPrint('📄 Generating summary PDF');
+      debugPrint('📄 Generating summary PDF (light theme)');
 
       final response = await http.post(
         Uri.parse('$_apiUrl/api/pdf'),
@@ -133,7 +132,7 @@ class ApiService extends ChangeNotifier {
           'company_name': companyName,
           'company_details': companyDetails,
           'template': template,
-          'theme': theme,
+          'theme': 'light',
         }),
       ).timeout(const Duration(seconds: 30));
 
