@@ -1,6 +1,8 @@
 {
   "projects": {
-    "default": "websler-pro"
+    "default": "websler-pro",
+    "production": "websler-pro",
+    "staging": "websler-pro-staging"
   },
   "targets": {},
   "etags": {}
