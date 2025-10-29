@@ -126,7 +126,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'This may take a minute',
+              'This may take 1 to 3 minutes',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -197,19 +197,53 @@ class _HistoryScreenState extends State<HistoryScreen> {
             onPressed: () async {
               Navigator.pop(context);
               try {
-                await context.read<ApiService>().clearHistory();
-                await context.read<ApiService>().clearAuditHistory();
+                // Clear summaries first
+                try {
+                  await context.read<ApiService>().clearHistory();
+                } catch (e) {
+                  debugPrint('⚠️ Error clearing summaries: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error clearing summaries: $e'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+
+                // Then clear audits
+                try {
+                  await context.read<ApiService>().clearAuditHistory();
+                } catch (e) {
+                  debugPrint('⚠️ Error clearing audits: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error clearing audits: $e'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+
+                // Reload history
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('History cleared')),
-                  );
+                  debugPrint('🔄 Reloading history after delete...');
                   _loadHistory();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✓ History cleared successfully'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
                 }
               } catch (e) {
+                debugPrint('❌ Unexpected error in _clearHistory: $e');
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Text('Unexpected error: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );

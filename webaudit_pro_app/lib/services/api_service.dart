@@ -173,14 +173,20 @@ class ApiService extends ChangeNotifier {
 
   Future<void> clearHistory() async {
     try {
+      debugPrint('🗑️ Clearing Weblser summary history...');
       final response = await http.delete(
         Uri.parse('$_apiUrl/api/history'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
+      debugPrint('📊 Clear history response: ${response.statusCode}');
       if (response.statusCode != 200) {
-        throw Exception('Failed to clear history: ${response.statusCode}');
+        debugPrint('❌ Clear history failed: ${response.body}');
+        throw Exception('Failed to clear history: ${response.statusCode} - ${response.body}');
       }
+      debugPrint('✅ Weblser history cleared successfully');
     } catch (e) {
+      debugPrint('🔴 Error clearing history: $e');
       throw Exception('Error clearing history: $e');
     }
   }
@@ -336,14 +342,20 @@ class ApiService extends ChangeNotifier {
   /// Clear all audit history
   Future<void> clearAuditHistory() async {
     try {
+      debugPrint('🗑️ Clearing WebAudit Pro audit history...');
       final response = await http.delete(
         Uri.parse('$_apiUrl/api/audit/history/clear'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
+      debugPrint('📊 Clear audit history response: ${response.statusCode}');
       if (response.statusCode != 200) {
-        throw Exception('Failed to clear audit history: ${response.statusCode}');
+        debugPrint('❌ Clear audit history failed: ${response.body}');
+        throw Exception('Failed to clear audit history: ${response.statusCode} - ${response.body}');
       }
+      debugPrint('✅ WebAudit Pro history cleared successfully');
     } catch (e) {
+      debugPrint('🔴 Error clearing audit history: $e');
       throw Exception('Error clearing audit history: $e');
     }
   }
