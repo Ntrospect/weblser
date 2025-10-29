@@ -9,6 +9,7 @@ import '../models/analysis.dart';
 import '../models/audit_result.dart';
 import '../models/website_analysis.dart';
 import '../utils/env_loader.dart';
+import '../utils/pdf_utils.dart';
 
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -110,6 +111,8 @@ class ApiService extends ChangeNotifier {
     }
   }
 
+  /// Generate PDF from a summary analysis
+  /// Returns: filepath (desktop/mobile) or empty string (web, opens in new tab)
   Future<String> generatePdf(
     String analysisId, {
     String? logoUrl,
@@ -119,6 +122,8 @@ class ApiService extends ChangeNotifier {
     String theme = 'light',
   }) async {
     try {
+      debugPrint('📄 Generating summary PDF');
+
       final response = await http.post(
         Uri.parse('$_apiUrl/api/pdf'),
         headers: _buildHeaders(),
@@ -133,26 +138,36 @@ class ApiService extends ChangeNotifier {
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        // Get the downloads directory
+        final filename = 'weblser-analysis-${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+        // Handle web platform - open in new tab
+        if (kIsWeb) {
+          debugPrint('🌐 Opening PDF in new tab (web)');
+          final success = await PdfUtils.openPdfInNewTab(response.bodyBytes, filename);
+          if (!success) {
+            throw Exception('Failed to open PDF in new tab');
+          }
+          return ''; // Return empty string for web (no file path)
+        }
+
+        // Handle mobile/desktop - save to file
+        debugPrint('💾 Saving PDF to file (mobile/desktop)');
         final Directory? downloadsDir = await getDownloadsDirectory();
         if (downloadsDir == null) {
           throw Exception('Could not access Downloads directory');
         }
 
-        // Create filename with timestamp
-        final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-        final String filename = 'weblser-analysis-$timestamp.pdf';
         final String filepath = '${downloadsDir.path}/$filename';
-
-        // Save PDF file
         final File file = File(filepath);
         await file.writeAsBytes(response.bodyBytes);
+        debugPrint('✅ PDF saved to: $filepath');
 
         return filepath;
       } else {
         throw Exception('Failed to generate PDF: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('❌ Error generating PDF: $e');
       throw Exception('Error generating PDF: $e');
     }
   }
@@ -273,6 +288,7 @@ class ApiService extends ChangeNotifier {
 
   /// Generate PDF report for an audit
   /// documentType: "audit-report", "improvement-plan", or "partnership-proposal"
+  /// Returns: filepath (desktop/mobile) or empty string (web, opens in new tab)
   Future<String> generateAuditPdf(
     String auditId,
     String documentType, {
@@ -287,6 +303,8 @@ class ApiService extends ChangeNotifier {
         throw Exception('Invalid document type: $documentType');
       }
 
+      debugPrint('📄 Generating PDF: $documentType');
+
       final response = await http.post(
         Uri.parse('$_apiUrl/api/audit/generate-pdf/$auditId/$documentType'),
         headers: _buildHeaders(),
@@ -300,26 +318,36 @@ class ApiService extends ChangeNotifier {
       ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
-        // Get the downloads directory
+        final filename = 'webaudit-$documentType-${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+        // Handle web platform - open in new tab
+        if (kIsWeb) {
+          debugPrint('🌐 Opening PDF in new tab (web)');
+          final success = await PdfUtils.openPdfInNewTab(response.bodyBytes, filename);
+          if (!success) {
+            throw Exception('Failed to open PDF in new tab');
+          }
+          return ''; // Return empty string for web (no file path)
+        }
+
+        // Handle mobile/desktop - save to file
+        debugPrint('💾 Saving PDF to file (mobile/desktop)');
         final Directory? downloadsDir = await getDownloadsDirectory();
         if (downloadsDir == null) {
           throw Exception('Could not access Downloads directory');
         }
 
-        // Create filename based on document type
-        final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-        final String filename = 'webaudit-$documentType-$timestamp.pdf';
         final String filepath = '${downloadsDir.path}/$filename';
-
-        // Save PDF file
         final File file = File(filepath);
         await file.writeAsBytes(response.bodyBytes);
+        debugPrint('✅ PDF saved to: $filepath');
 
         return filepath;
       } else {
         throw Exception('Failed to generate PDF: ${response.statusCode}');
       }
     } catch (e) {
+      debugPrint('❌ Error generating PDF: $e');
       throw Exception('Error generating PDF: $e');
     }
   }
