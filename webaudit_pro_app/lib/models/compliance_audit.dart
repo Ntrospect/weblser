@@ -1,9 +1,4 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'compliance_audit.g.dart';
-
 /// Represents a single compliance finding within a category
-@JsonSerializable()
 class ComplianceFinding {
   final String category;
   final String status; // Compliant, Partially Compliant, Non-Compliant
@@ -21,14 +16,28 @@ class ComplianceFinding {
     required this.priority,
   });
 
-  factory ComplianceFinding.fromJson(Map<String, dynamic> json) =>
-      _$ComplianceFindingFromJson(json);
+  factory ComplianceFinding.fromJson(Map<String, dynamic> json) {
+    return ComplianceFinding(
+      category: json['category'] as String,
+      status: json['status'] as String,
+      riskLevel: json['risk_level'] as String,
+      findings: List<String>.from(json['findings'] as List),
+      recommendations: List<String>.from(json['recommendations'] as List),
+      priority: json['priority'] as String,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ComplianceFindingToJson(this);
+  Map<String, dynamic> toJson() => {
+    'category': category,
+    'status': status,
+    'risk_level': riskLevel,
+    'findings': findings,
+    'recommendations': recommendations,
+    'priority': priority,
+  };
 }
 
 /// Represents compliance scores and findings for a single jurisdiction
-@JsonSerializable()
 class ComplianceJurisdictionScore {
   final String jurisdiction; // AU, NZ, GDPR, CCPA
   final int score;
@@ -42,14 +51,26 @@ class ComplianceJurisdictionScore {
     required this.criticalIssues,
   });
 
-  factory ComplianceJurisdictionScore.fromJson(Map<String, dynamic> json) =>
-      _$ComplianceJurisdictionScoreFromJson(json);
+  factory ComplianceJurisdictionScore.fromJson(Map<String, dynamic> json) {
+    return ComplianceJurisdictionScore(
+      jurisdiction: json['jurisdiction'] as String,
+      score: json['score'] as int,
+      findings: (json['findings'] as List)
+          .map((f) => ComplianceFinding.fromJson(f as Map<String, dynamic>))
+          .toList(),
+      criticalIssues: List<String>.from(json['critical_issues'] as List),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ComplianceJurisdictionScoreToJson(this);
+  Map<String, dynamic> toJson() => {
+    'jurisdiction': jurisdiction,
+    'score': score,
+    'findings': findings.map((f) => f.toJson()).toList(),
+    'critical_issues': criticalIssues,
+  };
 }
 
 /// Complete compliance audit report
-@JsonSerializable()
 class ComplianceAudit {
   final String id;
   final String url;
@@ -60,6 +81,7 @@ class ComplianceAudit {
   final List<String> criticalIssues;
   final Map<String, dynamic> remediationRoadmap;
   final String createdAt;
+  final String highestRiskLevel;
 
   ComplianceAudit({
     required this.id,
@@ -71,12 +93,41 @@ class ComplianceAudit {
     required this.criticalIssues,
     required this.remediationRoadmap,
     required this.createdAt,
+    this.highestRiskLevel = 'High',
   });
 
-  factory ComplianceAudit.fromJson(Map<String, dynamic> json) =>
-      _$ComplianceAuditFromJson(json);
+  factory ComplianceAudit.fromJson(Map<String, dynamic> json) {
+    return ComplianceAudit(
+      id: json['id'] as String,
+      url: json['url'] as String,
+      siteTitle: json['site_title'] as String?,
+      jurisdictions: List<String>.from(json['jurisdictions'] as List),
+      overallScore: json['overall_score'] as int,
+      jurisdictionScores: (json['jurisdiction_scores'] as Map<String, dynamic>)
+          .map((key, value) => MapEntry(
+              key,
+              ComplianceJurisdictionScore.fromJson(
+                  value as Map<String, dynamic>))),
+      criticalIssues: List<String>.from(json['critical_issues'] as List),
+      remediationRoadmap: json['remediation_roadmap'] as Map<String, dynamic>,
+      createdAt: json['created_at'] as String,
+      highestRiskLevel: json['highest_risk_level'] as String? ?? 'High',
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ComplianceAuditToJson(this);
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'url': url,
+    'site_title': siteTitle,
+    'jurisdictions': jurisdictions,
+    'overall_score': overallScore,
+    'jurisdiction_scores': jurisdictionScores
+        .map((key, value) => MapEntry(key, value.toJson())),
+    'critical_issues': criticalIssues,
+    'remediation_roadmap': remediationRoadmap,
+    'created_at': createdAt,
+    'highest_risk_level': highestRiskLevel,
+  };
 
   /// Get human-readable jurisdiction name
   static String getJurisdictionName(String code) {

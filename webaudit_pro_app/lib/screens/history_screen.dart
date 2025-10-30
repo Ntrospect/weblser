@@ -438,9 +438,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildComplianceCard(ComplianceAudit compliance) {
-    final scoreColor = compliance.overall_score >= 80
+    final scoreColor = compliance.overallScore >= 80
         ? Colors.green
-        : compliance.overall_score >= 60
+        : compliance.overallScore >= 60
             ? Colors.orange
             : Colors.red;
 
@@ -492,7 +492,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  '${compliance.overall_score}/100',
+                  '${compliance.overallScore}/100',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: scoreColor,
                     fontWeight: FontWeight.bold,
@@ -523,7 +523,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                compliance.created_at.split('T')[0],
+                compliance.createdAt.split('T')[0],
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -535,7 +535,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  compliance.highest_risk_level,
+                  compliance.highestRiskLevel,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,

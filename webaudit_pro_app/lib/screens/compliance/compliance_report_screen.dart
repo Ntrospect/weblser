@@ -180,7 +180,7 @@ class _ComplianceReportScreenState extends State<ComplianceReportScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              widget.compliance.highest_risk_level,
+              widget.compliance.highestRiskLevel,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white70,
               ),
