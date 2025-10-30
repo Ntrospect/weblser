@@ -8,6 +8,7 @@ import 'dart:async';
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
 import '../models/website_analysis.dart';
+import '../models/compliance_audit.dart';
 import '../utils/env_loader.dart';
 import '../utils/pdf_utils.dart';
 
@@ -532,6 +533,137 @@ class ApiService extends ChangeNotifier {
       );
     } catch (e) {
       throw Exception('Error upgrading to audit: $e');
+    }
+  }
+
+  // ==================== Compliance Audit Methods ====================
+
+  /// Generate a compliance audit for a website
+  Future<ComplianceAudit> generateComplianceAudit(
+    String url, {
+    List<String> jurisdictions = const ['AU', 'NZ'],
+    String? auditId,
+    int timeout = 10,
+  }) async {
+    if (_authToken == null || _authToken!.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final request = ComplianceAuditRequest(
+        url: url,
+        jurisdictions: jurisdictions,
+        timeout: timeout,
+        auditId: auditId,
+      );
+
+      final response = await http
+          .post(
+            Uri.parse('$_apiUrl/api/compliance-audit'),
+            headers: _buildHeaders(),
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(Duration(seconds: timeout + 5));
+
+      if (response.statusCode != 200) {
+        throw Exception('Compliance audit failed: ${response.body}');
+      }
+
+      final jsonData = jsonDecode(response.body);
+      return ComplianceAudit.fromJson(jsonData);
+    } catch (e) {
+      throw Exception('Error generating compliance audit: $e');
+    }
+  }
+
+  /// Retrieve a compliance audit by ID
+  Future<ComplianceAudit> getComplianceAudit(String complianceId) async {
+    if (_authToken == null || _authToken!.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl/api/compliance-audit/$complianceId'),
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to retrieve compliance audit: ${response.body}');
+      }
+
+      final jsonData = jsonDecode(response.body);
+      return ComplianceAudit.fromJson(jsonData);
+    } catch (e) {
+      throw Exception('Error retrieving compliance audit: $e');
+    }
+  }
+
+  /// Generate compliance audit PDF report
+  Future<String> generateCompliancePdf(
+    ComplianceAudit compliance, {
+    String? clientName,
+    String? companyName,
+    String? companyDetails,
+  }) async {
+    if (_authToken == null || _authToken!.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      // Build query parameters
+      final queryParams = {
+        'compliance_id': compliance.id,
+      };
+
+      if (clientName != null) queryParams['client_name'] = clientName;
+      if (companyName != null) queryParams['company_name'] = companyName;
+      if (companyDetails != null) queryParams['company_details'] = companyDetails;
+
+      final uri = Uri.parse('$_apiUrl/api/compliance/generate-pdf')
+          .replace(queryParameters: queryParams);
+
+      final response = await http.get(
+        uri,
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode != 200) {
+        throw Exception('PDF generation failed: ${response.body}');
+      }
+
+      // Save PDF to downloads
+      final directory = await getDownloadsDirectory();
+      if (directory == null) throw Exception('Downloads directory not found');
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filePath = '${directory.path}/compliance-report-$timestamp.pdf';
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+
+      return filePath;
+    } catch (e) {
+      throw Exception('Error generating PDF: $e');
+    }
+  }
+
+  /// Delete a compliance audit
+  Future<void> deleteComplianceAudit(String complianceId) async {
+    if (_authToken == null || _authToken!.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$_apiUrl/api/compliance-audit/$complianceId'),
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete compliance audit: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting compliance audit: $e');
     }
   }
 }

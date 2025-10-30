@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../models/website_analysis.dart';
@@ -30,11 +31,56 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  /// Validate URL for common issues
+  /// Returns error message if invalid, null if valid
+  String? _validateUrl(String url) {
+    if (url.isEmpty) {
+      return 'Please enter a website URL';
+    }
+
+    // Check for spaces in the URL (especially in domain)
+    if (url.contains(' ')) {
+      return 'URL cannot contain spaces. Did you mean: ${url.replaceAll(' ', '')}?';
+    }
+
+    // Try to parse as URI to check basic validity
+    try {
+      final uri = Uri.parse(url);
+
+      // Check if scheme is present
+      if (uri.scheme.isEmpty) {
+        return 'URL must start with http:// or https://';
+      }
+
+      // Check if scheme is valid
+      if (!['http', 'https'].contains(uri.scheme)) {
+        return 'URL must use http:// or https:// protocol';
+      }
+
+      // Check if host is present
+      if (uri.host.isEmpty) {
+        return 'Please enter a valid domain (e.g., example.com)';
+      }
+
+      // Check for spaces in host (should be caught above but double-check)
+      if (uri.host.contains(' ')) {
+        return 'Domain name cannot contain spaces';
+      }
+
+      return null; // Valid URL
+    } catch (e) {
+      return 'Invalid URL format. Please check and try again.';
+    }
+  }
+
   void _generateSummary() async {
     final url = _urlController.text.trim();
-    if (url.isEmpty) {
+
+    // Validate URL before attempting to process
+    final validationError = _validateUrl(url);
+    if (validationError != null) {
       setState(() {
-        _error = 'Please enter a website URL';
+        _error = validationError;
       });
       return;
     }

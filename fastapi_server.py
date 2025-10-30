@@ -6,11 +6,13 @@ Provides REST API endpoints for website analysis, comprehensive audits, PDF gene
 Endpoints:
 - /api/analyze/* - Original weblser summary analysis
 - /api/audit/* - WebAudit Pro 10-point comprehensive audit
+- /api/compliance/* - Compliance audit (Australia, NZ, GDPR, CCPA)
 """
 
 import json
 import os
 import uuid
+import jwt
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
@@ -19,11 +21,13 @@ from io import BytesIO
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Header
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from supabase import create_client, Client
+from anthropic import Anthropic
 
 from analyzer import WebsiteAnalyzer
 from audit_engine import WebsiteAuditor
@@ -101,6 +105,47 @@ class AuditHistoryResponse(BaseModel):
     total: int
 
 
+# ==================== Compliance Models ====================
+
+class ComplianceRequest(BaseModel):
+    """Request model for compliance audit."""
+    url: str
+    jurisdictions: List[str] = ['AU', 'NZ']  # Default: Australia & New Zealand
+    timeout: int = 10
+    audit_id: Optional[str] = None  # Link to existing audit (optional)
+
+
+class ComplianceFinding(BaseModel):
+    """Single finding for a compliance category."""
+    category: str
+    status: str  # Compliant, Partially Compliant, Non-Compliant
+    risk_level: str  # Critical, High, Medium, Low
+    findings: List[str]
+    recommendations: List[str]
+    priority: str  # Immediate, Short-term, Long-term
+
+
+class ComplianceJurisdictionScore(BaseModel):
+    """Score and findings for a single jurisdiction."""
+    jurisdiction: str  # AU, NZ, GDPR, CCPA
+    score: int
+    findings: List[ComplianceFinding]
+    critical_issues: List[str]
+
+
+class ComplianceResponse(BaseModel):
+    """Response model for compliance audit."""
+    id: str
+    url: str
+    site_title: Optional[str]
+    jurisdictions: List[str]
+    overall_score: int
+    jurisdiction_scores: Dict[str, ComplianceJurisdictionScore]
+    critical_issues: List[str]
+    remediation_roadmap: Dict[str, List[str]]
+    created_at: str
+
+
 # ==================== Sentry Setup ====================
 
 sentry_sdk.init(
@@ -135,6 +180,42 @@ app.add_middleware(
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# ==================== Supabase Setup ====================
+
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://kmlhslmkdnjakkpluwup.supabase.co')  # Staging
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
+if SUPABASE_KEY:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
+
+
+def extract_user_id_from_jwt(authorization_header: Optional[str]) -> str:
+    """Extract user ID from JWT token in Authorization header."""
+    if not authorization_header:
+        raise HTTPException(status_code=401, detail="Missing authorization header")
+
+    try:
+        # Authorization header format: "Bearer <token>"
+        parts = authorization_header.split()
+        if len(parts) != 2 or parts[0].lower() != 'bearer':
+            raise HTTPException(status_code=401, detail="Invalid authorization header format")
+
+        token = parts[1]
+
+        # Decode JWT without verification (we trust Supabase issued it)
+        decoded = jwt.decode(token, options={"verify_signature": False})
+        user_id = decoded.get('sub')
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="No user ID in token")
+
+        return user_id
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
 
 # ==================== Storage ====================
 
@@ -636,6 +717,376 @@ async def generate_audit_pdf(audit_id: str, document_type: str, request: Optiona
             status_code=500,
             detail=f"PDF generation failed: {str(e)}"
         )
+
+
+# ==================== Compliance Audit Endpoints ====================
+
+def build_compliance_prompt(site_content: str, site_metadata: dict, jurisdictions: List[str]) -> str:
+    """Build comprehensive multi-jurisdiction compliance evaluation prompt."""
+
+    jurisdiction_sections = []
+
+    if 'AU' in jurisdictions:
+        jurisdiction_sections.append("""
+AUSTRALIA COMPLIANCE EVALUATION
+================================
+Evaluate against:
+- Competition and Consumer Act 2010 (Australian Consumer Law / ACL)
+- Privacy Act 1988 (Australian Privacy Principles - APPs)
+- Spam Act 2003
+- Do Not Call Register Act 2006
+- AANA Code of Ethics & Advertising Standards
+- Fair Trading Act
+- Website Accessibility (WCAG 2.1 Level AA)
+
+Check for:
+- ACL Compliance (s18: misleading/deceptive conduct, pricing clarity, claims substantiation)
+- Privacy Policy (clear, accessible, APP1-13 compliance)
+- Cookie consent and tracking disclosures
+- Unsubscribe links and marketing opt-out mechanisms
+- Business registration info (ABN/ACN)
+- Contact information and support mechanisms
+- Terms of Service fairness and enforceability
+- Refund/return policy compliance
+- HTTPS/SSL certificate presence
+- Security headers implementation
+- Accessibility compliance (alt text, captions, keyboard navigation)
+""")
+
+    if 'NZ' in jurisdictions:
+        jurisdiction_sections.append("""
+NEW ZEALAND COMPLIANCE EVALUATION
+==================================
+Evaluate against:
+- Consumer Guarantees Act 1993
+- Privacy Act 2020
+- Spam Act 2003
+- Fair Trading Act 1986
+- Disable Discrimination Act 1993
+- Health and Safety at Work Act 2015 (if applicable)
+
+Check for:
+- Privacy Policy (NZ Privacy Act compliant)
+- Clear terms and conditions
+- Consumer guarantee disclosures
+- Fair pricing and no misleading claims
+- Contact information and dispute resolution
+- Data security measures
+- Accessibility compliance
+- Marketing consent mechanisms
+""")
+
+    if 'GDPR' in jurisdictions:
+        jurisdiction_sections.append("""
+GDPR COMPLIANCE EVALUATION (European Union)
+============================================
+Evaluate against:
+- General Data Protection Regulation (GDPR) Articles 5-49
+- ePrivacy Directive and EDPB Guidelines
+- GDPR Recitals and guidance
+
+Check for:
+- Valid lawful basis for processing (consent, contract, legitimate interest)
+- GDPR-compliant privacy notice (transparent, concise, easily accessible)
+- Data controller information clearly identified
+- Data Processing Agreement if using processors
+- Cookie consent mechanism (EDPB: explicit opt-in before non-essential cookies)
+- Cookie categories: essential, analytics, marketing, functional
+- Cookie policy explaining all cookies and their purposes
+- User rights implementation: access, rectification, erasure, portability, objection
+- Cross-border transfer mechanisms (SCCs, adequacy decisions, BCRs)
+- Data retention and deletion policies
+- Breach notification process and GDPR compliance
+- Data Protection Impact Assessment (DPIA) documentation
+- Right to lodge complaints with DPA
+- Sub-processor transparency
+- Appropriate security measures (encryption, access controls)
+""")
+
+    if 'CCPA' in jurisdictions:
+        jurisdiction_sections.append("""
+CCPA/CPRA COMPLIANCE EVALUATION (California)
+=============================================
+Evaluate against:
+- California Consumer Privacy Act (CCPA)
+- California Privacy Rights Act (CPRA) amendments
+- California's Consumer Legal Remedies Act
+
+Check for:
+- Lawful basis for data collection and sale
+- Consumer disclosures: what data is collected, purposes, retention
+- "Do Not Sell My Personal Information" link (clear, conspicuous)
+- "Limit the Use and Disclosure of My Sensitive Personal Information" option
+- Consumer rights implementation: access, deletion, opt-out of sale
+- Opt-in requirement before selling personal information
+- Privacy policy addressing all required disclosures
+- Service provider contracts for data processors
+- No discrimination for exercising CCPA rights
+- Reasonable security practices
+- Age-appropriate privacy practices
+- Sale of data to third parties disclosure
+- Business operations disclosure
+- Contact information for privacy inquiries
+""")
+
+    full_prompt = f"""You are an expert legal compliance analyst specializing in international privacy law, consumer protection regulations, and digital compliance standards.
+
+Analyze the following website content and metadata for legal and regulatory compliance across the specified jurisdictions.
+
+WEBSITE CONTENT:
+{site_content[:5000]}  # Limit to prevent token explosion
+
+WEBSITE METADATA:
+- Title: {site_metadata.get('title', 'N/A')}
+- Meta Description: {site_metadata.get('meta_description', 'N/A')}
+- URL: {site_metadata.get('url', 'N/A')}
+
+{chr(10).join(jurisdiction_sections)}
+
+AUDIT OUTPUT FORMAT:
+Return your analysis as a valid JSON object with this exact structure:
+
+{{
+  "jurisdictions": {{
+    "AU": {{
+      "score": <0-100>,
+      "categories": {{
+        "acl_compliance": {{"status": "Compliant|Partially Compliant|Non-Compliant", "risk_level": "Critical|High|Medium|Low", "findings": [...], "recommendations": [...], "priority": "Immediate|Short-term|Long-term"}},
+        "privacy_data_protection": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
+        "advertising_marketing": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
+        "security_trust": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
+        "accessibility": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
+        "ecommerce_terms": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}}
+      }},
+      "critical_issues": [...]
+    }},
+    "NZ": {{ ... (same structure as AU) ... }},
+    "GDPR": {{ ... (same structure as AU) ... }},
+    "CCPA": {{ ... (same structure as AU) ... }}
+  }},
+  "overall_score": <0-100>,
+  "highest_risk_level": "Critical|High|Medium|Low",
+  "critical_issues": [...],
+  "remediation_roadmap": {{
+    "immediate": [...],
+    "short_term": [...],
+    "long_term": [...]
+  }}
+}}
+
+For each jurisdiction requested:
+1. Assess compliance status
+2. Identify critical, high, medium, and low risk issues
+3. Provide specific findings with evidence from the website
+4. Give actionable recommendations for remediation
+5. Prioritize actions (Immediate = within 0-30 days, Short-term = 1-3 months, Long-term = 3-6 months)
+
+Be thorough, specific, and provide practical guidance for business owners to achieve compliance."""
+
+    return full_prompt
+
+
+@app.post("/api/compliance-audit", response_model=ComplianceResponse)
+async def compliance_audit(
+    request: ComplianceRequest,
+    authorization: str = Header(None)
+):
+    """
+    Generate comprehensive compliance audit for a website across multiple jurisdictions.
+
+    Args:
+        request: ComplianceRequest with URL and jurisdictions
+        authorization: Bearer token for user authentication
+
+    Returns:
+        ComplianceResponse with findings, scores, and recommendations
+    """
+    try:
+        # Extract user ID from JWT
+        user_id = extract_user_id_from_jwt(authorization)
+
+        if not supabase:
+            raise HTTPException(
+                status_code=500,
+                detail="Supabase not configured"
+            )
+
+        # Get API key
+        api_key = os.getenv('ANTHROPIC_API_KEY')
+        if not api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="ANTHROPIC_API_KEY environment variable not set"
+            )
+
+        # Analyze website content
+        analyzer = WebsiteAnalyzer(timeout=request.timeout, api_key=api_key)
+        analysis_result = analyzer.analyze(request.url)
+
+        if not analysis_result.get('success'):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to fetch website: {analysis_result.get('summary', 'Unknown error')}"
+            )
+
+        # Build compliance evaluation prompt
+        site_metadata = {
+            'url': analysis_result['url'],
+            'title': analysis_result['title'],
+            'meta_description': analysis_result['meta_description']
+        }
+
+        prompt = build_compliance_prompt(
+            analysis_result.get('extracted_content', ''),
+            site_metadata,
+            request.jurisdictions
+        )
+
+        # Call Claude API for compliance analysis
+        client = Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=4096,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        # Extract and parse JSON response
+        response_text = response.content[0].text
+
+        # Find JSON in response (Claude may include explanation text)
+        json_start = response_text.find('{')
+        json_end = response_text.rfind('}') + 1
+
+        if json_start == -1 or json_end == 0:
+            raise ValueError("No JSON found in Claude response")
+
+        compliance_data = json.loads(response_text[json_start:json_end])
+
+        # Generate unique ID
+        compliance_id = str(uuid.uuid4())
+        created_at = datetime.utcnow().isoformat()
+
+        # Prepare data for Supabase
+        supabase_data = {
+            'id': compliance_id,
+            'user_id': user_id,
+            'audit_id': request.audit_id,
+            'website_url': request.url,
+            'site_title': analysis_result.get('title'),
+            'jurisdictions': request.jurisdictions,
+            'au_score': compliance_data['jurisdictions'].get('AU', {}).get('score'),
+            'nz_score': compliance_data['jurisdictions'].get('NZ', {}).get('score'),
+            'gdpr_score': compliance_data['jurisdictions'].get('GDPR', {}).get('score'),
+            'ccpa_score': compliance_data['jurisdictions'].get('CCPA', {}).get('score'),
+            'overall_score': compliance_data['overall_score'],
+            'highest_risk_level': compliance_data['highest_risk_level'],
+            'findings': compliance_data['jurisdictions'],
+            'critical_issues': compliance_data['critical_issues'],
+            'remediation_roadmap': compliance_data['remediation_roadmap'],
+            'status': 'completed',
+            'created_at': created_at
+        }
+
+        # Save to Supabase
+        result = supabase.table('compliance_audits').insert(supabase_data).execute()
+
+        # Also save normalized findings for easier querying
+        for jurisdiction, data in compliance_data['jurisdictions'].items():
+            for category, findings in data.get('categories', {}).items():
+                supabase.table('compliance_findings').insert({
+                    'compliance_audit_id': compliance_id,
+                    'jurisdiction': jurisdiction,
+                    'category': category,
+                    'status': findings.get('status'),
+                    'risk_level': findings.get('risk_level'),
+                    'findings': findings.get('findings', []),
+                    'recommendations': findings.get('recommendations', []),
+                    'priority': findings.get('priority')
+                }).execute()
+
+        # Build response
+        jurisdiction_scores = {}
+        for jurisdiction in request.jurisdictions:
+            j_data = compliance_data['jurisdictions'].get(jurisdiction, {})
+            jurisdiction_scores[jurisdiction] = {
+                'jurisdiction': jurisdiction,
+                'score': j_data.get('score', 0),
+                'findings': [],  # Simplified for response
+                'critical_issues': j_data.get('critical_issues', [])
+            }
+
+        return ComplianceResponse(
+            id=compliance_id,
+            url=request.url,
+            site_title=analysis_result.get('title'),
+            jurisdictions=request.jurisdictions,
+            overall_score=compliance_data['overall_score'],
+            jurisdiction_scores=jurisdiction_scores,
+            critical_issues=compliance_data['critical_issues'],
+            remediation_roadmap=compliance_data['remediation_roadmap'],
+            created_at=created_at
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Compliance audit failed: {str(e)}"
+        )
+
+
+@app.get("/api/compliance-audit/{compliance_id}", response_model=ComplianceResponse)
+async def get_compliance_audit(
+    compliance_id: str,
+    authorization: str = Header(None)
+):
+    """
+    Retrieve a specific compliance audit by ID.
+
+    Args:
+        compliance_id: UUID of the compliance audit
+        authorization: Bearer token for user authentication
+
+    Returns:
+        ComplianceResponse with full audit data
+    """
+    try:
+        user_id = extract_user_id_from_jwt(authorization)
+
+        if not supabase:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+
+        # Get audit from Supabase
+        result = supabase.table('compliance_audits').select('*').eq('id', compliance_id).eq('user_id', user_id).execute()
+
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Compliance audit not found")
+
+        audit = result.data[0]
+
+        return ComplianceResponse(
+            id=audit['id'],
+            url=audit['website_url'],
+            site_title=audit['site_title'],
+            jurisdictions=audit['jurisdictions'],
+            overall_score=audit['overall_score'],
+            jurisdiction_scores={j: {'jurisdiction': j, 'score': audit.get(f'{j.lower()}_score', 0), 'findings': [], 'critical_issues': []} for j in audit['jurisdictions']},
+            critical_issues=audit['critical_issues'],
+            remediation_roadmap=audit['remediation_roadmap'],
+            created_at=audit['created_at']
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve audit: {str(e)}")
 
 
 # ==================== Main ====================

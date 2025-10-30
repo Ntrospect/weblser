@@ -8,6 +8,7 @@ import '../widgets/styled_card.dart';
 import '../widgets/app_badge.dart';
 import 'audit_reports_screen.dart';
 import 'criterion_detail_screen.dart';
+import 'compliance/compliance_selection_screen.dart';
 
 class AuditResultsScreen extends StatefulWidget {
   final AuditResult auditResult;
@@ -140,6 +141,20 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   style: AppButtonStyles.primaryElevatedButton(context),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Compliance Audit Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _navigateToComplianceAudit(),
+                  icon: const Icon(Icons.gavel),
+                  label: const Text(
+                    'Run Compliance Audit',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -578,6 +593,18 @@ class _AuditResultsScreenState extends State<AuditResultsScreen> {
       MaterialPageRoute(
         builder: (context) => AuditReportsScreen(
           auditResult: _auditResult,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToComplianceAudit() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ComplianceSelectionScreen(
+          auditId: _auditResult.id,
+          auditUrl: _auditResult.url,
         ),
       ),
     );
