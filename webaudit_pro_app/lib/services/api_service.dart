@@ -79,6 +79,7 @@ class ApiService extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse('$_apiUrl/api/history?limit=$limit'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -99,6 +100,7 @@ class ApiService extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse('$_apiUrl/api/analyses/$id'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -252,6 +254,7 @@ class ApiService extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse('$_apiUrl/api/audit/$auditId'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -269,6 +272,7 @@ class ApiService extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse('$_apiUrl/api/audit/history/list?limit=$limit'),
+        headers: _buildHeaders(),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
