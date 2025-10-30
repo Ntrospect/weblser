@@ -178,13 +178,13 @@ class _ComplianceSelectionScreenState extends State<ComplianceSelectionScreen> {
         child: Card(
           elevation: isSelected ? 4 : 0,
           color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.05)
+              ? const Color(0xFF51BCE0).withOpacity(0.15)
               : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
               color: isSelected
-                  ? Theme.of(context).primaryColor
+                  ? const Color(0xFF51BCE0)
                   : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
             ),
