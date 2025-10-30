@@ -1257,12 +1257,23 @@ def build_jurisdiction_scores(audit: dict) -> dict:
         critical_issues = []
 
         if jurisdiction_data:
-            # Extract findings from categories
+            # Extract findings from categories - build ComplianceFinding objects
             for category, cat_data in jurisdiction_data.get('categories', {}).items():
-                if cat_data.get('findings'):
-                    findings.extend(cat_data.get('findings', []))
-                if cat_data.get('risk_level') == 'Critical':
-                    critical_issues.extend(cat_data.get('findings', []))
+                if isinstance(cat_data, dict):
+                    # Create a ComplianceFinding-like object from category data
+                    finding_obj = {
+                        'category': category,
+                        'status': cat_data.get('status', 'Unknown'),
+                        'risk_level': cat_data.get('risk_level', 'Low'),
+                        'findings': cat_data.get('findings', []),
+                        'recommendations': cat_data.get('recommendations', []),
+                        'priority': cat_data.get('priority', 'Long-term')
+                    }
+                    findings.append(finding_obj)
+
+                    # Track critical issues separately
+                    if cat_data.get('risk_level') == 'Critical':
+                        critical_issues.extend(cat_data.get('findings', []))
 
             # Also get critical_issues if stored directly
             critical_issues.extend(jurisdiction_data.get('critical_issues', []))
