@@ -1013,7 +1013,7 @@ async def compliance_audit(
         # Call Claude API for compliance analysis
         client = Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-5",
             max_tokens=4096,
             messages=[
                 {
