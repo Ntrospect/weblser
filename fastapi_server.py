@@ -184,12 +184,19 @@ if static_dir.exists():
 # ==================== Supabase Setup ====================
 
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://kmlhslmkdnjakkpluwup.supabase.co')  # Staging
-SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')  # Anon key (subject to RLS)
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')  # Service role key (bypasses RLS)
 
 if SUPABASE_KEY:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 else:
     supabase = None
+
+# Service role client for backend operations that need to bypass RLS
+if SUPABASE_SERVICE_ROLE_KEY:
+    supabase_service: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+else:
+    supabase_service = None
 
 
 def extract_user_id_from_jwt(authorization_header: Optional[str]) -> str:
@@ -912,41 +919,43 @@ WEBSITE METADATA:
 {chr(10).join(jurisdiction_sections)}
 
 AUDIT OUTPUT FORMAT:
-Return your analysis as a valid JSON object with this exact structure:
+Return ONLY a valid JSON object with this exact structure. Ensure all string values are properly JSON-escaped (replace double quotes with \", backslashes with \\, newlines with \\n):
 
 {{
   "jurisdictions": {{
     "AU": {{
-      "score": <0-100>,
+      "score": <0-100 integer>,
       "categories": {{
-        "acl_compliance": {{"status": "Compliant|Partially Compliant|Non-Compliant", "risk_level": "Critical|High|Medium|Low", "findings": [...], "recommendations": [...], "priority": "Immediate|Short-term|Long-term"}},
+        "acl_compliance": {{"status": "Compliant|Partially Compliant|Non-Compliant", "risk_level": "Critical|High|Medium|Low", "findings": ["finding 1", "finding 2"], "recommendations": ["rec 1", "rec 2"], "priority": "Immediate|Short-term|Long-term"}},
         "privacy_data_protection": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
         "advertising_marketing": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
         "security_trust": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
         "accessibility": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}},
         "ecommerce_terms": {{"status": "...", "risk_level": "...", "findings": [...], "recommendations": [...], "priority": "..."}}
       }},
-      "critical_issues": [...]
+      "critical_issues": ["issue 1", "issue 2"]
     }},
     "NZ": {{ ... (same structure as AU) ... }},
     "GDPR": {{ ... (same structure as AU) ... }},
     "CCPA": {{ ... (same structure as AU) ... }}
   }},
-  "overall_score": <0-100>,
+  "overall_score": <0-100 integer>,
   "highest_risk_level": "Critical|High|Medium|Low",
-  "critical_issues": [...],
+  "critical_issues": ["issue 1", "issue 2"],
   "remediation_roadmap": {{
-    "immediate": [...],
-    "short_term": [...],
-    "long_term": [...]
+    "immediate": ["action 1", "action 2"],
+    "short_term": ["action 1", "action 2"],
+    "long_term": ["action 1", "action 2"]
   }}
 }}
+
+IMPORTANT: Return ONLY valid JSON with no additional text before or after. All string values must be properly escaped for JSON.
 
 For each jurisdiction requested:
 1. Assess compliance status
 2. Identify critical, high, medium, and low risk issues
-3. Provide specific findings with evidence from the website
-4. Give actionable recommendations for remediation
+3. Provide specific findings with evidence from the website (keep findings concise, max 200 chars)
+4. Give actionable recommendations for remediation (keep recommendations concise, max 200 chars)
 5. Prioritize actions (Immediate = within 0-30 days, Short-term = 1-3 months, Long-term = 3-6 months)
 
 Be thorough, specific, and provide practical guidance for business owners to achieve compliance."""
@@ -997,15 +1006,30 @@ async def compliance_audit(
                 detail=f"Failed to fetch website: {analysis_result.get('summary', 'Unknown error')}"
             )
 
-        # Build compliance evaluation prompt
+        # Helper function to clean quoted strings from analyzer output
+        def clean_value(value):
+            """Remove extra quotes that analyzer sometimes adds"""
+            if isinstance(value, str):
+                # Remove surrounding single quotes if present
+                if value.startswith("'") and value.endswith("'"):
+                    value = value[1:-1]
+                # Remove surrounding double quotes if present
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+            return value
+
+        # Build compliance evaluation prompt with cleaned values
         site_metadata = {
-            'url': analysis_result['url'],
-            'title': analysis_result['title'],
-            'meta_description': analysis_result['meta_description']
+            'url': clean_value(analysis_result.get('url', '')),
+            'title': clean_value(analysis_result.get('title', '')),
+            'meta_description': clean_value(analysis_result.get('meta_description', ''))
         }
 
+        # Also clean extracted_content before using in prompt
+        extracted_content = clean_value(analysis_result.get('extracted_content', ''))
+
         prompt = build_compliance_prompt(
-            analysis_result.get('extracted_content', ''),
+            extracted_content,
             site_metadata,
             request.jurisdictions
         )
@@ -1014,7 +1038,7 @@ async def compliance_audit(
         client = Anthropic(api_key=api_key)
         response = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=4096,
+            max_tokens=8192,
             messages=[
                 {
                     "role": "user",
@@ -1026,14 +1050,116 @@ async def compliance_audit(
         # Extract and parse JSON response
         response_text = response.content[0].text
 
+        # CRITICAL FIX: Strip markdown code fence markers if present (```json ... ```)
+        response_text = response_text.strip()
+        if response_text.startswith('```'):
+            # Remove opening code fence (with optional language specifier)
+            start_fence = response_text.find('\n')
+            if start_fence != -1:
+                response_text = response_text[start_fence + 1:]
+        if response_text.endswith('```'):
+            response_text = response_text[:-3].strip()
+
+        # Strip surrounding quotes (single or double) that wrap the JSON
+        response_text = response_text.strip()
+        # Keep stripping matching quotes from outside until we hit {
+        while response_text and response_text[0] in ("'", '"'):
+            quote_char = response_text[0]
+            # Check if the matching quote exists at the end
+            if response_text.endswith(quote_char) and len(response_text) > 1:
+                response_text = response_text[1:-1].strip()
+            else:
+                # Mismatched or single quote - just strip the leading one
+                response_text = response_text[1:].strip()
+                break
+
         # Find JSON in response (Claude may include explanation text)
         json_start = response_text.find('{')
-        json_end = response_text.rfind('}') + 1
-
-        if json_start == -1 or json_end == 0:
+        if json_start == -1:
+            print(f"ERROR: No JSON found in Claude response. Response: {response_text[:500]}")
             raise ValueError("No JSON found in Claude response")
 
-        compliance_data = json.loads(response_text[json_start:json_end])
+        # Count braces to find the matching closing brace
+        brace_count = 0
+        in_string = False
+        escape_next = False
+        json_end = -1
+
+        for i in range(json_start, len(response_text)):
+            char = response_text[i]
+
+            # Handle escape sequences in strings
+            if escape_next:
+                escape_next = False
+                continue
+
+            if char == '\\':
+                escape_next = True
+                continue
+
+            # Track if we're inside a string
+            if char == '"':
+                in_string = not in_string
+                continue
+
+            # Only count braces when not in a string
+            if not in_string:
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        json_end = i + 1
+                        break
+
+        # If brace counting failed, try to recover by closing open braces and strings
+        if json_end == -1:
+            print(f"WARNING: Unclosed braces/strings detected (final brace count: {brace_count}, in_string: {in_string}). Attempting recovery...")
+            # The JSON is incomplete - close any unterminated string first
+            if in_string:
+                response_text = response_text + '"'
+            # Then close remaining braces
+            if brace_count > 0:
+                response_text = response_text + ('}' * brace_count)
+            json_end = len(response_text)
+
+        json_str = response_text[json_start:json_end]
+
+        # Log the extracted JSON for debugging if there are issues
+        print(f"Extracted JSON length: {len(json_str)}")
+        print(f"JSON preview (first 500 chars): {json_str[:500]}")
+
+        try:
+            # Try to parse JSON
+            compliance_data = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            # Log detailed error information
+            error_pos = e.pos if hasattr(e, 'pos') else 'unknown'
+            error_line = e.lineno if hasattr(e, 'lineno') else 'unknown'
+            error_col = e.colno if hasattr(e, 'colno') else 'unknown'
+
+            print(f"JSON Parsing Error at position {error_pos}, line {error_line}, col {error_col}")
+            print(f"Error message: {str(e)}")
+
+            # Show context around the error position
+            if error_pos != 'unknown' and isinstance(error_pos, int):
+                start = max(0, error_pos - 150)
+                end = min(len(json_str), error_pos + 150)
+                error_context = json_str[start:end]
+                print(f"Context around error (chars {start}-{end}):")
+                print(error_context)
+                print(f"Error position marker: {' ' * (error_pos - start)}^")
+
+            # Show character at error position
+            if error_pos != 'unknown' and isinstance(error_pos, int) and error_pos < len(json_str):
+                char_at_error = json_str[error_pos]
+                print(f"Character at error position: '{char_at_error}' (ord={ord(char_at_error)})")
+
+            print(f"\nFull JSON length: {len(json_str)} characters")
+            print(f"JSON start (first 300 chars):\n{json_str[:300]}")
+            print(f"\nJSON end (last 300 chars):\n{json_str[-300:]}")
+
+            raise ValueError(f"Failed to parse compliance response JSON at position {error_pos}: {str(e)}")
 
         # Generate unique ID
         compliance_id = str(uuid.uuid4())
@@ -1060,13 +1186,18 @@ async def compliance_audit(
             'created_at': created_at
         }
 
-        # Save to Supabase
-        result = supabase.table('compliance_audits').insert(supabase_data).execute()
+        # Save to Supabase (RLS policies allow user to insert their own data via anon key)
+        # Use service role if available, otherwise use regular client
+        save_client = supabase_service if supabase_service else supabase
+        if not save_client:
+            raise HTTPException(status_code=500, detail="Supabase not configured")
+
+        result = save_client.table('compliance_audits').insert(supabase_data).execute()
 
         # Also save normalized findings for easier querying
         for jurisdiction, data in compliance_data['jurisdictions'].items():
             for category, findings in data.get('categories', {}).items():
-                supabase.table('compliance_findings').insert({
+                save_client.table('compliance_findings').insert({
                     'compliance_audit_id': compliance_id,
                     'jurisdiction': jurisdiction,
                     'category': category,
@@ -1128,11 +1259,13 @@ async def get_compliance_audit_history(
     try:
         user_id = extract_user_id_from_jwt(authorization)
 
-        if not supabase:
+        # Use service role client for reading (bypasses RLS auth check, but we verify user_id manually)
+        query_client = supabase_service if supabase_service else supabase
+        if not query_client:
             raise HTTPException(status_code=500, detail="Supabase not configured")
 
-        # Get compliance audits from Supabase, sorted by newest first
-        result = (supabase
+        # Get compliance audits from Supabase, sorted by newest first (using service role to bypass RLS)
+        result = (query_client
                  .table('compliance_audits')
                  .select('*')
                  .eq('user_id', user_id)
@@ -1180,11 +1313,13 @@ async def get_compliance_audit(
     try:
         user_id = extract_user_id_from_jwt(authorization)
 
-        if not supabase:
+        # Use service role client for reading (bypasses RLS auth check, but we verify user_id manually)
+        query_client = supabase_service if supabase_service else supabase
+        if not query_client:
             raise HTTPException(status_code=500, detail="Supabase not configured")
 
-        # Get audit from Supabase
-        result = supabase.table('compliance_audits').select('*').eq('id', compliance_id).eq('user_id', user_id).execute()
+        # Get audit from Supabase using service role to bypass RLS
+        result = query_client.table('compliance_audits').select('*').eq('id', compliance_id).eq('user_id', user_id).execute()
 
         if not result.data:
             raise HTTPException(status_code=404, detail="Compliance audit not found")
@@ -1233,11 +1368,13 @@ async def generate_compliance_pdf(
     try:
         user_id = extract_user_id_from_jwt(authorization)
 
-        if not supabase:
+        # Use service role client for reading (bypasses RLS auth check, but we verify user_id manually)
+        query_client = supabase_service if supabase_service else supabase
+        if not query_client:
             raise HTTPException(status_code=500, detail="Supabase not configured")
 
-        # Get compliance audit from Supabase
-        result = supabase.table('compliance_audits').select('*').eq('id', compliance_id).eq('user_id', user_id).execute()
+        # Get compliance audit from Supabase using service role to bypass RLS
+        result = query_client.table('compliance_audits').select('*').eq('id', compliance_id).eq('user_id', user_id).execute()
 
         if not result.data:
             raise HTTPException(status_code=404, detail="Compliance audit not found")

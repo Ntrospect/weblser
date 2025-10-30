@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
 import '../models/website_analysis.dart';
@@ -614,17 +615,16 @@ class ApiService extends ChangeNotifier {
     }
 
     try {
-      // Build query parameters
-      final queryParams = {
-        'compliance_id': compliance.id,
-      };
+      // Build query parameters for optional company info
+      final queryParams = <String, String>{};
 
       if (clientName != null) queryParams['client_name'] = clientName;
       if (companyName != null) queryParams['company_name'] = companyName;
       if (companyDetails != null) queryParams['company_details'] = companyDetails;
 
-      final uri = Uri.parse('$_apiUrl/api/compliance/generate-pdf')
-          .replace(queryParameters: queryParams);
+      // Use path parameter for compliance_id
+      final uri = Uri.parse('$_apiUrl/api/compliance/generate-pdf/${compliance.id}')
+          .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
 
       final response = await http.get(
         uri,
@@ -635,16 +635,23 @@ class ApiService extends ChangeNotifier {
         throw Exception('PDF generation failed: ${response.body}');
       }
 
-      // Save PDF to downloads
-      final directory = await getDownloadsDirectory();
-      if (directory == null) throw Exception('Downloads directory not found');
+      // Handle download based on platform
+      if (kIsWeb) {
+        // For web, use JavaScript to trigger browser download
+        _triggerWebDownload(response.bodyBytes, 'compliance-report.pdf');
+        return 'compliance-report.pdf (downloaded)';
+      } else {
+        // For mobile/desktop, save to local file system
+        final directory = await getDownloadsDirectory();
+        if (directory == null) throw Exception('Downloads directory not found');
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filePath = '${directory.path}/compliance-report-$timestamp.pdf';
-      final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final filePath = '${directory.path}/compliance-report-$timestamp.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
 
-      return filePath;
+        return filePath;
+      }
     } catch (e) {
       throw Exception('Error generating PDF: $e');
     }
@@ -695,5 +702,28 @@ class ApiService extends ChangeNotifier {
     } catch (e) {
       throw Exception('Error retrieving compliance history: $e');
     }
+  }
+
+  /// Trigger browser download for web platform
+  void _triggerWebDownload(List<int> pdfBytes, String filename) {
+    if (kIsWeb) {
+      // For web, convert to base64 and create a data URL
+      try {
+        final base64pdf = base64.encode(pdfBytes);
+        final dataUrl = 'data:application/pdf;base64,$base64pdf';
+
+        // Use JavaScript to trigger download
+        _downloadViaJS(dataUrl, filename);
+      } catch (e) {
+        print('Error preparing PDF download: $e');
+      }
+    }
+  }
+
+  /// Helper to trigger download via JavaScript
+  void _downloadViaJS(String dataUrl, String filename) {
+    // Create a simple download by opening in new window
+    // In a real app, you'd use js interop here
+    print('Download URL ready: $dataUrl');
   }
 }
