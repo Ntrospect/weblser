@@ -178,15 +178,15 @@ class _ComplianceSelectionScreenState extends State<ComplianceSelectionScreen> {
         child: Card(
           elevation: isSelected ? 1 : 0,
           color: isSelected
-              ? const Color(0xFF51BCE0).withOpacity(0.12)
+              ? Colors.blue.withOpacity(0.1)
               : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
               color: isSelected
-                  ? const Color(0xFF51BCE0)
+                  ? Colors.blue.withOpacity(0.5)
                   : Colors.grey[300]!,
-              width: isSelected ? 3 : 1,
+              width: isSelected ? 2 : 1,
             ),
           ),
           child: InkWell(
