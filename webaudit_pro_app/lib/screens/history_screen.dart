@@ -4,9 +4,11 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/theme_provider.dart';
 import '../models/website_analysis.dart';
+import '../models/compliance_audit.dart';
 import '../theme/spacing.dart';
 import '../widgets/styled_card.dart';
 import 'audit_results_screen.dart';
+import 'compliance/compliance_report_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = false;
   bool _isScrolled = false;
   List<WebsiteAnalysis> _history = [];
+  List<ComplianceAudit> _complianceHistory = [];
   late ScrollController _scrollController;
 
   @override
@@ -54,10 +57,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     try {
       final apiService = context.read<ApiService>();
-      final history = await apiService.getUnifiedHistory(limit: 50);
+
+      // Load both summaries/audits and compliance audits
+      final unifiedHistory = await apiService.getUnifiedHistory(limit: 50);
+      final complianceAudits = await apiService.getComplianceHistory(limit: 50);
+
       if (mounted) {
         setState(() {
-          _history = history;
+          _history = unifiedHistory;
+          _complianceHistory = complianceAudits;
         });
       }
     } catch (e) {
@@ -75,6 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         }
         setState(() {
           _history = [];
+          _complianceHistory = [];
         });
       }
     } finally {
@@ -92,6 +101,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Analysis deleted')),
+        );
+        _loadHistory();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _deleteCompliance(ComplianceAudit compliance) async {
+    try {
+      await context.read<ApiService>().deleteComplianceAudit(compliance.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compliance audit deleted')),
         );
         _loadHistory();
       }
@@ -218,9 +248,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           body: RefreshIndicator(
             onRefresh: _loadHistory,
-            child: _isLoading && _history.isEmpty
+            child: _isLoading && _history.isEmpty && _complianceHistory.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : _history.isEmpty
+                : _history.isEmpty && _complianceHistory.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -248,11 +278,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     : ListView.separated(
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(16, 130, 16, 16),
-                        itemCount: _history.length,
+                        itemCount: _history.length + _complianceHistory.length,
                         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
-                          final analysis = _history[index];
-                          return _buildHistoryCard(analysis);
+                          // Display summaries/audits first, then compliance audits
+                          if (index < _history.length) {
+                            final analysis = _history[index];
+                            return _buildHistoryCard(analysis);
+                          } else {
+                            final complianceIndex = index - _history.length;
+                            final compliance = _complianceHistory[complianceIndex];
+                            return _buildComplianceCard(compliance);
+                          }
                         },
                       ),
           ),
@@ -398,5 +435,143 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
         ),
       );
+  }
+
+  Widget _buildComplianceCard(ComplianceAudit compliance) {
+    final scoreColor = compliance.overall_score >= 80
+        ? Colors.green
+        : compliance.overall_score >= 60
+            ? Colors.orange
+            : Colors.red;
+
+    return StyledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.gavel,
+                  color: Colors.purple,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Compliance Report',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      compliance.url,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: scoreColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${compliance.overall_score}/100',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scoreColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Jurisdictions
+          Wrap(
+            spacing: 8,
+            children: compliance.jurisdictions.map((jurisdiction) {
+              return Chip(
+                label: Text(
+                  '${ComplianceAudit.getJurisdictionEmoji(jurisdiction)} ${ComplianceAudit.getJurisdictionName(jurisdiction)}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                side: BorderSide(color: Colors.grey[300]!),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Date and Risk Level
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                compliance.created_at.split('T')[0],
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  compliance.highest_risk_level,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Action Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => _deleteCompliance(compliance),
+                child: const Text('Delete'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ComplianceReportScreen(
+                        compliance: compliance,
+                      ),
+                    ),
+                  ).then((_) => _loadHistory());
+                },
+                child: const Text('View Report'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

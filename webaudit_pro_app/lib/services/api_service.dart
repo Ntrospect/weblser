@@ -666,4 +666,31 @@ class ApiService extends ChangeNotifier {
       throw Exception('Error deleting compliance audit: $e');
     }
   }
+
+  /// Get compliance audit history (list of compliance audits)
+  Future<List<ComplianceAudit>> getComplianceHistory({int limit = 100}) async {
+    if (_authToken == null || _authToken!.isEmpty) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl/api/compliance-audit/history/list?limit=$limit'),
+        headers: _buildHeaders(),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        // If 404 or 401, treat as empty list (user may not have compliance audits)
+        if (response.statusCode == 404 || response.statusCode == 401) {
+          return [];
+        }
+        throw Exception('Failed to retrieve compliance history: ${response.body}');
+      }
+
+      final jsonData = jsonDecode(response.body) as List;
+      return jsonData.map((item) => ComplianceAudit.fromJson(item)).toList();
+    } catch (e) {
+      throw Exception('Error retrieving compliance history: $e');
+    }
+  }
 }
