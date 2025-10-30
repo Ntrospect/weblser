@@ -1241,6 +1241,42 @@ async def compliance_audit(
         )
 
 
+def build_jurisdiction_scores(audit: dict) -> dict:
+    """
+    Helper function to build jurisdiction_scores from saved audit data.
+    Extracts jurisdiction-specific findings and critical issues from the stored findings.
+    """
+    jurisdiction_scores = {}
+    findings_data = audit.get('findings', {})
+
+    for jurisdiction in audit.get('jurisdictions', []):
+        jurisdiction_data = findings_data.get(jurisdiction, {})
+
+        # Extract findings and critical issues from the saved data
+        findings = []
+        critical_issues = []
+
+        if jurisdiction_data:
+            # Extract findings from categories
+            for category, cat_data in jurisdiction_data.get('categories', {}).items():
+                if cat_data.get('findings'):
+                    findings.extend(cat_data.get('findings', []))
+                if cat_data.get('risk_level') == 'Critical':
+                    critical_issues.extend(cat_data.get('findings', []))
+
+            # Also get critical_issues if stored directly
+            critical_issues.extend(jurisdiction_data.get('critical_issues', []))
+
+        jurisdiction_scores[jurisdiction] = {
+            'jurisdiction': jurisdiction,
+            'score': audit.get(f'{jurisdiction.lower()}_score', 0),
+            'findings': findings,
+            'critical_issues': list(set(critical_issues))  # Remove duplicates
+        }
+
+    return jurisdiction_scores
+
+
 @app.get("/api/compliance-audit/history/list")
 async def get_compliance_audit_history(
     authorization: str = Header(None),
@@ -1281,7 +1317,7 @@ async def get_compliance_audit_history(
                 site_title=audit['site_title'],
                 jurisdictions=audit['jurisdictions'],
                 overall_score=audit['overall_score'],
-                jurisdiction_scores={j: {'jurisdiction': j, 'score': audit.get(f'{j.lower()}_score', 0), 'findings': [], 'critical_issues': []} for j in audit['jurisdictions']},
+                jurisdiction_scores=build_jurisdiction_scores(audit),
                 critical_issues=audit['critical_issues'],
                 remediation_roadmap=audit['remediation_roadmap'],
                 created_at=audit['created_at']
@@ -1332,7 +1368,7 @@ async def get_compliance_audit(
             site_title=audit['site_title'],
             jurisdictions=audit['jurisdictions'],
             overall_score=audit['overall_score'],
-            jurisdiction_scores={j: {'jurisdiction': j, 'score': audit.get(f'{j.lower()}_score', 0), 'findings': [], 'critical_issues': []} for j in audit['jurisdictions']},
+            jurisdiction_scores=build_jurisdiction_scores(audit),
             critical_issues=audit['critical_issues'],
             remediation_roadmap=audit['remediation_roadmap'],
             created_at=audit['created_at']
