@@ -175,14 +175,13 @@ class _ComplianceSelectionScreenState extends State<ComplianceSelectionScreen> {
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: Card(
-          elevation: isSelected ? 1 : 0,
-          color: isSelected
-              ? Colors.blue.withOpacity(0.1)
-              : Colors.transparent,
-          shape: RoundedRectangleBorder(
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.blue.withOpacity(0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
+            border: Border.all(
               color: isSelected
                   ? Colors.blue.withOpacity(0.5)
                   : Colors.grey[300]!,
