@@ -285,17 +285,21 @@ async def sentry_debug():
 
 
 @app.post("/api/analyze", response_model=AnalysisResult)
-async def analyze_url(request: AnalyzeRequest):
+async def analyze_url(request: AnalyzeRequest, authorization: str = Header(None)):
     """
     Analyze a website and generate a summary.
 
     Args:
         request: AnalyzeRequest with URL and optional timeout
+        authorization: JWT token from Authorization header
 
     Returns:
         AnalysisResult with ID, URL, title, description, and summary
     """
     try:
+        # Extract user_id from JWT token
+        user_id = extract_user_id_from_jwt(authorization)
+
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
             raise HTTPException(
@@ -310,9 +314,10 @@ async def analyze_url(request: AnalyzeRequest):
         analysis_id = str(uuid.uuid4())
         created_at = datetime.utcnow().isoformat()
 
-        # Store in history
+        # Store in history with user_id
         history = get_history()
         history[analysis_id] = {
+            "user_id": user_id,
             "url": result['url'],
             "title": result['title'],
             "meta_description": result['meta_description'],
@@ -332,6 +337,8 @@ async def analyze_url(request: AnalyzeRequest):
             created_at=created_at
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -362,34 +369,51 @@ async def get_analysis(analysis_id: str):
 
 
 @app.get("/api/history", response_model=HistoryResponse)
-async def get_history_list(limit: int = Query(100, ge=1, le=1000)):
+async def get_history_list(authorization: str = Header(None), limit: int = Query(100, ge=1, le=1000)):
     """
-    Get analysis history.
+    Get analysis history for authenticated user.
 
     Args:
+        authorization: JWT token from Authorization header
         limit: Maximum number of analyses to return
 
     Returns:
         HistoryResponse with list of analyses
     """
-    history = get_history()
+    try:
+        # Extract user_id from JWT token
+        user_id = extract_user_id_from_jwt(authorization)
 
-    # Sort by created_at (newest first)
-    sorted_analyses = sorted(
-        history.items(),
-        key=lambda x: x[1]['created_at'],
-        reverse=True
-    )[:limit]
+        history = get_history()
 
-    analyses = [
-        AnalysisResult(id=aid, **data)
-        for aid, data in sorted_analyses
-    ]
+        # Filter by user_id and sort by created_at (newest first)
+        user_analyses = [
+            (aid, data) for aid, data in history.items()
+            if data.get('user_id') == user_id
+        ]
 
-    return HistoryResponse(
-        analyses=analyses,
-        total=len(history)
-    )
+        sorted_analyses = sorted(
+            user_analyses,
+            key=lambda x: x[1]['created_at'],
+            reverse=True
+        )[:limit]
+
+        analyses = [
+            AnalysisResult(id=aid, **{k: v for k, v in data.items() if k != 'user_id'})
+            for aid, data in sorted_analyses
+        ]
+
+        return HistoryResponse(
+            analyses=analyses,
+            total=len(user_analyses)
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get history: {str(e)}"
+        )
 
 
 @app.post("/api/pdf")
@@ -487,17 +511,21 @@ async def clear_history():
 # ==================== WebAudit Pro - Audit Endpoints ====================
 
 @app.post("/api/audit/analyze", response_model=AuditResponse)
-async def audit_website(request: AuditRequest):
+async def audit_website(request: AuditRequest, authorization: str = Header(None)):
     """
     Perform comprehensive 10-point audit of a website.
 
     Args:
         request: AuditRequest with URL and optional settings
+        authorization: JWT token from Authorization header
 
     Returns:
         AuditResponse with overall score, 10 criterion scores, and recommendations
     """
     try:
+        # Extract user_id from JWT token
+        user_id = extract_user_id_from_jwt(authorization)
+
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
             raise HTTPException(
@@ -513,8 +541,9 @@ async def audit_website(request: AuditRequest):
 
         # Convert audit result to dictionary
         audit_dict = auditor.to_dict(audit_result)
+        audit_dict['user_id'] = user_id
 
-        # Store in history
+        # Store in history with user_id
         audit_history = get_audit_history()
         audit_history[audit_id] = audit_dict
         save_audit_history(audit_history)
@@ -532,6 +561,8 @@ async def audit_website(request: AuditRequest):
             priority_recommendations=audit_result.priority_recommendations
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -540,56 +571,93 @@ async def audit_website(request: AuditRequest):
 
 
 @app.get("/api/audit/{audit_id}", response_model=AuditResponse)
-async def get_audit(audit_id: str):
+async def get_audit(audit_id: str, authorization: str = Header(None)):
     """
-    Retrieve a specific audit by ID.
+    Retrieve a specific audit by ID (authenticated user only).
 
     Args:
         audit_id: UUID of the audit
+        authorization: JWT token from Authorization header
 
     Returns:
         AuditResponse
     """
-    audit_history = get_audit_history()
-    if audit_id not in audit_history:
-        raise HTTPException(status_code=404, detail="Audit not found")
+    try:
+        # Extract user_id from JWT token
+        user_id = extract_user_id_from_jwt(authorization)
 
-    audit_data = audit_history[audit_id]
-    return AuditResponse(
-        id=audit_id,
-        **audit_data
-    )
+        audit_history = get_audit_history()
+        if audit_id not in audit_history:
+            raise HTTPException(status_code=404, detail="Audit not found")
+
+        audit_data = audit_history[audit_id]
+
+        # Verify user_id matches
+        if audit_data.get('user_id') != user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to access this audit")
+
+        # Remove user_id from response
+        audit_data_clean = {k: v for k, v in audit_data.items() if k != 'user_id'}
+
+        return AuditResponse(
+            id=audit_id,
+            **audit_data_clean
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve audit: {str(e)}"
+        )
 
 
 @app.get("/api/audit/history/list", response_model=AuditHistoryResponse)
-async def get_audit_history_list(limit: int = Query(100, ge=1, le=1000)):
+async def get_audit_history_list(authorization: str = Header(None), limit: int = Query(100, ge=1, le=1000)):
     """
-    Get audit history.
+    Get audit history for authenticated user.
 
     Args:
+        authorization: JWT token from Authorization header
         limit: Maximum number of audits to return
 
     Returns:
         AuditHistoryResponse with list of audits
     """
-    audit_history = get_audit_history()
+    try:
+        # Extract user_id from JWT token
+        user_id = extract_user_id_from_jwt(authorization)
 
-    # Sort by audit_timestamp (newest first)
-    sorted_audits = sorted(
-        audit_history.items(),
-        key=lambda x: x[1]['audit_timestamp'],
-        reverse=True
-    )[:limit]
+        audit_history = get_audit_history()
 
-    audits = [
-        AuditResponse(id=aid, **data)
-        for aid, data in sorted_audits
-    ]
+        # Filter by user_id and sort by audit_timestamp (newest first)
+        user_audits = [
+            (aid, data) for aid, data in audit_history.items()
+            if data.get('user_id') == user_id
+        ]
 
-    return AuditHistoryResponse(
-        audits=audits,
-        total=len(audit_history)
-    )
+        sorted_audits = sorted(
+            user_audits,
+            key=lambda x: x[1]['audit_timestamp'],
+            reverse=True
+        )[:limit]
+
+        audits = [
+            AuditResponse(id=aid, **{k: v for k, v in data.items() if k != 'user_id'})
+            for aid, data in sorted_audits
+        ]
+
+        return AuditHistoryResponse(
+            audits=audits,
+            total=len(user_audits)
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get audit history: {str(e)}"
+        )
 
 
 @app.delete("/api/audit/{audit_id}")
