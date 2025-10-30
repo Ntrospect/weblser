@@ -176,9 +176,9 @@ class _ComplianceSelectionScreenState extends State<ComplianceSelectionScreen> {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: Card(
-          elevation: isSelected ? 4 : 0,
+          elevation: isSelected ? 1 : 0,
           color: isSelected
-              ? const Color(0xFF51BCE0).withOpacity(0.40)
+              ? const Color(0xFF51BCE0).withOpacity(0.12)
               : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -186,7 +186,7 @@ class _ComplianceSelectionScreenState extends State<ComplianceSelectionScreen> {
               color: isSelected
                   ? const Color(0xFF51BCE0)
                   : Colors.grey[300]!,
-              width: isSelected ? 2 : 1,
+              width: isSelected ? 3 : 1,
             ),
           ),
           child: InkWell(
