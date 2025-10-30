@@ -11,6 +11,7 @@ import '../models/website_analysis.dart';
 import '../models/compliance_audit.dart';
 import '../utils/env_loader.dart';
 import '../utils/pdf_utils.dart';
+import '../config/environment.dart';
 
 class ApiService extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -379,8 +380,10 @@ class ApiService extends ChangeNotifier {
       try {
         debugPrint('🗑️ Clearing WebAudit Pro audit history...');
 
-        // Defensive null checks
-        final baseUrl = _apiUrl ?? 'https://api.websler.pro';
+        // Defensive null checks with environment-aware fallback
+        final baseUrl = _apiUrl ?? (AppConfig.environment == Environment.staging
+            ? 'https://140.99.254.83'
+            : 'https://api.websler.pro');
         final headers = _buildHeaders() ?? {'Content-Type': 'application/json'};
         final url = '$baseUrl/api/audit/history/clear';
 

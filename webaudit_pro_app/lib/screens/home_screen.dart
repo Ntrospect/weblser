@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Validate URL for common issues
   /// Returns error message if invalid, null if valid
+  /// Auto-prepends https:// if no scheme is present
   String? _validateUrl(String url) {
     if (url.isEmpty) {
       return 'Please enter a website URL';
@@ -43,11 +44,17 @@ class _HomeScreenState extends State<HomeScreen> {
       return 'URL cannot contain spaces. Did you mean: ${url.replaceAll(' ', '')}?';
     }
 
+    // Auto-prepend https:// if no scheme is present
+    String processedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      processedUrl = 'https://$url';
+    }
+
     // Try to parse as URI to check basic validity
     try {
-      final uri = Uri.parse(url);
+      final uri = Uri.parse(processedUrl);
 
-      // Check if scheme is present
+      // Check if scheme is present (should always be true now)
       if (uri.scheme.isEmpty) {
         return 'URL must start with http:// or https://';
       }
@@ -66,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (uri.host.contains(' ')) {
         return 'Domain name cannot contain spaces';
       }
+
+      // Store the processed URL back to the controller so it displays the full URL
+      _urlController.text = processedUrl;
 
       return null; // Valid URL
     } catch (e) {
