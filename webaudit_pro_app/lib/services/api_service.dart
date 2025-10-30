@@ -546,7 +546,7 @@ class ApiService extends ChangeNotifier {
     String url, {
     List<String> jurisdictions = const ['AU', 'NZ'],
     String? auditId,
-    int timeout = 10,
+    int timeout = 360,
   }) async {
     if (_authToken == null || _authToken!.isEmpty) {
       throw Exception('User not authenticated');
