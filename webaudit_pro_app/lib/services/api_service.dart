@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:html' as html;
 import '../models/analysis.dart';
 import '../models/audit_result.dart';
 import '../models/website_analysis.dart';
@@ -722,8 +723,33 @@ class ApiService extends ChangeNotifier {
 
   /// Helper to trigger download via JavaScript
   void _downloadViaJS(String dataUrl, String filename) {
-    // Create a simple download by opening in new window
-    // In a real app, you'd use js interop here
-    print('Download URL ready: $dataUrl');
+    if (kIsWeb) {
+      try {
+        // Create an anchor element to trigger the download
+        final anchor = html.AnchorElement()
+          ..href = dataUrl
+          ..download = filename
+          ..style.display = 'none';
+
+        // Append to document body
+        html.window.document.documentElement?.append(anchor);
+
+        // Trigger the download
+        anchor.click();
+
+        // Clean up - remove the anchor from DOM after a short delay
+        Future.delayed(Duration(milliseconds: 200), () {
+          try {
+            anchor.remove();
+          } catch (e) {
+            print('Note: Could not remove download element: $e');
+          }
+        });
+
+        print('PDF download triggered: $filename');
+      } catch (e) {
+        print('Error triggering PDF download: $e');
+      }
+    }
   }
 }
