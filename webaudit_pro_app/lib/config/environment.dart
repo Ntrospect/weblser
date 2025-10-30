@@ -16,12 +16,29 @@ class SupabaseConfig {
 
 /// App configuration that automatically detects environment
 class AppConfig {
-  /// Determines environment based on build mode
-  /// Debug builds (flutter run) use staging
-  /// Release builds (flutter build web) use production
-  static const Environment environment = kDebugMode
-      ? Environment.staging
-      : Environment.production;
+  /// Determines environment based on:
+  /// 1. Build-time --dart-define=ENVIRONMENT (takes precedence)
+  /// 2. Debug builds (flutter run) use staging
+  /// 3. Release builds (flutter build web) use production by default
+  static Environment get environment {
+    // First check if ENVIRONMENT was passed via --dart-define
+    const String envFromDefine = String.fromEnvironment('ENVIRONMENT', defaultValue: '');
+
+    if (envFromDefine.isNotEmpty) {
+      if (envFromDefine == 'staging') {
+        return Environment.staging;
+      } else if (envFromDefine == 'production') {
+        return Environment.production;
+      }
+    }
+
+    // Fall back to build mode detection
+    if (kDebugMode) {
+      return Environment.staging;
+    } else {
+      return Environment.production;
+    }
+  }
 
   /// Get the appropriate Supabase configuration for current environment
   static SupabaseConfig get supabaseConfig {

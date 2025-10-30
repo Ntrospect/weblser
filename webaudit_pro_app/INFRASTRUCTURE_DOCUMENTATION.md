@@ -296,12 +296,12 @@ static const Environment environment = kDebugMode
 
 ### Build & Deploy Commands
 
-**Build for Web:**
+**Build for Staging (with staging Supabase credentials):**
 ```bash
 cd webaudit_pro_app
 flutter clean
 flutter pub get
-flutter build web --release
+flutter build web --release --dart-define=ENVIRONMENT=staging
 ```
 
 **Deploy to Staging:**
@@ -309,10 +309,23 @@ flutter build web --release
 firebase deploy --only hosting:websler-pro-staging
 ```
 
+**Build for Production (with production Supabase credentials):**
+```bash
+cd webaudit_pro_app
+flutter clean
+flutter pub get
+flutter build web --release --dart-define=ENVIRONMENT=production
+```
+
 **Deploy to Production:**
 ```bash
 firebase deploy --only hosting:websler-pro-production
 ```
+
+**Important:** Always use the `--dart-define=ENVIRONMENT=` flag when building for web to ensure the correct Supabase credentials are embedded in the build. This ensures:
+- Staging builds use Staging Supabase (`kmlhslmkdnjakkpluwup`)
+- Production builds use Production Supabase (`vwnbhsmfpxdfcvqnzddc`)
+- User authentication tokens match the database environment
 
 ---
 
