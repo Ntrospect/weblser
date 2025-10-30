@@ -292,7 +292,8 @@ class ApiService extends ChangeNotifier {
     String auditId,
     String documentType, {
     String? clientName,
-    String companyName = 'WebAudit Pro',
+    String? logoUrl,
+    String? companyName,
     String? companyDetails,
   }) async {
     try {
@@ -311,6 +312,7 @@ class ApiService extends ChangeNotifier {
           'audit_id': auditId,
           'document_type': documentType,
           'client_name': clientName,
+          'logo_url': logoUrl,
           'company_name': companyName,
           'company_details': companyDetails,
         }),
@@ -478,20 +480,22 @@ class ApiService extends ChangeNotifier {
     WebsiteAnalysis analysis, {
     String documentType = 'audit-report', // For audits
     String? clientName,
-    String companyName = 'WebAudit Pro',
+    String? logoUrl,
+    String? companyName,
     String? companyDetails,
   }) async {
     try {
       if (analysis.isSummary) {
         // For summaries, use the weblser PDF generation
         return await generatePdf(analysis.id,
-            logoUrl: null, companyName: companyName, companyDetails: companyDetails);
+            logoUrl: logoUrl, companyName: companyName, companyDetails: companyDetails);
       } else {
         // For audits, use the audit PDF generation
         return await generateAuditPdf(
           analysis.id,
           documentType,
           clientName: clientName,
+          logoUrl: logoUrl,
           companyName: companyName,
           companyDetails: companyDetails,
         );

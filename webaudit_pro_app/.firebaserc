@@ -4,6 +4,24 @@
     "production": "websler-pro",
     "staging": "websler-pro-staging"
   },
-  "targets": {},
+  "targets": {
+    "websler-pro": {
+      "hosting": {
+        "websler-pro-production": [
+          "websler-pro"
+        ],
+        "websler-pro-staging": [
+          "websler-pro-staging"
+        ]
+      }
+    },
+    "websler-pro-staging": {
+      "hosting": {
+        "websler-pro-staging": [
+          "websler-pro-staging"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

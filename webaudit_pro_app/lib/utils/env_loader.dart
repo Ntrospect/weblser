@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/environment.dart';
 
 /// Environment configuration loader
 /// Provides centralized access to environment variables
@@ -16,8 +17,20 @@ class EnvConfig {
   }
 
   /// Get API base URL from environment or return default
+  /// Tries .env first, then uses environment-aware default
   static String getApiUrl() {
-    _cachedApiUrl ??= _safeGet('API_BASE_URL') ?? 'https://api.websler.pro';
+    if (_cachedApiUrl != null) return _cachedApiUrl!;
+
+    // Try to load from .env (works locally)
+    final envApiUrl = _safeGet('API_BASE_URL');
+    if (envApiUrl != null) {
+      _cachedApiUrl = envApiUrl;
+      return _cachedApiUrl!;
+    }
+
+    // Fall back to environment-aware default
+    // Both staging and production use the HTTPS api.websler.pro domain
+    _cachedApiUrl = 'https://api.websler.pro';
     return _cachedApiUrl!;
   }
 

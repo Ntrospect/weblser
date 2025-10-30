@@ -15,6 +15,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _apiUrlController;
+  late TextEditingController _logoUrlController;
   late TextEditingController _companyNameController;
   late TextEditingController _companyDetailsController;
   late TextEditingController _fullNameController;
@@ -22,12 +23,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _auditCount = 0;
   int _summaryCount = 0;
   bool _isLoadingStats = true;
+  bool _isSavingBranding = false;
+  bool _isPreviewingBranding = false;
 
   @override
   void initState() {
     super.initState();
     final apiService = context.read<ApiService>();
     _apiUrlController = TextEditingController(text: apiService.apiUrl);
+    _logoUrlController = TextEditingController();
     _companyNameController = TextEditingController();
     _companyDetailsController = TextEditingController();
     _fullNameController = TextEditingController();
@@ -37,16 +41,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadPdfBrandingSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _companyNameController.text = prefs.getString('pdf_company_name') ?? '';
-      _companyDetailsController.text = prefs.getString('pdf_company_details') ?? '';
-    });
+    try {
+      final authService = context.read<AuthService>();
+      final user = authService.currentUser;
+
+      if (user != null) {
+        setState(() {
+          _logoUrlController.text = user.avatarUrl ?? '';
+          _companyNameController.text = user.companyName ?? '';
+          _companyDetailsController.text = user.companyDetails ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading branding settings: $e');
+    }
   }
 
   @override
   void dispose() {
     _apiUrlController.dispose();
+    _logoUrlController.dispose();
     _companyNameController.dispose();
     _companyDetailsController.dispose();
     _fullNameController.dispose();
@@ -72,17 +86,178 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _savePdfBrandingSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final companyName = _companyNameController.text.trim();
-    final companyDetails = _companyDetailsController.text.trim();
+    setState(() => _isSavingBranding = true);
 
-    await prefs.setString('pdf_company_name', companyName);
-    await prefs.setString('pdf_company_details', companyDetails);
+    try {
+      final authService = context.read<AuthService>();
+      final logoUrl = _logoUrlController.text.trim();
+      final companyName = _companyNameController.text.trim();
+      final companyDetails = _companyDetailsController.text.trim();
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PDF branding saved successfully')),
+      // Update user profile in Supabase
+      await authService.updateUserProfile(
+        avatarUrl: logoUrl.isEmpty ? null : logoUrl,
+        companyName: companyName.isEmpty ? null : companyName,
+        companyDetails: companyDetails.isEmpty ? null : companyDetails,
       );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ PDF branding saved successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error saving branding: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      debugPrint('Error saving PDF branding: $e');
+    } finally {
+      setState(() => _isSavingBranding = false);
+    }
+  }
+
+  Future<void> _previewBrandingPdf() async {
+    setState(() => _isPreviewingBranding = true);
+
+    try {
+      final authService = context.read<AuthService>();
+      final apiService = context.read<ApiService>();
+      final user = authService.currentUser;
+
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Generate a preview PDF with their branding and sample data
+      // This creates a test summary PDF so they can see their branding
+      const testSummaryId = 'preview-test';
+      final filePath = await apiService.generatePdf(
+        testSummaryId,
+        logoUrl: user.avatarUrl,
+        companyName: user.companyName,
+        companyDetails: user.companyDetails,
+      );
+
+      if (mounted) {
+        // Show success dialog with preview info
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('PDF Preview Generated'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Your PDF preview has been generated! Here\'s what your clients will see:',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (user.avatarUrl != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              'Logo: Displayed in header',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            ),
+                          ),
+                        if (user.companyName != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Company Name:',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                ),
+                                Text(
+                                  user.companyName!,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF9018ad),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (user.companyDetails != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Contact Details:',
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              ),
+                              Text(
+                                user.companyDetails!,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: const Text(
+                      'Preview saved to Downloads! You can open it to see the exact layout and styling with your branding.',
+                      style: TextStyle(fontSize: 13, color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating preview: ${e.toString().replaceFirst('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      debugPrint('Error previewing PDF branding: $e');
+    } finally {
+      setState(() => _isPreviewingBranding = false);
     }
   }
 
@@ -542,6 +717,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Logo URL Field
+                    Text(
+                      'Logo URL',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _logoUrlController,
+                      decoration: InputDecoration(
+                        hintText: 'https://example.com/logo.png',
+                        prefixIcon: const Icon(Icons.image),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Logo Preview
+                    if (_logoUrlController.text.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Container(
+                          height: 80,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey[100],
+                          ),
+                          child: Image.network(
+                            _logoUrlController.text,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                '❌ Invalid logo URL',
+                                style: TextStyle(color: Colors.red[700]),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    // Company Name Field
                     Text(
                       'Company Name',
                       style: Theme.of(context).textTheme.labelMedium,
@@ -558,6 +775,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Company Details Field
                     Text(
                       'Company Details',
                       style: Theme.of(context).textTheme.labelMedium,
@@ -576,7 +794,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'These will be added to PDF reports you generate.',
+                      '📄 Light theme only for professional, printer-friendly PDFs',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -585,9 +803,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _savePdfBrandingSettings,
-                        icon: const Icon(Icons.save),
-                        label: const Text('Save PDF Branding'),
+                        onPressed: _isSavingBranding ? null : _savePdfBrandingSettings,
+                        icon: _isSavingBranding
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.save),
+                        label: Text(_isSavingBranding ? 'Saving...' : 'Save PDF Branding'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _isPreviewingBranding ? null : _previewBrandingPdf,
+                        icon: _isPreviewingBranding
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.preview),
+                        label: Text(_isPreviewingBranding ? 'Generating preview...' : 'Preview PDF with Branding'),
                       ),
                     ),
                   ],

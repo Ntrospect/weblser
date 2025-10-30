@@ -386,6 +386,7 @@ class AuthService extends ChangeNotifier {
   /// Update user profile
   Future<void> updateUserProfile({
     String? fullName,
+    String? avatarUrl,
     String? companyName,
     String? companyDetails,
   }) async {
@@ -394,6 +395,7 @@ class AuthService extends ChangeNotifier {
     try {
       final updatedUser = _currentUser!.copyWith(
         fullName: fullName,
+        avatarUrl: avatarUrl,
         companyName: companyName,
         companyDetails: companyDetails,
         updatedAt: DateTime.now(),
@@ -401,10 +403,23 @@ class AuthService extends ChangeNotifier {
 
       _currentUser = updatedUser;
 
+      // Also update in Supabase
+      await _supabase
+          .from('users')
+          .update({
+            'full_name': fullName,
+            'avatar_url': avatarUrl,
+            'company_name': companyName,
+            'company_details': companyDetails,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', _currentUser!.id);
+
       print('✅ User profile updated');
       notifyListeners();
     } catch (e) {
       print('❌ Update profile error: $e');
+      throw Exception('Failed to update profile: $e');
     }
   }
 

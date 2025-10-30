@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/audit_result.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import 'dart:io';
 
 class AuditReportsScreen extends StatefulWidget {
@@ -56,17 +56,18 @@ class _AuditReportsScreenState extends State<AuditReportsScreen> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final companyName = prefs.getString('pdf_company_name') ?? 'WebAudit Pro';
-      final companyDetails = prefs.getString('pdf_company_details');
+      // Get branding from AuthService (current user profile)
+      final authService = context.read<AuthService>();
+      final user = authService.currentUser;
 
       final apiService = context.read<ApiService>();
       final filepath = await apiService.generateAuditPdf(
         _auditResult.id,
         documentType,
         clientName: _auditResult.websiteName,
-        companyName: companyName,
-        companyDetails: companyDetails,
+        logoUrl: user?.avatarUrl,
+        companyName: user?.companyName,
+        companyDetails: user?.companyDetails,
       );
 
       if (mounted) {
