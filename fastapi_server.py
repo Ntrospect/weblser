@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict
 from io import BytesIO
+from urllib.parse import urlparse
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -1600,11 +1601,19 @@ async def generate_compliance_pdf(
         with open(pdf_path, 'rb') as f:
             pdf_bytes = f.read()
 
+        # Generate descriptive filename with domain and timestamp
+        website_url = audit_data.get('website_url', 'unknown')
+        domain = urlparse(website_url).netloc or 'unknown'
+        # Clean domain name for filename (remove www.)
+        domain_clean = domain.replace('www.', '').replace('.', '-')
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"compliance-report_{domain_clean}_{timestamp}.pdf"
+
         # Return PDF
         return FileResponse(
             path=pdf_path,
             media_type="application/pdf",
-            filename=f"compliance-report_{compliance_id[:8]}.pdf"
+            filename=filename
         )
 
     except HTTPException:
