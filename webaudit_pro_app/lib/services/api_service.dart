@@ -705,29 +705,40 @@ class ApiService extends ChangeNotifier {
     }
   }
 
-  /// Trigger browser download for web platform
+  /// Trigger browser download for web platform using blob URLs
   void _triggerWebDownload(List<int> pdfBytes, String filename) {
     if (kIsWeb) {
-      // For web, convert to base64 and create a data URL
       try {
-        final base64pdf = base64.encode(pdfBytes);
-        final dataUrl = 'data:application/pdf;base64,$base64pdf';
+        // Create a blob from the PDF bytes
+        final blob = html.Blob([pdfBytes], 'application/pdf');
 
-        // Use JavaScript to trigger download
-        _downloadViaJS(dataUrl, filename);
+        // Create a blob URL (more reliable than data URLs)
+        final blobUrl = html.Url.createObjectUrl(blob);
+
+        // Use JavaScript to trigger download via blob URL
+        _downloadViaJS(blobUrl, filename);
+
+        // Clean up the blob URL after a delay
+        Future.delayed(Duration(seconds: 2), () {
+          try {
+            html.Url.revokeObjectUrl(blobUrl);
+          } catch (e) {
+            print('Note: Could not revoke blob URL: $e');
+          }
+        });
       } catch (e) {
-        print('Error preparing PDF download: $e');
+        print('Error preparing PDF blob download: $e');
       }
     }
   }
 
-  /// Helper to trigger download via JavaScript
-  void _downloadViaJS(String dataUrl, String filename) {
+  /// Helper to trigger download via JavaScript using blob URL
+  void _downloadViaJS(String blobUrl, String filename) {
     if (kIsWeb) {
       try {
         // Create an anchor element to trigger the download
         final anchor = html.AnchorElement()
-          ..href = dataUrl
+          ..href = blobUrl
           ..download = filename
           ..style.display = 'none';
 
@@ -746,9 +757,9 @@ class ApiService extends ChangeNotifier {
           }
         });
 
-        print('PDF download triggered: $filename');
+        print('PDF download triggered via blob: $filename');
       } catch (e) {
-        print('Error triggering PDF download: $e');
+        print('Error triggering PDF blob download: $e');
       }
     }
   }
