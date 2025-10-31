@@ -216,7 +216,7 @@ class ApiService extends ChangeNotifier {
   /// Run a comprehensive 10-point audit on a website
   Future<AuditResult> auditWebsite(
     String url, {
-    int timeout = 60,
+    int timeout = 120,
     bool deepScan = true,
   }) async {
     try {
