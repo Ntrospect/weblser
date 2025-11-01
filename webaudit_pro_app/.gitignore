@@ -57,3 +57,38 @@ app.*.map.json
 credentials.json
 auth-tokens.json
 firebase-key.json
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+*.dist-info/
+
+# Environments
+.venv/
+env/
+venv/
+
+# Tools & caches
+.mypy_cache/
+.pytest_cache/
+.cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+!.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
